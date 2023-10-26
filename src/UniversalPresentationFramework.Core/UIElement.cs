@@ -9,6 +9,28 @@ namespace Wodsoft.UI
 {
     public class UIElement : Visual
     {
+        #region Layout
 
+        public void Measure(Size availableSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Arrange(Rect finalRect)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual Size MeasureCore(Size availableSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual void ArrangeCore(Rect finalRect)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }
