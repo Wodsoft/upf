@@ -9,6 +9,7 @@ namespace Wodsoft.UI.Media
     public abstract class Visual : DependencyObject
     {
         private Visual? _parent;
+        internal int ParentIndex;
 
         protected void AddVisualChild(Visual child)
         {
@@ -39,25 +40,29 @@ namespace Wodsoft.UI.Media
 
         protected virtual int VisualChildrenCount => 0;
 
-        protected Visual? VisualParent => _parent;
+        public Visual? VisualParent => _parent;
 
-        //internal void InternalAddVisualChild(Visual child)
-        //{
-        //    AddVisualChild(child);
-        //}
+        internal void InternalAddVisualChild(Visual child)
+        {
+            AddVisualChild(child);
+        }
 
-        //internal void InternalRemoveVisualChild(Visual child)
-        //{
-        //    RemoveVisualChild(child);
-        //}
+        internal void InternalRemoveVisualChild(Visual child)
+        {
+            RemoveVisualChild(child);
+        }
 
-        //internal Visual InternalGetVisualChild(int index)
-        //{
-        //    return GetVisualChild(index);
-        //}
+        internal Visual InternalGetVisualChild(int index)
+        {
+            return GetVisualChild(index);
+        }
 
         protected virtual void OnVisualChildrenChanged(Visual? visualAdded, Visual? visualRemoved) { }
 
         protected virtual void OnVisualParentChanged(Visual? oldParent) { }
+
+        public bool IsRootElement { get; }
+
+        public bool HasVisualParent => _parent != null;
     }
 }

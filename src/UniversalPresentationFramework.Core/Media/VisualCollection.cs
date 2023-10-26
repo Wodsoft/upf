@@ -18,7 +18,7 @@ namespace Wodsoft.UI.Media
     /// </remarks>
     public sealed class VisualCollection : ICollection
     {
-        private Visual[] _items;
+        private Visual?[]? _items;
         private int _size;
         private Visual _owner;
 
@@ -35,18 +35,6 @@ namespace Wodsoft.UI.Media
         private const int c_defaultCapacity = 4;
         private const float c_growFactor = 1.5f;
 
-        internal int InternalCount { get { return _size; } }
-
-        /// <summary>
-        /// Returns a reference to the internal Visual children array.
-        /// </summary>
-        /// <remarks>
-        /// This array should never given out.
-        /// It is only used for internal code
-        /// to enumerate through the children.
-        /// </remarks>
-        internal Visual[] InternalArray { get { return _items; } }
-
         /// <summary>
         /// Creates a VisualCollection.
         /// </summary>
@@ -62,13 +50,7 @@ namespace Wodsoft.UI.Media
         /// <summary>
         /// Gets the number of elements in the collection.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return InternalCount;
-            }
-        }
+        public int Count => _size;
 
         /// <summary>
         /// True if the collection allows modifications, otherwise false.
@@ -137,14 +119,14 @@ namespace Wodsoft.UI.Media
             // the loop is programmed here out.
             for (int i = 0; i < _size; i++)
             {
-                array.SetValue(_items[i], i + index);
+                array.SetValue(_items![i], i + index);
             }
         }
 
         /// <summary>
         /// Copies the Visual collection to the specified array starting at the specified index.
         /// </summary>
-        public void CopyTo(Visual[] array, int index)
+        public void CopyTo(Visual?[] array, int index)
         {
             // Remark: This is the strongly typed version of the ICollection.CopyTo method.
             // FXCop requires us to implement this method.
@@ -164,7 +146,7 @@ namespace Wodsoft.UI.Media
             // the loop is programmed here out.
             for (int i = 0; i < _size; i++)
             {
-                array[i + index] = _items[i];
+                array[i + index] = _items![i];
             }
         }
 
@@ -261,7 +243,7 @@ namespace Wodsoft.UI.Media
         /// VisualCollection by using the following systax: <c>myVisualCollection[index]</c>.</remarks>
         /// <exception cref="ArgumentOutOfRangeException"><c>index</c> is less than zero -or- <c>index</c> is equal to or greater than Count.</exception>
         /// <exception cref="ArgumentException">If the new child has already a parent or if the slot a the specified index is not null.</exception>
-        public Visual this[int index]
+        public Visual? this[int index]
         {
             get
             {
@@ -272,16 +254,14 @@ namespace Wodsoft.UI.Media
                 // Disable PREsharp warning about throwing exceptions in property
                 // get methods
 
-#pragma warning disable 6503
                 if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException(nameof(index));
-                return _items[index];
-#pragma warning restore 6503
+                return _items![index];
             }
             set
             {
                 if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException(nameof(index));
 
-                Visual child = _items[index];
+                Visual? child = _items![index];
 
                 if ((value == null) && (child != null))
                 {
@@ -291,12 +271,12 @@ namespace Wodsoft.UI.Media
                 {
                     if (child != null)
                     {
-                        throw new System.ArgumentException(SR.Get(SRID.VisualCollection_EntryInUse));
+                        throw new System.ArgumentException("Child of visual collection is in used.");
                     }
-                    if ((value._parent != null) // Only a visual that isn't a visual parent or
+                    if ((value.HasVisualParent) // Only a visual that isn't a visual parent or
                         || value.IsRootElement) // are a root node of a visual target can be set into the collection.
                     {
-                        throw new System.ArgumentException(SR.Get(SRID.VisualCollection_VisualHasParent));
+                        throw new System.ArgumentException("Visual has parent.");
                     }
 
                     ConnectChild(index, value);
@@ -313,15 +293,15 @@ namespace Wodsoft.UI.Media
         /// <exception cref="ArgumentException">If the new child has already a parent or if the slot a the specified index is not null.</exception>
         private void ConnectChild(int index, Visual value)
         {
-            // It is invalid to modify the children collection that we 
-            // might be iterating during a property invalidation tree walk.
-            if (_owner.IsVisualChildrenIterationInProgress)
-            {
-                throw new InvalidOperationException(SR.Get(SRID.CannotModifyVisualChildrenDuringTreeWalk));
-            }
+            //// It is invalid to modify the children collection that we 
+            //// might be iterating during a property invalidation tree walk.
+            //if (_owner.IsVisualChildrenIterationInProgress)
+            //{
+            //    throw new InvalidOperationException(SR.Get(SRID.CannotModifyVisualChildrenDuringTreeWalk));
+            //}
 
-            value._parentIndex = index;
-            _items[index] = value;
+            value.ParentIndex = index;
+            _items![index] = value;
             IncrementVersion();
 
             // Notify the Visual tree about the children changes. 
@@ -333,19 +313,17 @@ namespace Wodsoft.UI.Media
         /// </summary>
         private void DisconnectChild(int index)
         {
-            Debug.Assert(_items[index] != null);
+            Visual child = _items![index]!;
 
-            Visual child = _items[index];
+            Visual oldParent = child.VisualParent!;
+            int oldParentIndex = child.ParentIndex;
 
-            Visual oldParent = VisualTreeHelper.GetContainingVisual2D(child._parent);
-            int oldParentIndex = child._parentIndex;
-
-            // It is invalid to modify the children collection that we 
-            // might be iterating during a property invalidation tree walk.
-            if (oldParent.IsVisualChildrenIterationInProgress)
-            {
-                throw new InvalidOperationException(SR.Get(SRID.CannotModifyVisualChildrenDuringTreeWalk));
-            }
+            //// It is invalid to modify the children collection that we 
+            //// might be iterating during a property invalidation tree walk.
+            //if (oldParent.IsVisualChildrenIterationInProgress)
+            //{
+            //    throw new InvalidOperationException(SR.Get(SRID.CannotModifyVisualChildrenDuringTreeWalk));
+            //}
 
             _items[index] = null;
 
@@ -364,10 +342,10 @@ namespace Wodsoft.UI.Media
         public int Add(Visual visual)
         {
             if ((visual != null) &&
-                ((visual._parent != null)   // Only visuals that are not connected to another tree
+                ((visual.HasVisualParent)   // Only visuals that are not connected to another tree
                  || visual.IsRootElement))  // or a visual target can be added.
             {
-                throw new System.ArgumentException(SR.Get(SRID.VisualCollection_VisualHasParent));
+                throw new System.ArgumentException("Visual has parent.");
             }
 
 
@@ -376,7 +354,7 @@ namespace Wodsoft.UI.Media
                 EnsureCapacity(_size + 1);
             }
             int addedPosition = _size++;
-            Debug.Assert(_items[addedPosition] == null);
+            Debug.Assert(_items![addedPosition] == null);
             if (visual != null)
             {
                 ConnectChild(addedPosition, visual);
@@ -402,7 +380,7 @@ namespace Wodsoft.UI.Media
                 // entry and return it.
                 for (int i = 0; i < _size; i++)
                 {
-                    if (_items[i] == null)
+                    if (_items![i] == null)
                     {
                         return i;
                     }
@@ -410,13 +388,13 @@ namespace Wodsoft.UI.Media
                 // No null entry found, return -1.
                 return -1;
             }
-            else if (visual._parent != _owner)
+            else if (visual.VisualParent != _owner)
             {
                 return -1;
             }
             else
             {
-                return visual._parentIndex;
+                return visual.ParentIndex;
             }
         }
 
@@ -437,13 +415,13 @@ namespace Wodsoft.UI.Media
             InternalRemove(visual);
         }
 
-        private void InternalRemove(Visual visual)
+        private void InternalRemove(Visual? visual)
         {
             int indexToRemove = -1;
 
             if (visual != null)
             {
-                if (visual._parent != _owner)
+                if (visual.VisualParent != _owner)
                 {
                     // If the Visual is not in this collection we silently return without
                     // failing. This is the same behavior that ArrayList implements. See
@@ -451,9 +429,7 @@ namespace Wodsoft.UI.Media
                     return;
                 }
 
-                Debug.Assert(visual._parent != null);
-
-                indexToRemove = visual._parentIndex;
+                indexToRemove = visual.ParentIndex;
                 DisconnectChild(indexToRemove);
             }
             else
@@ -462,7 +438,7 @@ namespace Wodsoft.UI.Media
                 // entry.
                 for (int i = 0; i < _size; i++)
                 {
-                    if (_items[i] == null)
+                    if (_items![i] == null)
                     {
                         indexToRemove = i;
                         break;
@@ -476,15 +452,15 @@ namespace Wodsoft.UI.Media
 
                 for (int i = indexToRemove; i < _size; i++)
                 {
-                    Visual child = _items[i + 1];
+                    Visual? child = _items![i + 1];
                     if (child != null)
                     {
-                        child._parentIndex = i;
+                        child.ParentIndex = i;
                     }
                     _items[i] = child;
                 }
 
-                _items[_size] = null;
+                _items![_size] = null;
             }
         }
 
@@ -535,7 +511,7 @@ namespace Wodsoft.UI.Media
             {
                 for (int i = 0; i < _size; i++)
                 {
-                    if (_items[i] == null)
+                    if (_items![i] == null)
                     {
                         return true;
                     }
@@ -544,7 +520,7 @@ namespace Wodsoft.UI.Media
             }
             else
             {
-                return (visual._parent == _owner);
+                return (visual.VisualParent == _owner);
             }
         }
 
@@ -560,9 +536,8 @@ namespace Wodsoft.UI.Media
         {
             for (int i = 0; i < _size; i++)
             {
-                if (_items[i] != null)
+                if (_items![i] != null)
                 {
-                    Debug.Assert(_items[i]._parent == _owner);
                     DisconnectChild(i);
                 }
                 _items[i] = null;
@@ -603,10 +578,10 @@ namespace Wodsoft.UI.Media
             }
 
             if ((visual != null) &&
-                ((visual._parent != null)   // Only visuals that are not connected to another tree
+                ((visual.HasVisualParent)   // Only visuals that are not connected to another tree
                  || visual.IsRootElement))  // or a visual target can be added.
             {
-                throw new System.ArgumentException(SR.Get(SRID.VisualCollection_VisualHasParent));
+                throw new System.ArgumentException("Visual has parent.");
             }
 
             if ((_items == null) || (_size == _items.Length))
@@ -616,14 +591,14 @@ namespace Wodsoft.UI.Media
 
             for (int i = _size - 1; i >= index; i--)
             {
-                Visual child = _items[i];
+                Visual? child = _items![i];
                 if (child != null)
                 {
-                    child._parentIndex = i + 1;
+                    child.ParentIndex = i + 1;
                 }
                 _items[i + 1] = child;
             }
-            _items[index] = null;
+            _items![index] = null;
 
             _size++;
             if (visual != null)
@@ -652,7 +627,7 @@ namespace Wodsoft.UI.Media
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            InternalRemove(_items[index]);
+            InternalRemove(_items![index]);
         }
 
 
@@ -695,7 +670,7 @@ namespace Wodsoft.UI.Media
             {
                 for (int i = index; i < index + count; i++)
                 {
-                    if (_items[i] != null)
+                    if (_items![i] != null)
                     {
                         DisconnectChild(i);
                         _items[i] = null;
@@ -705,10 +680,10 @@ namespace Wodsoft.UI.Media
                 _size -= count;
                 for (int i = index; i < _size; i++)
                 {
-                    Visual child = _items[i + count];
+                    Visual? child = _items![i + count];
                     if (child != null)
                     {
-                        child._parentIndex = i;
+                        child.ParentIndex = i;
                     }
                     _items[i] = child;
                     _items[i + count] = null;
@@ -730,14 +705,10 @@ namespace Wodsoft.UI.Media
             int newIndex;
             int oldIndex;
 
-            if (visual._parent == _owner)
+            if (visual.VisualParent == _owner)
             {
-                oldIndex = visual._parentIndex;
-                newIndex = destination != null ? destination._parentIndex : _size;
-
-                Debug.Assert(visual._parent != null);
-                Debug.Assert(destination == null || destination._parent == visual._parent);
-                Debug.Assert(newIndex >= 0 && newIndex <= _size, "New index is invalid");
+                oldIndex = visual.ParentIndex;
+                newIndex = destination != null ? destination.ParentIndex : _size;
 
                 if (oldIndex != newIndex)
                 {
@@ -749,10 +720,10 @@ namespace Wodsoft.UI.Media
 
                         for (int i = oldIndex; i < newIndex; i++)
                         {
-                            Visual child = _items[i + 1];
+                            Visual? child = _items![i + 1];
                             if (child != null)
                             {
-                                child._parentIndex = i;
+                                child.ParentIndex = i;
                             }
                             _items[i] = child;
                         }
@@ -765,17 +736,17 @@ namespace Wodsoft.UI.Media
 
                         for (int i = oldIndex; i > newIndex; i--)
                         {
-                            Visual child = _items[i - 1];
+                            Visual? child = _items![i - 1];
                             if (child != null)
                             {
-                                child._parentIndex = i;
+                                child.ParentIndex = i;
                             }
                             _items[i] = child;
                         }
                     }
 
-                    visual._parentIndex = newIndex;
-                    _items[newIndex] = visual;
+                    visual.ParentIndex = newIndex;
+                    _items![newIndex] = visual;
                 }
             }
 
@@ -837,7 +808,7 @@ namespace Wodsoft.UI.Media
             {
                 if (_version == _collection.Version)
                 {
-                    if ((_index > -2) && (_index < (_collection.InternalCount - 1)))
+                    if ((_index > -2) && (_index < (_collection.Count - 1)))
                     {
                         _index++;
                         _currentElement = _collection[_index];
