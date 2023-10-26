@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls
@@ -31,7 +32,7 @@ namespace Wodsoft.UI.Controls
         {
             if (visualParent == null)
             {
-                throw new ArgumentNullException(SR.Get(SRID.Panel_NoNullVisualParent, "visualParent", this.GetType()));
+                throw new ArgumentNullException(nameof(visualParent));
             }
 
             _visualChildren = new VisualCollection(visualParent);
@@ -93,8 +94,6 @@ namespace Wodsoft.UI.Controls
             get { return _visualChildren.Capacity; }
             set
             {
-                VerifyWriteAccess();
-
                 _visualChildren.Capacity = value;
             }
         }
@@ -102,13 +101,13 @@ namespace Wodsoft.UI.Controls
         /// <summary>
         /// For more details, see <see cref="System.Windows.Media.VisualCollection" />
         /// </summary>
-        public virtual UIElement this[int index]
+        public virtual UIElement? this[int index]
         {
             get { return _visualChildren[index] as UIElement; }
             set
             {
-                VerifyWriteAccess();
-                ValidateElement(value);
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
 
                 VisualCollection vc = _visualChildren;
 
@@ -116,7 +115,7 @@ namespace Wodsoft.UI.Controls
                 //remove previously hooked element from the logical tree
                 if (vc[index] != value)
                 {
-                    UIElement e = vc[index] as UIElement;
+                    UIElement? e = vc[index] as UIElement;
                     if (e != null)
                         ClearLogicalParent(e);
 
@@ -135,7 +134,8 @@ namespace Wodsoft.UI.Controls
         // in cooperation with the generator
         internal void SetInternal(int index, UIElement item)
         {
-            ValidateElement(item);
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
 
             VisualCollection vc = _visualChildren;
 
@@ -155,8 +155,8 @@ namespace Wodsoft.UI.Controls
         /// </summary>
         public virtual int Add(UIElement element)
         {
-            VerifyWriteAccess();
-
+            if (element == null)
+                throw new ArgumentNullException(nameof(element));
             return AddInternal(element);
         }
 
@@ -166,8 +166,6 @@ namespace Wodsoft.UI.Controls
         // in cooperation with the generator
         internal int AddInternal(UIElement element)
         {
-            ValidateElement(element);
-
             SetLogicalParent(element);
             int retVal = _visualChildren.Add(element);
 
@@ -192,8 +190,6 @@ namespace Wodsoft.UI.Controls
         /// </summary>
         public virtual void Remove(UIElement element)
         {
-            VerifyWriteAccess();
-
             RemoveInternal(element);
         }
 
@@ -229,8 +225,6 @@ namespace Wodsoft.UI.Controls
         /// </summary>
         public virtual void Clear()
         {
-            VerifyWriteAccess();
-
             ClearInternal();
         }
 
@@ -251,7 +245,7 @@ namespace Wodsoft.UI.Controls
                 Visual[] visuals = new Visual[cnt];
                 for (int i = 0; i < cnt; i++)
                 {
-                    visuals[i] = vc[i];
+                    visuals[i] = vc[i]!;
                 }
 
                 vc.Clear();
@@ -259,7 +253,7 @@ namespace Wodsoft.UI.Controls
                 //disconnect from logical tree
                 for (int i = 0; i < cnt; i++)
                 {
-                    UIElement e = visuals[i] as UIElement;
+                    UIElement? e = visuals[i] as UIElement;
                     if (e != null)
                     {
                         ClearLogicalParent(e);
@@ -276,8 +270,6 @@ namespace Wodsoft.UI.Controls
         /// </summary>
         public virtual void Insert(int index, UIElement element)
         {
-            VerifyWriteAccess();
-
             InsertInternal(index, element);
         }
 
@@ -287,8 +279,6 @@ namespace Wodsoft.UI.Controls
         // in cooperation with the generator
         internal void InsertInternal(int index, UIElement element)
         {
-            ValidateElement(element);
-
             SetLogicalParent(element);
             _visualChildren.Insert(index, element);
             _visualParent.InvalidateMeasure();
@@ -300,12 +290,10 @@ namespace Wodsoft.UI.Controls
         /// </summary>
         public virtual void RemoveAt(int index)
         {
-            VerifyWriteAccess();
-
             VisualCollection vc = _visualChildren;
 
             //disconnect from logical tree
-            UIElement e = vc[index] as UIElement;
+            UIElement? e = vc[index] as UIElement;
 
             vc.RemoveAt(index);
 
@@ -322,8 +310,6 @@ namespace Wodsoft.UI.Controls
         /// </summary>
         public virtual void RemoveRange(int index, int count)
         {
-            VerifyWriteAccess();
-
             RemoveRangeInternal(index, count);
         }
 
@@ -348,7 +334,7 @@ namespace Wodsoft.UI.Controls
                 int i = index;
                 for (int loop = 0; loop < count; i++, loop++)
                 {
-                    visuals[loop] = vc[i];
+                    visuals[loop] = vc[i]!;
                 }
 
                 vc.RemoveRange(index, count);
@@ -356,7 +342,7 @@ namespace Wodsoft.UI.Controls
                 //disconnect from logical tree
                 for (i = 0; i < count; i++)
                 {
-                    UIElement e = visuals[i] as UIElement;
+                    UIElement? e = visuals[i] as UIElement;
                     if (e != null)
                     {
                         ClearLogicalParent(e);
@@ -381,12 +367,12 @@ namespace Wodsoft.UI.Controls
         private UIElement Cast(object value)
         {
             if (value == null)
-                throw new System.ArgumentException(SR.Get(SRID.Collection_NoNull, "UIElementCollection"));
+                throw new System.ArgumentException(nameof(value));
 
-            UIElement element = value as UIElement;
+            UIElement? element = value as UIElement;
 
             if (element == null)
-                throw new System.ArgumentException(SR.Get(SRID.Collection_BadType, "UIElementCollection", value.GetType().Name, "UIElement"));
+                throw new System.ArgumentException("Value must be a UIElement object.");
 
             return element;
         }
@@ -396,32 +382,42 @@ namespace Wodsoft.UI.Controls
         /// <summary>
         /// Adds an element to the UIElementCollection
         /// </summary>
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
             return Add(Cast(value));
         }
 
         /// <summary>
         /// Determines whether an element is in the UIElementCollection.
         /// </summary>
-        bool IList.Contains(object value)
+        bool IList.Contains(object? value)
         {
-            return Contains(value as UIElement);
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (value is UIElement element)
+                return Contains(element);
+            return false;
         }
 
         /// <summary>
         /// Returns the index of the element in the UIElementCollection
         /// </summary>
-        int IList.IndexOf(object value)
+        int IList.IndexOf(object? value)
         {
-            return IndexOf(value as UIElement);
+            if (value is UIElement element)
+                return IndexOf(element);
+            return -1;
         }
 
         /// <summary>
         /// Inserts an element into the UIElementCollection
         /// </summary>
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
             Insert(index, Cast(value));
         }
 
@@ -442,15 +438,16 @@ namespace Wodsoft.UI.Controls
         /// <summary>
         /// Removes an element from the UIElementCollection
         /// </summary>
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
-            Remove(value as UIElement);
+            if (value is UIElement element)
+                Remove(element);
         }
 
         /// <summary>
         /// For more details, see <see cref="System.Windows.Media.VisualCollection" />
         /// </summary>
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get
             {
@@ -458,6 +455,7 @@ namespace Wodsoft.UI.Controls
             }
             set
             {
+
                 this[index] = Cast(value);
             }
         }
@@ -509,24 +507,6 @@ namespace Wodsoft.UI.Controls
         internal UIElement VisualParent
         {
             get { return (_visualParent); }
-        }
-
-        // Helper function to validate element; will throw exceptions if problems are detected.
-        private void ValidateElement(UIElement element)
-        {
-            if (element == null)
-            {
-                throw new ArgumentNullException(SR.Get(SRID.Panel_NoNullChildren, this.GetType()));
-            }
-        }
-
-        private void VerifyWriteAccess()
-        {
-            Panel p = _visualParent as Panel;
-            if (p != null && p.IsDataBound)
-            {
-                throw new InvalidOperationException(SR.Get(SRID.Panel_BoundPanel_NoChildren));
-            }
         }
 
         internal FrameworkElement LogicalParent

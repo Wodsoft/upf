@@ -700,7 +700,7 @@ namespace Wodsoft.UI.Media
         /// </summary>
         /// <param name="visual"></param>
         /// <param name="destination"></param>
-        internal void Move(Visual visual, Visual destination)
+        public void Move(Visual visual, Visual destination)
         {
             int newIndex;
             int oldIndex;
