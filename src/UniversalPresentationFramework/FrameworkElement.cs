@@ -41,6 +41,26 @@ namespace Wodsoft.UI
 
         #region Layout
 
+        protected sealed override Size MeasureCore(Size availableSize)
+        {
+            return base.MeasureCore(availableSize);
+        }
+
+        protected sealed override void ArrangeCore(Rect finalRect)
+        {
+            base.ArrangeCore(finalRect);
+        }
+
+        protected virtual Size MeasureOverride(Size availableSize)
+        {
+            return new Size(0, 0);
+        }
+
+        protected virtual Size ArrangeOverride(Size finalSize)
+        {
+            return finalSize;
+        }
+
         #endregion
     }
 }
