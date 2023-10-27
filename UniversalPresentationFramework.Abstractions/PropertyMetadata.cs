@@ -27,7 +27,7 @@ namespace Wodsoft.UI
             _defaultValue = defaultValue;
         }
 
-        public PropertyMetadata(PropertyChangedCallback propertyChangedCallback)
+        public PropertyMetadata(PropertyChangedCallback? propertyChangedCallback)
         {
             _propertyChangedCallback = propertyChangedCallback;
         }

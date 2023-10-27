@@ -32,5 +32,36 @@ namespace Wodsoft.UI
         }
 
         #endregion
+
+        public static readonly DependencyProperty VisibilityProperty =
+        DependencyProperty.Register(
+                "Visibility",
+                typeof(Visibility),
+                typeof(UIElement),
+                new PropertyMetadata(
+                        Visibility.Visible,
+                        new PropertyChangedCallback(OnVisibilityChanged)),
+                new ValidateValueCallback(ValidateVisibility));
+
+        private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement uie = (UIElement)d;
+            Visibility newVisibility = (Visibility)e.NewValue!;
+            uie._visibility = newVisibility;
+        }
+
+        private static bool ValidateVisibility(object? o)
+        {
+            if (o is Visibility value)
+                return (value == Visibility.Visible) || (value == Visibility.Hidden) || (value == Visibility.Collapsed);
+            return false;
+        }
+
+        private Visibility _visibility;
+        public Visibility Visibility
+        {
+            get { return _visibility; }
+            set { SetValue(VisibilityProperty, value); }
+        }
     }
 }
