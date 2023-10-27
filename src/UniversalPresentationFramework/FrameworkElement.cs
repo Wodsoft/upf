@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +36,183 @@ namespace Wodsoft.UI
             if (child.Parent != this)
                 throw new InvalidOperationException("This element is not the parent of child.");
             child.Parent = null;
+        }
+
+        #endregion
+
+        #region Size
+
+        /// <summary>
+        /// Width Dependency Property
+        /// </summary>
+        public static readonly DependencyProperty WidthProperty =
+                    DependencyProperty.Register(
+                                "Width",
+                                typeof(float),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                        float.NaN,
+                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                        new PropertyChangedCallback(OnTransformDirty)),
+                                new ValidateValueCallback(IsWidthHeightValid));
+
+        /// <summary>
+        /// Width Property
+        /// </summary>
+        [TypeConverter(typeof(LengthConverter))]
+        public float Width
+        {
+            get { return (float)GetValue(WidthProperty)!; }
+            set { SetValue(WidthProperty, value); }
+        }
+
+        /// <summary>
+        /// MinWidth Dependency Property
+        /// </summary>
+        public static readonly DependencyProperty MinWidthProperty =
+                    DependencyProperty.Register(
+                                "MinWidth",
+                                typeof(float),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                        0f,
+                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                        new PropertyChangedCallback(OnTransformDirty)),
+                                new ValidateValueCallback(IsMinWidthHeightValid));
+
+        /// <summary>
+        /// MinWidth Property
+        /// </summary>
+        [TypeConverter(typeof(LengthConverter))]
+        public float MinWidth
+        {
+            get { return (float)GetValue(MinWidthProperty)!; }
+            set { SetValue(MinWidthProperty, value); }
+        }
+
+        /// <summary>
+        /// MaxWidth Dependency Property
+        /// </summary>
+        public static readonly DependencyProperty MaxWidthProperty =
+                    DependencyProperty.Register(
+                                "MaxWidth",
+                                typeof(float),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                        Double.PositiveInfinity,
+                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                        new PropertyChangedCallback(OnTransformDirty)),
+                                new ValidateValueCallback(IsMaxWidthHeightValid));
+
+
+        /// <summary>
+        /// MaxWidth Property
+        /// </summary>
+        [TypeConverter(typeof(LengthConverter))]
+        public float MaxWidth
+        {
+            get { return (float)GetValue(MaxWidthProperty)!; }
+            set { SetValue(MaxWidthProperty, value); }
+        }
+
+        /// <summary>
+        /// Height Dependency Property
+        /// </summary>
+        public static readonly DependencyProperty HeightProperty =
+                    DependencyProperty.Register(
+                                "Height",
+                                typeof(float),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                    float.NaN,
+                                    FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                    new PropertyChangedCallback(OnTransformDirty)),
+                                new ValidateValueCallback(IsWidthHeightValid));
+
+        /// <summary>
+        /// Height Property
+        /// </summary>
+        [TypeConverter(typeof(LengthConverter))]
+        public float Height
+        {
+            get { return (float)GetValue(HeightProperty)!; }
+            set { SetValue(HeightProperty, value); }
+        }
+
+        /// <summary>
+        /// MinHeight Dependency Property
+        /// </summary>
+        public static readonly DependencyProperty MinHeightProperty =
+                    DependencyProperty.Register(
+                                "MinHeight",
+                                typeof(float),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                        0f,
+                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                        new PropertyChangedCallback(OnTransformDirty)),
+                                new ValidateValueCallback(IsMinWidthHeightValid));
+
+        /// <summary>
+        /// MinHeight Property
+        /// </summary>
+        [TypeConverter(typeof(LengthConverter))]
+        public float MinHeight
+        {
+            get { return (float)GetValue(MinHeightProperty)!; }
+            set { SetValue(MinHeightProperty, value); }
+        }
+
+        /// <summary>
+        /// MaxHeight Dependency Property
+        /// </summary>
+        public static readonly DependencyProperty MaxHeightProperty =
+                    DependencyProperty.Register(
+                                "MaxHeight",
+                                typeof(float),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                        float.PositiveInfinity,
+                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                        new PropertyChangedCallback(OnTransformDirty)),
+                                new ValidateValueCallback(IsMaxWidthHeightValid));
+
+        /// <summary>
+        /// MaxHeight Property
+        /// </summary>
+        [TypeConverter(typeof(LengthConverter))]
+        public float MaxHeight
+        {
+            get { return (float)GetValue(MaxHeightProperty)!; }
+            set { SetValue(MaxHeightProperty, value); }
+        }
+
+        private static bool IsWidthHeightValid(object? value)
+        {
+            if (value is float v)
+                return (float.IsNaN(v)) || (v >= 0f && !float.IsPositiveInfinity(v));
+            return false;
+        }
+
+        private static bool IsMinWidthHeightValid(object? value)
+        {
+            if (value is float v)
+                return (!float.IsNaN(v) && v >= 0f && !float.IsPositiveInfinity(v));
+            return false;
+        }
+
+        private static bool IsMaxWidthHeightValid(object? value)
+        {
+            if (value is float v)
+                return (!float.IsNaN(v) && v >= 0f);
+            return false;
+        }
+
+        private static void OnTransformDirty(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // Callback for MinWidth, MaxWidth, Width, MinHeight, MaxHeight, Height, and RenderTransformOffset
+            //FrameworkElement fe = (FrameworkElement)d;
+            //fe.AreTransformsClean = false;
         }
 
         #endregion
