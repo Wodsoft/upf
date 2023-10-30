@@ -16,7 +16,6 @@ namespace Wodsoft.UI.Platforms.Win32
     public class WindowContext : IWindowContext, IDisposable
     {
         private FreeLibrarySafeHandle _instance;
-        private IntPtr _windowPtr;
         private HWND _hwnd;
 
         private string _className;
@@ -130,7 +129,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public void Show()
         {
-            if (_windowPtr == IntPtr.Zero)
+            if (_hwnd.IsNull)
             {
                 _thread.Start();
             }
@@ -144,16 +143,16 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
-            _windowPtr = PInvoke.CreateWindowEx(
+            var windowPtr = PInvoke.CreateWindowEx(
                 GetExStyle(),
                 _className,
                 _title,
                 GetStyle(),
                 _x, _y, _width, _height,
                 HWND.Null, null, _instance, null);
-            if (_windowPtr == IntPtr.Zero)
+            if (windowPtr == IntPtr.Zero)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
-            _hwnd = new HWND(_windowPtr);
+            _hwnd = new HWND(windowPtr);
             if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL))
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             if (!PInvoke.UpdateWindow(_hwnd))
@@ -241,7 +240,10 @@ namespace Wodsoft.UI.Platforms.Win32
                 // TODO: 释放未托管的资源(未托管的对象)并重写终结器
                 // TODO: 将大型字段设置为 null
                 if (!_hwnd.IsNull)
+                {
                     PInvoke.DestroyWindow(_hwnd);
+                    _hwnd = HWND.Null;
+                }
                 _instance.Dispose();
                 _disposed = true;
             }
