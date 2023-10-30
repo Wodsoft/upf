@@ -9,3 +9,4 @@ DestroyWindow
 UnregisterClass
 ShowWindow
 UpdateWindow
+WM_*

@@ -12,8 +12,9 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             if (application.IsRunning)
                 throw new InvalidOperationException("Could not initialize services while application is running.");
-            application.WindowProvider = new WindowProvider();
-            application.LifecycleProvider = new LifecycleProvider();
+            var windowProvider = new WindowProvider();
+            application.WindowProvider = windowProvider;
+            application.LifecycleProvider = new LifecycleProvider(windowProvider);
         }
     }
 }

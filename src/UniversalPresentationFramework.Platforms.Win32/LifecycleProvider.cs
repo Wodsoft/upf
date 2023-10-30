@@ -12,9 +12,14 @@ namespace Wodsoft.UI.Platforms.Win32
         private object _lock = new object();
         private ManualResetEvent? _eventEvent;
 
-        public LifecycleProvider()
+        public LifecycleProvider(WindowProvider windowProvider)
         {
-            
+            windowProvider.WindowEmpty += WindowEmpty;
+        }
+
+        private void WindowEmpty(object? sender, EventArgs e)
+        {
+            _eventEvent?.Set();
         }
 
         public void Start()

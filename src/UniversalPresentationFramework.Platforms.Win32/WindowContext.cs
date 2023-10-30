@@ -167,7 +167,9 @@ namespace Wodsoft.UI.Platforms.Win32
             MSG msg;
             while (true)
             {
-                if (!_disposed && !_hwnd.IsNull && PInvoke.GetMessage(out msg, _hwnd, 0, 0))
+                if (_disposed || _hwnd.IsNull)
+                    break;
+                if (PInvoke.GetMessage(out msg, _hwnd, 0, 0))
                 {
                     PInvoke.TranslateMessage(msg);
                     PInvoke.DispatchMessage(msg);
@@ -236,6 +238,12 @@ namespace Wodsoft.UI.Platforms.Win32
 
         private LRESULT WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
         {
+            switch (msg)
+            {
+                case PInvoke.WM_DESTROY:
+                    DestoryWindow();
+                    break;
+            }
             return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
         }
 
@@ -271,9 +279,12 @@ namespace Wodsoft.UI.Platforms.Win32
 
         private void DestoryWindow()
         {
-            PInvoke.DestroyWindow(_hwnd);
-            _hwnd = HWND.Null;
-            Closed?.Invoke(this);
+            if (!_hwnd.IsNull)
+            {
+                PInvoke.DestroyWindow(_hwnd);
+                _hwnd = HWND.Null;
+                Closed?.Invoke(this);
+            }
         }
 
         protected virtual void Dispose(bool disposing)
