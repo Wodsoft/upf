@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>Wodsoft.UI.Test</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\UniversalPresentationFramework.Platforms.Win32\UniversalPresentationFramework.Platforms.Win32.csproj" />
+	  <ProjectReference Include="..\UniversalPresentationFramework.Test\UniversalPresentationFramework.Test.csproj" />
+	</ItemGroup>
+
+</Project>

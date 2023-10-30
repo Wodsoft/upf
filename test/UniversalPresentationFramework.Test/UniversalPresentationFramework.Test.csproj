@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>Wodsoft.UI.Test</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="App.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="MainWindow.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</None>
+	</ItemGroup>
+
+</Project>

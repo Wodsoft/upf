@@ -483,9 +483,9 @@ namespace Wodsoft.UI.Controls
         /// <param name="element"></param>
         protected void SetLogicalParent(UIElement element)
         {
-            if (_logicalParent != null)
+            if (_logicalParent != null && element is FrameworkElement fe)
             {
-                _logicalParent.AddLogicalChild(element);
+                _logicalParent.AddLogicalChild(fe);
             }
         }
 
@@ -495,9 +495,9 @@ namespace Wodsoft.UI.Controls
         /// <param name="element"></param>
         protected void ClearLogicalParent(UIElement element)
         {
-            if (_logicalParent != null)
+            if (_logicalParent != null && element is FrameworkElement fe)
             {
-                _logicalParent.RemoveLogicalChild(element);
+                _logicalParent.RemoveLogicalChild(fe);
             }
         }
 

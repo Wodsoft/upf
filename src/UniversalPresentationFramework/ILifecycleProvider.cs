@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    public abstract class WindowContext
+    public interface ILifecycleProvider
     {
-        
+        void Start();
+
+        void Stop();
+
+        void WaitForEnd();
     }
 }

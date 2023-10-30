@@ -1,0 +1,11 @@
+﻿CreateWindowEx
+RegisterClassEx
+GetMessage
+TranslateMessage
+DispatchMessage
+GetModuleHandle
+DefWindowProc
+DestroyWindow
+UnregisterClass
+ShowWindow
+UpdateWindow

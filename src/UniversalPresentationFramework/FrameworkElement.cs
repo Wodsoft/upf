@@ -99,7 +99,7 @@ namespace Wodsoft.UI
                                 typeof(float),
                                 typeof(FrameworkElement),
                                 new FrameworkPropertyMetadata(
-                                        Double.PositiveInfinity,
+                                        float.PositiveInfinity,
                                         FrameworkPropertyMetadataOptions.AffectsMeasure,
                                         new PropertyChangedCallback(OnTransformDirty)),
                                 new ValidateValueCallback(IsMaxWidthHeightValid));

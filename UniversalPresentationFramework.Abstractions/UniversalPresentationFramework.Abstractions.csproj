@@ -7,4 +7,8 @@
 		<RootNamespace>Wodsoft.UI</RootNamespace>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\src\UniversalPresentationFramework.Xaml\UniversalPresentationFramework.Xaml.csproj" />
+	</ItemGroup>
+
 </Project>

@@ -31,6 +31,16 @@ namespace Wodsoft.UI
             throw new NotImplementedException();
         }
 
+        public void InvalidateMeasure()
+        {
+
+        }
+
+        public void InvalidateArrange()
+        {
+
+        }
+
         #endregion
 
         public static readonly DependencyProperty VisibilityProperty =

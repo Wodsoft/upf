@@ -82,6 +82,8 @@ namespace Wodsoft.UI
                 value = metadata.CoerceValueCallback(this, value);
             if (dp.ValidateValueCallback != null && !dp.ValidateValueCallback(value))
                 throw new ArgumentException("Value validate failed.", nameof(value));
+            if (value != null && !dp.PropertyType.IsAssignableFrom(value.GetType()))
+                throw new ArgumentNullException($"Value can not assignable from \"{dp.PropertyType}\".");
             object? oldValue;
             if (_valueStores.TryGetValue(dp.GlobalIndex, out var store))
             {
