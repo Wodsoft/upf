@@ -132,6 +132,17 @@ namespace Wodsoft.UI
 
         #endregion
 
+        #region Events
+
+        public event CancelEventHandler? Closing;
+        public event EventHandler? Closed;
+        public event EventHandler? Activated;
+        public event EventHandler? Deactivated;
+        public event EventHandler? LocationChanged;
+        public event EventHandler? StateChanged;
+
+        #endregion
+
         #region Operator
 
         private object _lock = new object();
@@ -143,28 +154,92 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Application is not running.");
             lock (_lock)
             {
-                _context = Application.Current!.WindowProvider!.CreateContext();
-                _context.Title = Title;
-                _context.X = (int)Left;
-                _context.Y = (int)Top;
-                _context.Width = (int)Width;
-                _context.Height = (int)Height;
-                _context.State = WindowState;
-                _context.Style = WindowStyle;
-                _context.StartupLocation = WindowStartupLocation;
-                _context.AllowsTransparency = AllowsTransparency;
+                if (_context == null)
+                {
+                    _context = Application.Current!.WindowProvider!.CreateContext();
+                    _context.Title = Title;
+                    _context.X = (int)Left;
+                    _context.Y = (int)Top;
+                    _context.Width = (int)Width;
+                    _context.Height = (int)Height;
+                    _context.State = WindowState;
+                    _context.Style = WindowStyle;
+                    _context.StartupLocation = WindowStartupLocation;
+                    _context.AllowsTransparency = AllowsTransparency;
+                    _context.Closed += Context_Closed;
+                    _context.Closing += Context_Closing;
+                    _context.LocationChanged += Context_LocationChanged;
+                    _context.StateChanged += Context_StateChanged;
+                    _context.Activated += Context_Activated;
+                    _context.Deactivated += Context_Deactivated;
+                }
                 _context.Show();
+            }
+        }
+
+        private void Context_Deactivated(IWindowContext context)
+        {
+            Deactivated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Context_Activated(IWindowContext context)
+        {
+            Activated?.Invoke(this, EventArgs.Empty);
+
+        }
+
+        private void Context_StateChanged(IWindowContext context)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Context_LocationChanged(IWindowContext context)
+        {
+            LocationChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Context_Closing(object? sender, CancelEventArgs e)
+        {
+            Closing?.Invoke(this, e);
+        }
+
+        private void Context_Closed(IWindowContext context)
+        {
+            lock (_lock)
+            {
+                context.Closed -= Context_Closed;
+                context.Closing -= Context_Closing;
+                context.LocationChanged -= Context_LocationChanged;
+                context.StateChanged -= Context_StateChanged;
+                context.Activated -= Context_Activated;
+                context.Deactivated -= Context_Deactivated;
+                context.Dispose();
+                _context = null;
             }
         }
 
         public void Hide()
         {
-            throw new NotImplementedException();
+            if (Application.Current == null || !Application.Current.IsRunning)
+                throw new InvalidOperationException("Application is not running.");
+            lock (_lock)
+            {
+                if (_context == null)
+                    return;
+                _context.Hide();
+            }
         }
 
         public void Close()
         {
-            throw new NotImplementedException();
+            if (Application.Current == null || !Application.Current.IsRunning)
+                throw new InvalidOperationException("Application is not running.");
+            lock (_lock)
+            {
+                if (_context == null)
+                    return;
+                _context.Close();
+            }
         }
 
         public bool? ShowDialog()

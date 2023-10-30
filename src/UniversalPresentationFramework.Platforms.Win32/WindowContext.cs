@@ -122,13 +122,19 @@ namespace Wodsoft.UI.Platforms.Win32
 
         #endregion
 
+        #region Window Operations
+
         public void Hide()
         {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(WindowContext));
             throw new NotImplementedException();
         }
 
         public void Show()
         {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(WindowContext));
             if (_hwnd.IsNull)
             {
                 _thread.Start();
@@ -157,6 +163,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             if (!PInvoke.UpdateWindow(_hwnd))
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
+            Opened?.Invoke(this);
             MSG msg;
             while (true)
             {
@@ -167,6 +174,40 @@ namespace Wodsoft.UI.Platforms.Win32
                 }
             }
         }
+
+        public void Close()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(WindowContext));
+            if (_hwnd.IsNull)
+                return;
+            if (OnClosing())
+                DestoryWindow();
+        }
+
+        private bool OnClosing()
+        {
+            if (Closing == null)
+                return true;
+            var e = new CancelEventArgs();
+            Closing(this, e);
+            return !e.Cancel;
+        }
+
+        #endregion
+
+        #region Window Events
+
+        public event CancelEventHandler? Closing;
+        public event WindowContextEventHandler? Closed;
+        public event WindowContextEventHandler? Activated;
+        public event WindowContextEventHandler? Deactivated;
+        public event WindowContextEventHandler? LocationChanged;
+        public event WindowContextEventHandler? StateChanged;
+        public event WindowContextEventHandler? Disposed;
+        public event WindowContextEventHandler? Opened;
+
+        #endregion
 
         private unsafe WNDCLASSEXW GetWindowClass()
         {
@@ -228,6 +269,13 @@ namespace Wodsoft.UI.Platforms.Win32
             return style;
         }
 
+        private void DestoryWindow()
+        {
+            PInvoke.DestroyWindow(_hwnd);
+            _hwnd = HWND.Null;
+            Closed?.Invoke(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -241,11 +289,11 @@ namespace Wodsoft.UI.Platforms.Win32
                 // TODO: 将大型字段设置为 null
                 if (!_hwnd.IsNull)
                 {
-                    PInvoke.DestroyWindow(_hwnd);
-                    _hwnd = HWND.Null;
+                    DestoryWindow();
                 }
                 _instance.Dispose();
                 _disposed = true;
+                Disposed?.Invoke(this);
             }
         }
 

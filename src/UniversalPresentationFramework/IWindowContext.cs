@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    public interface IWindowContext
+    public interface IWindowContext : IDisposable
     {
         bool IsClosing { get; }
 
         void Show();
 
         void Hide();
+
+        void Close();
 
         string Title { get; set; }
 
@@ -31,5 +34,12 @@ namespace Wodsoft.UI
         WindowStyle Style { get; set; }
 
         bool AllowsTransparency { get; set; }
+
+        public event CancelEventHandler Closing;
+        public event WindowContextEventHandler Closed;
+        public event WindowContextEventHandler Activated;
+        public event WindowContextEventHandler Deactivated;
+        public event WindowContextEventHandler LocationChanged;
+        public event WindowContextEventHandler StateChanged;
     }
 }
