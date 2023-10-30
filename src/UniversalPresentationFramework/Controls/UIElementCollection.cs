@@ -364,7 +364,7 @@ namespace Wodsoft.UI.Controls
             _visualChildren.Move(visual, destination);
         }
 
-        private UIElement Cast(object value)
+        private UIElement Cast(object? value)
         {
             if (value == null)
                 throw new System.ArgumentException(nameof(value));

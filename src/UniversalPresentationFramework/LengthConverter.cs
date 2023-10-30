@@ -143,7 +143,7 @@ namespace Wodsoft.UI
                 }
                 else if (destinationType == typeof(InstanceDescriptor))
                 {
-                    ConstructorInfo ci = typeof(float).GetConstructor(new Type[] { typeof(float) });
+                    ConstructorInfo ci = typeof(float).GetConstructor(new Type[] { typeof(float) })!;
                     return new InstanceDescriptor(ci, new object[] { l });
                 }
             }
