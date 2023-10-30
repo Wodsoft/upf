@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.Graphics.OpenGL;
 using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Wodsoft.UI.Platforms.Win32
@@ -21,7 +22,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private string _className;
         private bool _disposed, _topMost;
         private string _title = string.Empty;
-        private Thread _thread;
+        private Thread _windowThread, _uiThread;
         private int _x, _y, _width, _height;
         private WindowState _state;
         private WindowStyle _style;
@@ -30,7 +31,8 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             _instance = PInvoke.GetModuleHandle((string?)null);
             _className = "upfwindow_" + Guid.NewGuid().ToString().Replace("-", "");
-            _thread = new Thread(NewWindow);
+            _windowThread = new Thread(ProcessWindow);
+            _uiThread = new Thread(ProcessUI);
             //_thread.SetApartmentState(ApartmentState.STA);
         }
 
@@ -128,7 +130,11 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(WindowContext));
-            throw new NotImplementedException();
+            if (!_hwnd.IsNull)
+            {
+                if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_HIDE))
+                    throw new Win32Exception(Marshal.GetLastPInvokeError());
+            }
         }
 
         public void Show()
@@ -137,15 +143,16 @@ namespace Wodsoft.UI.Platforms.Win32
                 throw new ObjectDisposedException(nameof(WindowContext));
             if (_hwnd.IsNull)
             {
-                _thread.Start();
+                _windowThread.Start();
             }
             else
             {
-
+                if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL))
+                    throw new Win32Exception(Marshal.GetLastPInvokeError());
             }
         }
 
-        private unsafe void NewWindow()
+        private unsafe void ProcessWindow()
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
@@ -163,7 +170,6 @@ namespace Wodsoft.UI.Platforms.Win32
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             if (!PInvoke.UpdateWindow(_hwnd))
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
-            Opened?.Invoke(this);
             MSG msg;
             while (true)
             {
@@ -175,6 +181,35 @@ namespace Wodsoft.UI.Platforms.Win32
                     PInvoke.DispatchMessage(msg);
                 }
             }
+        }
+
+        private void ProcessUI()
+        {
+            var hdc = PInvoke.GetDC(_hwnd);
+            if (hdc.Value == IntPtr.Zero)
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            var descriptor = new PIXELFORMATDESCRIPTOR
+            {
+                nSize = (ushort)Marshal.SizeOf<PIXELFORMATDESCRIPTOR>(),
+                nVersion = 1,
+                iPixelType = PFD_PIXEL_TYPE.PFD_TYPE_RGBA,
+                dwFlags = PFD_FLAGS.PFD_DRAW_TO_WINDOW | PFD_FLAGS.PFD_SUPPORT_OPENGL | PFD_FLAGS.PFD_DOUBLEBUFFER,
+                cColorBits = 32,
+                cAlphaBits = 0,
+                iLayerType = PFD_LAYER_TYPE.PFD_MAIN_PLANE,
+                cDepthBits = 24,
+                cStencilBits = 8
+            };
+            var format = PInvoke.ChoosePixelFormat(hdc, descriptor);
+            if (format == 0)
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            if (!PInvoke.SetPixelFormat(hdc, format, descriptor))
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            var hglrc = PInvoke.wglCreateContext(hdc);
+            if (hglrc.IsNull)
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            if (!PInvoke.wglMakeCurrent(hdc, hglrc))
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
         }
 
         public void Close()
@@ -194,6 +229,16 @@ namespace Wodsoft.UI.Platforms.Win32
             var e = new CancelEventArgs();
             Closing(this, e);
             return !e.Cancel;
+        }
+
+        private void DestoryWindow()
+        {
+            if (!_hwnd.IsNull)
+            {
+                PInvoke.DestroyWindow(_hwnd);
+                _hwnd = HWND.Null;
+                Closed?.Invoke(this);
+            }
         }
 
         #endregion
@@ -221,7 +266,7 @@ namespace Wodsoft.UI.Platforms.Win32
 #pragma warning disable CS8500 // 这会获取托管类型的地址、获取其大小或声明指向它的指针
                 wcx.cbSize = (uint)sizeof(WNDCLASSEXW);          // size of structure 
 #pragma warning restore CS8500 // 这会获取托管类型的地址、获取其大小或声明指向它的指针
-                wcx.style = WNDCLASS_STYLES.CS_HREDRAW | WNDCLASS_STYLES.CS_VREDRAW | WNDCLASS_STYLES.CS_DBLCLKS;                    // redraw if size changes 
+                wcx.style = WNDCLASS_STYLES.CS_HREDRAW | WNDCLASS_STYLES.CS_VREDRAW | WNDCLASS_STYLES.CS_DBLCLKS | WNDCLASS_STYLES.CS_OWNDC;                    // redraw if size changes 
                 wcx.lpfnWndProc = WndProc;     // points to window procedure 
                 wcx.cbClsExtra = 0;                // no extra class memory 
                 wcx.cbWndExtra = 0;                // no extra window memory 
@@ -242,6 +287,12 @@ namespace Wodsoft.UI.Platforms.Win32
             {
                 case PInvoke.WM_DESTROY:
                     DestoryWindow();
+                    break;
+                case PInvoke.WM_CREATE:
+                    Opened?.Invoke(this);
+                    break;
+                case PInvoke.WM_PAINT:
+                    _uiThread.Start();
                     break;
             }
             return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
@@ -277,15 +328,7 @@ namespace Wodsoft.UI.Platforms.Win32
             return style;
         }
 
-        private void DestoryWindow()
-        {
-            if (!_hwnd.IsNull)
-            {
-                PInvoke.DestroyWindow(_hwnd);
-                _hwnd = HWND.Null;
-                Closed?.Invoke(this);
-            }
-        }
+        #region Dispose
 
         protected virtual void Dispose(bool disposing)
         {
@@ -320,5 +363,7 @@ namespace Wodsoft.UI.Platforms.Win32
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        #endregion
     }
 }

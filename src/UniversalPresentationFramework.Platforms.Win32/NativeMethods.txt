@@ -9,4 +9,9 @@ DestroyWindow
 UnregisterClass
 ShowWindow
 UpdateWindow
+GetDC
 WM_*
+wglCreateContext
+wglMakeCurrent
+ChoosePixelFormat
+SetPixelFormat

@@ -7,4 +7,12 @@
 		<RootNamespace>Wodsoft.UI.Renderers.SkiaSharp</RootNamespace>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="SkiaSharp" Version="2.88.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+	</ItemGroup>
+
 </Project>
