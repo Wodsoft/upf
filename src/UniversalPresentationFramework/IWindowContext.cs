@@ -41,5 +41,7 @@ namespace Wodsoft.UI
         public event WindowContextEventHandler Deactivated;
         public event WindowContextEventHandler LocationChanged;
         public event WindowContextEventHandler StateChanged;
+        public event WindowContextEventHandler<DpiScale> DpiChanged;
+        public event WindowContextEventHandler<Size> SizeChanged;
     }
 }

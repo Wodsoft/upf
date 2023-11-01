@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wodsoft.UI.Renderers.SkiaSharp
+namespace Wodsoft.UI.Media
 {
-    public class RendererProvider : IRendererProvider
+    public interface IDrawingContent
     {
-
     }
 }

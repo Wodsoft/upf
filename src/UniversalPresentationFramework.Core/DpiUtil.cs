@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    /// <summary>
-    /// Framework Renderer Provider.
-    /// </summary>
-    public interface IRendererProvider
+    internal class DpiUtil
     {
-        IRendererContext CreateContext();
+        public const float DefaultPixelsPerInch = 96f;
     }
 }

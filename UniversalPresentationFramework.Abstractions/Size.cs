@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    public struct Size
+    public record struct Size
     {
         public Size(float width, float height)
         {
@@ -33,5 +33,7 @@ namespace Wodsoft.UI
                 _height = value;
             }
         }
+
+        public readonly static Size Empty = new Size(0, 0);
     }
 }

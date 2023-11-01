@@ -8,15 +8,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
-	    <PrivateAssets>all</PrivateAssets>
-	    <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-	  </PackageReference>
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+			<PrivateAssets>all</PrivateAssets>
+			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\UniversalPresentationFramework.Renderers.SkiaSharp\UniversalPresentationFramework.Renderers.SkiaSharp.csproj" />
-	  <ProjectReference Include="..\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+		<ProjectReference Include="..\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan.csproj" />
+		<ProjectReference Include="..\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
 	</ItemGroup>
 
 </Project>

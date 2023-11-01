@@ -11,6 +11,6 @@ namespace Wodsoft.UI
     /// </summary>
     public interface IWindowProvider
     {
-        IWindowContext CreateContext();
+        IWindowContext CreateContext(Window window);
     }
 }

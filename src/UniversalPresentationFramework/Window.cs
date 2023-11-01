@@ -156,25 +156,28 @@ namespace Wodsoft.UI
             {
                 if (_context == null)
                 {
-                    _context = Application.Current!.WindowProvider!.CreateContext();
-                    _context.Title = Title;
-                    _context.X = (int)Left;
-                    _context.Y = (int)Top;
-                    _context.Width = (int)Width;
-                    _context.Height = (int)Height;
-                    _context.State = WindowState;
-                    _context.Style = WindowStyle;
-                    _context.StartupLocation = WindowStartupLocation;
-                    _context.AllowsTransparency = AllowsTransparency;
+                    _context = Application.Current!.WindowProvider!.CreateContext(this);
                     _context.Closed += Context_Closed;
                     _context.Closing += Context_Closing;
                     _context.LocationChanged += Context_LocationChanged;
                     _context.StateChanged += Context_StateChanged;
                     _context.Activated += Context_Activated;
                     _context.Deactivated += Context_Deactivated;
+                    _context.DpiChanged += Context_DpiChanged;
+                    _context.SizeChanged += Context_SizeChanged;
                 }
                 _context.Show();
             }
+        }
+
+        private void Context_SizeChanged(IWindowContext context, Size e)
+        {
+            _visualSize = e;
+        }
+
+        private void Context_DpiChanged(IWindowContext context, DpiScale e)
+        {
+            _dpiScale = e;
         }
 
         private void Context_Deactivated(IWindowContext context)
@@ -213,6 +216,8 @@ namespace Wodsoft.UI
                 context.StateChanged -= Context_StateChanged;
                 context.Activated -= Context_Activated;
                 context.Deactivated -= Context_Deactivated;
+                context.DpiChanged -= Context_DpiChanged;
+                context.SizeChanged -= Context_SizeChanged;
                 context.Dispose();
                 _context = null;
             }
@@ -245,6 +250,22 @@ namespace Wodsoft.UI
         public bool? ShowDialog()
         {
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Render
+
+        private Size _visualSize;
+        public override Size GetVisualSize()
+        {
+            return _visualSize;
+        }
+
+        private DpiScale _dpiScale = DpiScale.Default;
+        public override DpiScale GetDpi()
+        {
+            return _dpiScale;
         }
 
         #endregion

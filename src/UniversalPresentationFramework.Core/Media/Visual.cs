@@ -8,10 +8,12 @@ namespace Wodsoft.UI.Media
 {
     public abstract class Visual : DependencyObject
     {
+        #region Tree
+
         private Visual? _parent;
         internal int ParentIndex;
 
-        protected void AddVisualChild(Visual child)
+        protected internal void AddVisualChild(Visual child)
         {
             if (child == null)
                 return;
@@ -22,7 +24,7 @@ namespace Wodsoft.UI.Media
             child.OnVisualParentChanged(null);
         }
 
-        protected void RemoveVisualChild(Visual child)
+        protected internal void RemoveVisualChild(Visual child)
         {
             if (child == null)
                 return;
@@ -33,30 +35,15 @@ namespace Wodsoft.UI.Media
             OnVisualChildrenChanged(null, child);
         }
 
-        protected virtual Visual GetVisualChild(int index)
+        protected internal virtual Visual GetVisualChild(int index)
         {
             throw new ArgumentOutOfRangeException("index");
         }
 
-        protected virtual int VisualChildrenCount => 0;
+        protected internal virtual int VisualChildrenCount => 0;
 
         public Visual? VisualParent => _parent;
-
-        internal void InternalAddVisualChild(Visual child)
-        {
-            AddVisualChild(child);
-        }
-
-        internal void InternalRemoveVisualChild(Visual child)
-        {
-            RemoveVisualChild(child);
-        }
-
-        internal Visual InternalGetVisualChild(int index)
-        {
-            return GetVisualChild(index);
-        }
-
+        
         protected virtual void OnVisualChildrenChanged(Visual? visualAdded, Visual? visualRemoved) { }
 
         protected virtual void OnVisualParentChanged(Visual? oldParent) { }
@@ -64,5 +51,26 @@ namespace Wodsoft.UI.Media
         public bool IsRootElement { get; }
 
         public bool HasVisualParent => _parent != null;
+
+        #endregion
+
+        #region Render
+
+        public virtual void RenderContext(RenderContext renderContext)
+        {
+
+        }
+
+        public virtual Size GetVisualSize()
+        {
+            return Size.Empty;
+        }
+
+        public virtual DpiScale GetDpi()
+        {
+            return DpiScale.Default;
+        }
+
+        #endregion
     }
 }

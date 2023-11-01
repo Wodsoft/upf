@@ -8,12 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SkiaSharp" Version="2.88.6" />
 		<PackageReference Include="SkiaSharp.Vulkan.SharpVk" Version="2.88.6" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+		<ProjectReference Include="..\UniversalPresentationFramework.Renderers.SkiaSharp\UniversalPresentationFramework.Renderers.SkiaSharp.csproj" />
 	</ItemGroup>
 
 </Project>

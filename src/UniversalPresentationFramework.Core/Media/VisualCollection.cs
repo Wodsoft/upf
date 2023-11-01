@@ -305,7 +305,7 @@ namespace Wodsoft.UI.Media
             IncrementVersion();
 
             // Notify the Visual tree about the children changes. 
-            _owner.InternalAddVisualChild(value);
+            _owner.AddVisualChild(value);
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace Wodsoft.UI.Media
 
             IncrementVersion();
 
-            _owner.InternalRemoveVisualChild(child);
+            _owner.RemoveVisualChild(child);
         }
 
         /// <summary>

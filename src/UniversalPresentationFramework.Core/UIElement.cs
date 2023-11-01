@@ -43,6 +43,25 @@ namespace Wodsoft.UI
 
         #endregion
 
+        #region Render
+
+        private IDrawingContent? _drawingContent;
+        protected virtual void OnRender(DrawingContext drawingContext)
+        {
+
+        }
+
+        public override void RenderContext(RenderContext renderContext)
+        {
+            if (_drawingContent != null)
+            {
+
+            }
+        }
+
+        #endregion
+
+
         public static readonly DependencyProperty VisibilityProperty =
         DependencyProperty.Register(
                 "Visibility",

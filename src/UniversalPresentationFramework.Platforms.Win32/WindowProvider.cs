@@ -11,9 +11,9 @@ namespace Wodsoft.UI.Platforms.Win32
         private List<IWindowContext> _contexts = new List<IWindowContext>();
         private object _lock = new object();
 
-        public IWindowContext CreateContext()
+        public IWindowContext CreateContext(Window window)
         {
-            var context = new WindowContext();
+            var context = new WindowContext(window);
             context.Disposed += Context_Disposed;
             context.Opened += Context_CreateOpened;
             context.Closed += Context_Closed;
