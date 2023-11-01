@@ -1,5 +1,4 @@
 ﻿using SharpVk;
-using SharpVk.Glfw;
 using SharpVk.Khronos;
 using SkiaSharp;
 using System;
