@@ -35,6 +35,8 @@ namespace Wodsoft.UI
 
         bool AllowsTransparency { get; set; }
 
+        bool IsInputProcessing { get; }
+
         public event CancelEventHandler Closing;
         public event WindowContextEventHandler Closed;
         public event WindowContextEventHandler Activated;

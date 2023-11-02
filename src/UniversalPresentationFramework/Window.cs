@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Controls;
@@ -11,6 +12,26 @@ namespace Wodsoft.UI
 {
     public class Window : ContentControl
     {
+        static Window()
+        {
+            WidthProperty.OverrideMetadata(typeof(Window), new PropertyMetadata(OnWidthChanged));
+            HeightProperty.OverrideMetadata(typeof(Window), new PropertyMetadata(OnHeightChanged));
+        }
+
+        private static void OnWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            Window w = (Window)d;
+            if (w._context != null && !w._context.IsInputProcessing)
+                w._context.Width = (int)(float)e.NewValue!;
+        }
+
+        private static void OnHeightChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            Window w = (Window)d;
+            if (w._context != null && !w._context.IsInputProcessing)
+                w._context.Height = (int)(float)e.NewValue!;
+        }
+
         #region Properties
 
         public static readonly DependencyProperty TitleProperty =
@@ -21,11 +42,8 @@ namespace Wodsoft.UI
         private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             Window w = (Window)d;
-            lock (w._lock)
-            {
-                if (w._context != null)
-                    w._context.Title = (string)e.NewValue!;
-            }
+            if (w._context != null)
+                w._context.Title = (string)e.NewValue!;
         }
         private static bool ValidateText(object? value)
         {
@@ -41,7 +59,7 @@ namespace Wodsoft.UI
         private static void OnLeftChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             Window w = (Window)d;
-            if (w._context != null)
+            if (w._context != null && !w._context.IsInputProcessing)
                 w._context.X = (int)(float)e.NewValue!;
         }
         private static object? CoerceLeft(DependencyObject d, object? value)
@@ -72,7 +90,7 @@ namespace Wodsoft.UI
         private static void OnTopChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             Window w = (Window)d;
-            if (w._context != null)
+            if (w._context != null && !w._context.IsInputProcessing)
                 w._context.Y = (int)(float)e.NewValue!;
         }
         private static object? CoerceTop(DependencyObject d, object? value)
@@ -172,6 +190,8 @@ namespace Wodsoft.UI
 
         private void Context_SizeChanged(IWindowContext context, Size e)
         {
+            Width = e.Width;
+            Height = e.Height;
             _visualSize = e;
         }
 
@@ -188,7 +208,6 @@ namespace Wodsoft.UI
         private void Context_Activated(IWindowContext context)
         {
             Activated?.Invoke(this, EventArgs.Empty);
-
         }
 
         private void Context_StateChanged(IWindowContext context)
@@ -198,6 +217,8 @@ namespace Wodsoft.UI
 
         private void Context_LocationChanged(IWindowContext context)
         {
+            Left = context.X;
+            Top = context.Y;
             LocationChanged?.Invoke(this, EventArgs.Empty);
         }
 

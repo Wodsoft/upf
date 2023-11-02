@@ -15,3 +15,6 @@ GetDeviceCaps
 GetDC
 ReleaseDC
 GetClientRect
+SwapBuffers
+BeginPaint
+EndPaint

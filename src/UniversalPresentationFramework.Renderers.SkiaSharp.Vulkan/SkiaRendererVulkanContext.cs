@@ -1,5 +1,6 @@
 ﻿using SharpVk;
 using SharpVk.Khronos;
+using SharpVk.Multivendor;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -8,58 +9,110 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using PhysicalDevice = SharpVk.PhysicalDevice;
+using Semaphore = SharpVk.Semaphore;
+using Version = SharpVk.Version;
 
 namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererVulkanContext : SkiaRendererContext
     {
         private readonly GRSharpVkBackendContext _backendContext;
+        private readonly Instance _instance;
+        private readonly Surface _surface;
+        private readonly PhysicalDevice _physicalDevice;
+        private readonly Device _device;
+        private readonly QueueFamilyIndices _queueFamilies;
+        private readonly Queue _presentQueue;
+        private readonly Semaphore _renderFinishedSemaphore, _imageAvailableSemaphore;
         private GRBackendRenderTarget? _renderTarget;
-        private SharpVk.Image? _image;
-        private SharpVk.DeviceMemory? _memory;
-        private Surface _surface;
+        private Image? _image;
+        private Swapchain? _swapchain;
 
-        public SkiaRendererVulkanContext(GRSharpVkBackendContext backendContext, IntPtr hinstance, IntPtr hwnd)
+        private SkiaRendererVulkanContext(GRSharpVkBackendContext backendContext, Instance instance, Surface surface, PhysicalDevice physicalDevice, Device device,
+            QueueFamilyIndices queueFamilies, Queue presentQueue)
             : base(GRContext.CreateVulkan(backendContext))
         {
-            _backendContext = backendContext;          
-            _surface = backendContext.VkInstance.CreateWin32Surface(hinstance, hwnd);
-            //var swapChainSupport = new SwapChainSupportDetails
-            //{
-            //    Capabilities = backendContext.VkPhysicalDevice.GetSurfaceCapabilities(_surface),
-            //    Formats = backendContext.VkPhysicalDevice.GetSurfaceFormats(_surface),
-            //    PresentModes = backendContext.VkPhysicalDevice.GetSurfacePresentModes(_surface)
-            //};
-            //SurfaceFormat surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
-
-            //uint imageCount = swapChainSupport.Capabilities.MinImageCount + 1;
-            //if (swapChainSupport.Capabilities.MaxImageCount > 0 && imageCount > swapChainSupport.Capabilities.MaxImageCount)
-            //{
-            //    imageCount = swapChainSupport.Capabilities.MaxImageCount;
-            //}
-            //QueueFamilyIndices queueFamilies = FindQueueFamilies(backendContext.VkPhysicalDevice);
-            //var indices = queueFamilies.Indices.ToArray();
-            //Extent2D extent = ChooseSwapExtent(swapChainSupport.Capabilities);
-
-            //this.swapChain = device.CreateSwapchain(surface,
-            //                                        imageCount,
-            //                                        surfaceFormat.Format,
-            //                                        surfaceFormat.ColorSpace,
-            //                                        extent,
-            //                                        1,
-            //                                        ImageUsageFlags.ColorAttachment,
-            //                                        indices.Length == 1
-            //                                            ? SharingMode.Exclusive
-            //                                            : SharingMode.Concurrent,
-            //                                        indices,
-            //                                        swapChainSupport.Capabilities.CurrentTransform,
-            //                                        CompositeAlphaFlags.Opaque,
-            //                                        this.ChooseSwapPresentMode(swapChainSupport.PresentModes),
-            //                                        true,
-            //                                        this.swapChain);
+            _backendContext = backendContext;
+            _instance = instance;
+            _surface = surface;
+            _physicalDevice = physicalDevice;
+            _device = device;
+            _queueFamilies = queueFamilies;
+            _presentQueue = presentQueue;
+            _renderFinishedSemaphore = device.CreateSemaphore();
+            _imageAvailableSemaphore = device.CreateSemaphore();
         }
+
+        #region CreateContext
+
+        public static SkiaRendererVulkanContext CreateFromWindowHandle(IntPtr hinstance, IntPtr hwnd)
+        {
+            var enabledLayers = Instance.EnumerateLayerProperties().Any(x => x.LayerName == "VK_LAYER_LUNARG_standard_validation")
+                ? new string[] { "VK_LAYER_LUNARG_standard_validation" } : null;
+            var instance = Instance.Create(enabledLayers, new[]
+                {
+                    KhrExtensions.Surface,
+                    KhrExtensions.Win32Surface,
+                    ExtExtensions.DebugReport,
+                }, applicationInfo: new ApplicationInfo
+                {
+                    ApplicationName = "UPF Application",
+                    ApplicationVersion = new Version(1, 0, 0),
+                    EngineName = "UPF",
+                    EngineVersion = new Version(0, 4, 0),
+                    ApiVersion = new Version(1, 0, 0)
+                });
+            var surface = instance.CreateWin32Surface(hinstance, hwnd);
+            instance.EnumeratePhysicalDevices();
+            var physicalDevice = instance.EnumeratePhysicalDevices().First(t => IsSuitableDevice(t, surface));
+            QueueFamilyIndices queueFamilies = FindQueueFamilies(physicalDevice, surface);
+            var device = physicalDevice.CreateDevice(queueFamilies.Indices
+                                                        .Select(index => new DeviceQueueCreateInfo
+                                                        {
+                                                            QueueFamilyIndex = index,
+                                                            QueuePriorities = new[] { 1f }
+                                                        }).ToArray(),
+                                                        null,
+                                                        KhrExtensions.Swapchain);
+
+            var graphicsQueue = device.GetQueue(queueFamilies.GraphicsFamily!.Value, 0);
+            var presentQueue = device.GetQueue(queueFamilies.PresentFamily!.Value, 0);
+            //var transferQueue = device.GetQueue(queueFamilies.TransferFamily!.Value, 0);
+
+            GRVkGetProcedureAddressDelegate getProc = (name, instanceHandle, deviceHandle) =>
+            {
+                return instance.GetProcedureAddress(name);
+            };
+            var extensions = physicalDevice.EnumerateDeviceExtensionProperties(null).Select(t => t.ExtensionName).ToArray();
+            using var backendContext = new GRSharpVkBackendContext
+            {
+                VkInstance = instance,
+                VkPhysicalDevice = physicalDevice,
+                VkDevice = device,
+                VkQueue = graphicsQueue,
+                VkPhysicalDeviceFeatures = physicalDevice.GetFeatures(),
+                Extensions = GRVkExtensions.Create(getProc, (IntPtr)instance.RawHandle.ToUInt64(), (IntPtr)physicalDevice.RawHandle.ToUInt64(), null, extensions),
+                GraphicsQueueIndex = queueFamilies.GraphicsFamily!.Value,
+                GetProcedureAddress = (name, innerInstance, innerDevice) =>
+                {
+                    if (innerInstance != null)
+                        return innerInstance.GetProcedureAddress(name);
+                    if (innerDevice != null)
+                        return innerDevice.GetProcedureAddress(name);
+                    return instance.GetProcedureAddress(name);
+                }
+            };
+            return new SkiaRendererVulkanContext(backendContext, instance, surface, physicalDevice, device, queueFamilies, presentQueue);
+        }
+
+        private static bool IsSuitableDevice(PhysicalDevice device, Surface surface)
+        {
+            return device.EnumerateDeviceExtensionProperties(null).Any(extension => extension.ExtensionName == KhrExtensions.Swapchain)
+                    && FindQueueFamilies(device, surface).IsComplete;
+        }
+
+        #endregion
 
         protected override SKSurface CreateSurface(int width, int height)
         {
@@ -67,77 +120,62 @@ namespace Wodsoft.UI.Renderers
                 _renderTarget.Dispose();
             if (_image != null)
                 _image.Dispose();
-
-            //SurfaceFormat surfaceFormat = ChooseSwapSurfaceFormat(_backendContext.VkPhysicalDevice.GetSurfaceFormats(_surface));
-            _image = _backendContext.VkDevice.CreateImage(
-                SharpVk.ImageType.Image2d,
-                SharpVk.Format.R8G8B8A8UNorm,
-                new Extent3D((uint)width, (uint)height, 1),
-                9,
-                1,
-                SampleCountFlags.SampleCount1,
-                ImageTiling.Optimal,
-                ImageUsageFlags.ColorAttachment | ImageUsageFlags.TransferDestination | ImageUsageFlags.Sampled,
-                SharingMode.Exclusive,
-                new[] { _backendContext.GraphicsQueueIndex },
-                ImageLayout.Undefined);
-            var memoryRequirements = _image.GetMemoryRequirements();
-           _memory = _backendContext.VkDevice.AllocateMemory(memoryRequirements.Size,
-                    FindMemoryType(_backendContext.VkPhysicalDevice, memoryRequirements.MemoryTypeBits, MemoryPropertyFlags.DeviceLocal));
-            _image.BindMemory(_memory, 0);
-            var commandPool = _backendContext.VkDevice.CreateCommandPool(_backendContext.GraphicsQueueIndex);
-            var commandBuffer = _backendContext.VkDevice.AllocateCommandBuffer(commandPool, CommandBufferLevel.Primary);
-            commandBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit);
-            var subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, 9, 0, 1);
-            var barrier = new ImageMemoryBarrier()
+            var swapChainSupport = new SwapChainSupportDetails
             {
-                SourceAccessMask = 0,
-                DestinationAccessMask = 0,
-                OldLayout = ImageLayout.Undefined,
-                NewLayout = ImageLayout.ColorAttachmentOptimal,
-                SourceQueueFamilyIndex = SharpVk.Constants.QueueFamilyIgnored,
-                DestinationQueueFamilyIndex = SharpVk.Constants.QueueFamilyIgnored,
-                Image = _image,
-                SubresourceRange = subresourceRange
+                Capabilities = _physicalDevice.GetSurfaceCapabilities(_surface),
+                Formats = _physicalDevice.GetSurfaceFormats(_surface),
+                PresentModes = _physicalDevice.GetSurfacePresentModes(_surface)
             };
-            commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.AllCommands, null, null, new[] { barrier });
-            commandBuffer.End();            
-            _backendContext.VkQueue.Submit(new[] { new SubmitInfo() { CommandBuffers = new[] { commandBuffer }, } }, null);
-            _backendContext.VkQueue.WaitIdle();
-            commandPool.FreeCommandBuffers(new[] { commandBuffer });            
+            var imageUsageFlags = ImageUsageFlags.ColorAttachment | ImageUsageFlags.TransferSource | ImageUsageFlags.TransferDestination;
+            if (swapChainSupport.Capabilities.SupportedUsageFlags.HasFlag(ImageUsageFlags.InputAttachment))
+                imageUsageFlags |= ImageUsageFlags.InputAttachment;
+            if (swapChainSupport.Capabilities.SupportedUsageFlags.HasFlag(ImageUsageFlags.Sampled))
+                imageUsageFlags |= ImageUsageFlags.Sampled;
+            var alphaFlags = swapChainSupport.Capabilities.SupportedCompositeAlpha.HasFlag(CompositeAlphaFlags.Inherit) ? CompositeAlphaFlags.Inherit : CompositeAlphaFlags.Opaque;
+            //uint imageCount = swapChainSupport.Capabilities.MinImageCount + 1;
+            //if (swapChainSupport.Capabilities.MaxImageCount > 0 && imageCount > swapChainSupport.Capabilities.MaxImageCount)
+            //{
+            //    imageCount = swapChainSupport.Capabilities.MaxImageCount;
+            //}
+            var indices = _queueFamilies.Indices.ToArray();
+            Extent2D extent = new Extent2D((uint)width, (uint)height);
+            var sharingMode = indices.Length == 1 ? SharingMode.Exclusive : SharingMode.Concurrent;
+            _swapchain = _device.CreateSwapchain(_surface,
+                                                    1,
+                                                    Format.R8G8B8A8UNorm,
+                                                    ColorSpace.SrgbNonlinear,
+                                                    extent,
+                                                    1,
+                                                    imageUsageFlags,
+                                                    sharingMode,
+                                                    indices,
+                                                    swapChainSupport.Capabilities.CurrentTransform,
+                                                    alphaFlags,
+                                                    ChooseSwapPresentMode(swapChainSupport.PresentModes),
+                                                    true,
+                                                    _swapchain);
+
+            _image = _swapchain.GetImages()[0];
             _renderTarget = new GRBackendRenderTarget(width, height, 1, new GRVkImageInfo
             {
-                CurrentQueueFamily = _backendContext.GraphicsQueueIndex,
+                CurrentQueueFamily = _queueFamilies.PresentFamily!.Value,
                 Format = (uint)SharpVk.Format.R8G8B8A8UNorm,
                 Image = _image.RawHandle.ToUInt64(),
-                ImageLayout = (uint)ImageLayout.ColorAttachmentOptimal,
+                ImageLayout = (uint)ImageLayout.Undefined,
                 ImageTiling = (uint)ImageTiling.Optimal,
-                LevelCount = 9,
+                LevelCount = 1,
                 Protected = false,
-                Alloc = new GRVkAlloc()
-                {
-                    Memory = _memory.RawHandle.ToUInt64(),
-                    Flags = 0,
-                    Offset = 0,
-                    Size = memoryRequirements.Size
-                }
+                Alloc = new GRVkAlloc(),
+                ImageUsageFlags = (uint)imageUsageFlags,
+                SharingMode = (uint)sharingMode
             });
-            return SKSurface.Create(GRContext, _renderTarget, GRSurfaceOrigin.TopLeft, SKColorType.Rgba8888);
+            var surface = SKSurface.Create(GRContext, _renderTarget, GRSurfaceOrigin.TopLeft, SKColorType.Rgba8888);
+            return surface;
         }
 
-        private static uint FindMemoryType(PhysicalDevice physicalDevice, uint memoryTypeBits, MemoryPropertyFlags flags)
+        protected override void AfterRender()
         {
-            var props = physicalDevice.GetMemoryProperties();
-
-            for (int i = 0; i < props.MemoryTypes.Length; i++)
-            {
-                var type = props.MemoryTypes[i];
-                if ((memoryTypeBits & (1 << i)) != 0 && type.PropertyFlags.HasFlag(flags))
-                {
-                    return (uint)i;
-                }
-            }
-            return 0;
+            _presentQueue!.Present(_renderFinishedSemaphore, _swapchain, 0, null);
         }
 
         protected override void DisposeCore(bool disposing)
@@ -146,6 +184,17 @@ namespace Wodsoft.UI.Renderers
             {
                 if (_renderTarget != null)
                     _renderTarget.Dispose();
+                if (_image != null)
+                    _image.Dispose();
+                if (_swapchain != null)
+                    _swapchain.Dispose();
+                _renderFinishedSemaphore.Dispose();
+                _renderFinishedSemaphore.Dispose();
+                _imageAvailableSemaphore.Dispose();
+                _backendContext.Dispose();
+                _device.Dispose();
+                _surface.Dispose();
+                _instance.Dispose();
             }
         }
 
@@ -156,29 +205,29 @@ namespace Wodsoft.UI.Renderers
             public PresentMode[] PresentModes;
         }
 
-        private SurfaceFormat ChooseSwapSurfaceFormat(SurfaceFormat[] availableFormats)
-        {
-            if (availableFormats.Length == 1 && availableFormats[0].Format == Format.Undefined)
-            {
-                return new SurfaceFormat
-                {
-                    Format = Format.R8G8B8A8UNorm,
-                    ColorSpace = ColorSpace.SrgbNonlinear
-                };
-            }
+        //private SurfaceFormat ChooseSwapSurfaceFormat(SurfaceFormat[] availableFormats)
+        //{
+        //    if (availableFormats.Length == 1 && availableFormats[0].Format == Format.Undefined)
+        //    {
+        //        return new SurfaceFormat
+        //        {
+        //            Format = Format.R8G8B8A8UNorm,
+        //            ColorSpace = ColorSpace.SrgbNonlinear
+        //        };
+        //    }
 
-            foreach (var format in availableFormats)
-            {
-                if (format.Format == Format.R8G8B8A8UNorm && format.ColorSpace == ColorSpace.SrgbNonlinear)
-                {
-                    return format;
-                }
-            }
+        //    foreach (var format in availableFormats)
+        //    {
+        //        if (format.Format == Format.R8G8B8A8UNorm && format.ColorSpace == ColorSpace.SrgbNonlinear)
+        //        {
+        //            return format;
+        //        }
+        //    }
 
-            return availableFormats[0];
-        }
+        //    return availableFormats[0];
+        //}
 
-        private QueueFamilyIndices FindQueueFamilies(PhysicalDevice device)
+        private static QueueFamilyIndices FindQueueFamilies(PhysicalDevice device, Surface surface)
         {
             QueueFamilyIndices indices = new QueueFamilyIndices();
 
@@ -191,7 +240,7 @@ namespace Wodsoft.UI.Renderers
                     indices.GraphicsFamily = index;
                 }
 
-                if (device.GetSurfaceSupport(index, _surface))
+                if (device.GetSurfaceSupport(index, surface))
                 {
                     indices.PresentFamily = index;
                 }
@@ -231,20 +280,11 @@ namespace Wodsoft.UI.Renderers
             }
         }
 
-        //private Extent2D ChooseSwapExtent(SurfaceCapabilities capabilities)
-        //{
-        //    if (capabilities.CurrentExtent.Width != uint.MaxValue)
-        //    {
-        //        return capabilities.CurrentExtent;
-        //    }
-        //    else
-        //    {
-        //        return new Extent2D
-        //        {
-        //            Width = Math.Max(capabilities.MinImageExtent.Width, Math.Min(capabilities.MaxImageExtent.Width, SurfaceWidth)),
-        //            Height = Math.Max(capabilities.MinImageExtent.Height, Math.Min(capabilities.MaxImageExtent.Height, SurfaceHeight))
-        //        };
-        //    }
-        //}
+        private PresentMode ChooseSwapPresentMode(PresentMode[] availablePresentModes)
+        {
+            return availablePresentModes.Contains(PresentMode.Mailbox)
+                    ? PresentMode.Mailbox
+                    : PresentMode.Fifo;
+        }
     }
 }

@@ -16,18 +16,24 @@ namespace Wodsoft.UI.Renderers
         private SKSurface? _surface;
         private bool _disposed;
         private int _width, _height;
+        private Stopwatch _stopwatch;
 
-        private static SKPoint _FpsPoint = new SKPoint(10, 10);
-        private static SKPaint _FpsPaint = new SKPaint(new SKFont(SKTypeface.Default, 16, 1, 0));
+        private static SKPoint _FpsPoint;
+        private static SKPaint _FpsPaint = new SKPaint(new SKFont(SKTypeface.Default, 24, 1, 0));
         static SkiaRendererContext()
         {
             _FpsPaint.SetColor(new SKColorF(1f, 1f, 0), null);
             _FpsPaint.Style = SKPaintStyle.Fill;
+            _FpsPaint.TextAlign = SKTextAlign.Left;
+            var rect = new SKRect();
+            var measure = _FpsPaint.MeasureText("0", ref rect);
+            _FpsPoint = new SKPoint(10 - rect.Left, 10 - rect.Top);
         }
 
         public SkiaRendererContext(GRContext? grContext)
         {
             _grContext = grContext;
+            _stopwatch = new Stopwatch();
         }
 
         protected GRContext? GRContext => _grContext;
@@ -52,18 +58,21 @@ namespace Wodsoft.UI.Renderers
                 _height = height;
             }
             BeforeRender();
-            _surface.Canvas.Clear(new SKColor(255, 0, 0));
-            _surface.Canvas.ResetMatrix();
-            _surface.Canvas.Scale(dpi.DpiScaleX, dpi.DpiScaleY);
+            var canvas = _surface.Canvas;
+            canvas.Clear(new SKColor(255, 255, 255, 0));
+            canvas.ResetMatrix();
+            canvas.Scale(dpi.DpiScaleX, dpi.DpiScaleY);
             RenderCore(visual);
             if (Debugger.IsAttached)
-            {
-                //new SKPaint()
-                _surface.Canvas.DrawText("0", _FpsPoint, _FpsPaint);
+            {                
+                var fps = (int)MathF.Round(1000f / _stopwatch.ElapsedMilliseconds);
+                fps = Math.Max(1, fps);
+                canvas.DrawText(fps.ToString(), _FpsPoint, _FpsPaint);
             }
-            _surface.Canvas.Flush();
+            canvas.Flush();
             AfterRender();
             _surface.Flush();
+            _stopwatch.Restart();
         }
 
         private void RenderCore(Visual visual)

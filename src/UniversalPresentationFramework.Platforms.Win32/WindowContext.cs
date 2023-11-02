@@ -25,9 +25,9 @@ namespace Wodsoft.UI.Platforms.Win32
         private HWND _hwnd;
 
         private string _className;
-        private bool _disposed, _topMost;
+        private bool _disposed, _topMost, _inputProcessing;
         private string _title = string.Empty;
-        private Thread _windowThread;
+        private Thread _windowThread, _uiThread, _inputThread;
         private int _x, _y, _width, _height;
         private WindowState _state;
         private WindowStyle _style;
@@ -49,6 +49,8 @@ namespace Wodsoft.UI.Platforms.Win32
             _instance = PInvoke.GetModuleHandle((string?)null);
             _className = "upfwindow_" + Guid.NewGuid().ToString().Replace("-", "");
             _windowThread = new Thread(ProcessWindow);
+            _uiThread = new Thread(ProcessUI);
+            _inputThread = new Thread(ProcessInput);
             _window = window;
             //_thread.SetApartmentState(ApartmentState.STA);
         }
@@ -139,6 +141,8 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public bool AllowsTransparency { get; set; }
 
+        public bool IsInputProcessing => _inputProcessing;
+
         #endregion
 
         #region Window Operations
@@ -167,119 +171,6 @@ namespace Wodsoft.UI.Platforms.Win32
                 if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL))
                     throw new Win32Exception(Marshal.GetLastPInvokeError());
             }
-        }
-
-        private unsafe void ProcessWindow()
-        {
-            if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
-                throw new Win32Exception(Marshal.GetLastPInvokeError());
-            var windowPtr = PInvoke.CreateWindowEx(
-                GetExStyle(),
-                _className,
-                _title,
-                GetStyle(),
-                _x, _y, _width, _height,
-                HWND.Null, null, _instance, null);
-            if (windowPtr == IntPtr.Zero)
-                throw new Win32Exception(Marshal.GetLastPInvokeError());
-            _hwnd = new HWND(windowPtr);
-            if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL))
-                throw new Win32Exception(Marshal.GetLastPInvokeError());
-            if (!PInvoke.UpdateWindow(_hwnd))
-                throw new Win32Exception(Marshal.GetLastPInvokeError());
-            MSG msg;
-            while (true)
-            {
-                if (_disposed || _hwnd.IsNull)
-                    break;
-                if (PInvoke.GetMessage(out msg, _hwnd, 0, 0))
-                {
-                    PInvoke.TranslateMessage(msg);
-                    PInvoke.DispatchMessage(msg);
-                }
-            }
-        }
-
-        private void ProcessUI()
-        {
-            var instance = Instance.Create(null, new[] { "VK_KHR_surface", "VK_KHR_win32_surface" });
-            var physicalDevice = instance.EnumeratePhysicalDevices().First();
-            var surface = instance.CreateWin32Surface(_instance.DangerousGetHandle(), _hwnd.Value);
-            (var graphicsFamily, var presentFamily) = FindQueueFamilies(physicalDevice, surface);
-            var queueInfos = new[]
-            {
-                new DeviceQueueCreateInfo { QueueFamilyIndex = graphicsFamily, QueuePriorities = new[] { 1f } },
-                new DeviceQueueCreateInfo { QueueFamilyIndex = presentFamily, QueuePriorities = new[] { 1f } },
-            };
-            var device = physicalDevice.CreateDevice(queueInfos, null, null);
-            var graphicsQueue = device.GetQueue(graphicsFamily, 0);
-            GRVkGetProcedureAddressDelegate getProc = (name, instanceHandle, deviceHandle) =>
-            {
-                return instance.GetProcedureAddress(name);
-            };
-            var extensions = physicalDevice.EnumerateDeviceExtensionProperties(null).Select(t => t.ExtensionName).ToArray();
-            using var vkBackendContext = new GRSharpVkBackendContext
-            {
-                VkInstance = instance,
-                VkPhysicalDevice = physicalDevice,
-                VkDevice = device,
-                VkQueue = graphicsQueue,
-                VkPhysicalDeviceFeatures = physicalDevice.GetFeatures(),
-                Extensions = GRVkExtensions.Create(getProc, (IntPtr)instance.RawHandle.ToUInt64(), (IntPtr)physicalDevice.RawHandle.ToUInt64(), null, extensions),
-                GraphicsQueueIndex = graphicsFamily,
-                GetProcedureAddress = (name, innerInstance, innerDevice) =>
-                {
-                    if (innerInstance != null)
-                        return innerInstance.GetProcedureAddress(name);
-                    if (innerDevice != null)
-                        return innerDevice.GetProcedureAddress(name);
-                    return instance.GetProcedureAddress(name);
-                },
-            };
-            SkiaRendererContext rendererContext = new SkiaRendererVulkanContext(vkBackendContext, _instance.DangerousGetHandle(), _hwnd.Value);
-            //PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1000d / 60d));
-            try
-            {
-                while (true)
-                {
-                    if (_disposed || _hwnd.IsNull)
-                        break;
-                    rendererContext.Render(_window);
-                    Thread.Sleep(10);
-                    //await timer.WaitForNextTickAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-            rendererContext.Dispose();
-        }
-
-        private (uint, uint) FindQueueFamilies(PhysicalDevice physicalDevice, Surface surface)
-        {
-            var queueFamilyProperties = physicalDevice.GetQueueFamilyProperties();
-
-            var graphicsFamily = queueFamilyProperties
-                .Select((properties, index) => new { properties, index })
-                .SkipWhile(pair => !pair.properties.QueueFlags.HasFlag(QueueFlags.Graphics))
-                .FirstOrDefault();
-
-            if (graphicsFamily == null)
-                throw new Exception("Unable to find graphics queue");
-
-            uint? presentFamily = default;
-
-            for (uint i = 0; i < queueFamilyProperties.Length; ++i)
-            {
-                if (physicalDevice.GetSurfaceSupport(i, surface))
-                    presentFamily = i;
-            }
-
-            if (!presentFamily.HasValue)
-                throw new Exception("Unable to find present queue");
-
-            return ((uint)graphicsFamily.index, presentFamily.Value);
         }
 
         public void Close()
@@ -323,10 +214,92 @@ namespace Wodsoft.UI.Platforms.Win32
         public event WindowContextEventHandler? StateChanged;
         public event WindowContextEventHandler? Disposed;
         public event WindowContextEventHandler? Opened;
-        public event WindowContextEventHandler<DpiScale> DpiChanged;
-        public event WindowContextEventHandler<Size> SizeChanged;
+        public event WindowContextEventHandler<DpiScale>? DpiChanged;
+        public event WindowContextEventHandler<Size>? SizeChanged;
 
         #endregion
+
+        #region Window Process
+
+        private unsafe void ProcessWindow()
+        {
+            if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            var windowPtr = PInvoke.CreateWindowEx(
+                GetExStyle(),
+                _className,
+                _title,
+                GetStyle(),
+                _x, _y, _width, _height,
+                HWND.Null, null, _instance, null);
+            if (windowPtr == IntPtr.Zero)
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            _hwnd = new HWND(windowPtr);
+            if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL))
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            if (!PInvoke.UpdateWindow(_hwnd))
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            MSG msg;
+            while (true)
+            {
+                if (_disposed || _hwnd.IsNull)
+                    break;
+                if (PInvoke.GetMessage(out msg, _hwnd, 0, 0))
+                {
+                    PInvoke.TranslateMessage(msg);
+                    PInvoke.DispatchMessage(msg);
+                }
+            }
+        }
+
+        private void ProcessUI()
+        {
+            //var hdc = PInvoke.GetDC(_hwnd);
+            var rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
+            PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1000d / 60d));
+            try
+            {
+                //PAINTSTRUCT paint;
+                while (!_disposed && !_hwnd.IsNull)
+                {
+                    //Thread.Sleep(10);
+                    //PInvoke.BeginPaint(_hwnd, out paint);
+                    rendererContext.Render(_window);
+                    //PInvoke.EndPaint(_hwnd, paint);
+                    //PInvoke.SwapBuffers(hdc);
+                    //timer.WaitForNextTickAsync().AsTask().Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(ex);
+#endif
+            }
+            rendererContext.Dispose();
+            //PInvoke.ReleaseDC(_hwnd, hdc);
+        }
+
+        private bool _locationChanged, _sizeChanged;
+        private void ProcessInput()
+        {
+            while (!_disposed && !_hwnd.IsNull)
+            {
+                _inputProcessing = true;
+                if (_locationChanged)
+                {
+                    _locationChanged = false;
+                    LocationChanged?.Invoke(this);
+                }
+                if (_sizeChanged)
+                {
+                    _sizeChanged = false;
+                    SizeChanged?.Invoke(this, new Size(_width, _height));
+                }
+                _inputProcessing = false;
+                Thread.Sleep(10);
+            }
+        }
 
         private unsafe WNDCLASSEXW GetWindowClass()
         {
@@ -353,7 +326,7 @@ namespace Wodsoft.UI.Platforms.Win32
             }
         }
 
-        private LRESULT WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
+        private unsafe LRESULT WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
         {
             switch (msg)
             {
@@ -364,28 +337,50 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                 case PInvoke.WM_CREATE:
                     {
+                        _hwnd = hwnd;
                         var dc = PInvoke.GetDC(hwnd);
                         var x = PInvoke.GetDeviceCaps(dc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
                         var y = PInvoke.GetDeviceCaps(dc, GET_DEVICE_CAPS_INDEX.LOGPIXELSY);
                         PInvoke.ReleaseDC(hwnd, dc);
                         DpiChanged?.Invoke(this, new DpiScale(x / 96f, y / 96f));
-                        if (!PInvoke.GetClientRect(hwnd, out var rect))
-                            throw new Win32Exception(Marshal.GetLastPInvokeError());
-                        SizeChanged?.Invoke(this, new Size(rect.Width, rect.Height));
+                        //if (!PInvoke.GetClientRect(hwnd, out var rect))
+                        //    throw new Win32Exception(Marshal.GetLastPInvokeError());
+                        //SizeChanged?.Invoke(this, new Size(rect.Width, rect.Height));
                         Opened?.Invoke(this);
-                        //ProcessUI();
-                        new Thread(ProcessUI).Start();
+                        //new Thread(ProcessUI).Start();
+                        //Task.Run(ProcessUI);
+                        _inputThread.Start();
                         break;
                     }
                 case PInvoke.WM_DPICHANGED:
                     {
                         var x = wParam.Value & 0xffff;
-                        var y = wParam.Value >> 4;
+                        var y = wParam.Value >> 16;
                         DpiChanged?.Invoke(this, new DpiScale(x / 96f, y / 96f));
                         break;
                     }
                 case PInvoke.WM_PAINT:
                     {
+                        if (_uiThread.ThreadState == ThreadState.Unstarted)
+                            _uiThread.Start();
+                        //if (_rendererContext == null)
+                        //    _rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
+                        //_rendererContext!.Render(_window);
+                        break;
+                    }
+                case PInvoke.WM_MOVING:
+                    {
+                        ref RECT rect = ref Unsafe.AsRef<RECT>((void*)lParam.Value);
+                        _x = rect.X;
+                        _y = rect.Y;
+                        _locationChanged = true;
+                        break;
+                    }
+                case PInvoke.WM_SIZE:
+                    {
+                        _width = (int)(lParam.Value & 0xffff);
+                        _height = (int)(lParam.Value >> 16);
+                        _sizeChanged = true;
                         break;
                     }
             }
@@ -421,6 +416,8 @@ namespace Wodsoft.UI.Platforms.Win32
                 style |= WINDOW_STYLE.WS_BORDER | WINDOW_STYLE.WS_CAPTION;
             return style;
         }
+
+        #endregion
 
         #region Dispose
 

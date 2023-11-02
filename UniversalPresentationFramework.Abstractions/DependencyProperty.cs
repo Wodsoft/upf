@@ -96,7 +96,7 @@ namespace Wodsoft.UI
                     metadata = new PropertyMetadata();
                 if (metadata.IsSealed)
                     throw new ArgumentException("Metadata is sealed.", nameof(metadata));
-                var isNullable = propertyType.IsValueType && Nullable.GetUnderlyingType(propertyType) == null;
+                var isNullable = !propertyType.IsValueType || Nullable.GetUnderlyingType(propertyType) != null;
                 if (metadata.DefaultValue == null)
                 {
                     if (!isNullable)
@@ -178,7 +178,7 @@ namespace Wodsoft.UI
             if (metadata.DefaultValue == null)
             {
                 if (!_isNullable)
-                    metadata.DefaultValue = Activator.CreateInstance(PropertyType);
+                    metadata.DefaultValue = DefaultMetadata.DefaultValue;
                 if (ValidateValueCallback != null && !ValidateValueCallback(metadata.DefaultValue))
                     throw new ArgumentException($"Default value of type \"{PropertyType.FullName}\" validate failed.");
             }
