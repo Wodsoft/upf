@@ -262,12 +262,12 @@ namespace Wodsoft.UI.Platforms.Win32
                 //PAINTSTRUCT paint;
                 while (!_disposed && !_hwnd.IsNull)
                 {
-                    //Thread.Sleep(10);
                     //PInvoke.BeginPaint(_hwnd, out paint);
                     rendererContext.Render(_window);
                     //PInvoke.EndPaint(_hwnd, paint);
                     //PInvoke.SwapBuffers(hdc);
                     //timer.WaitForNextTickAsync().AsTask().Wait();
+                    Thread.Sleep(10);
                 }
             }
             catch (Exception ex)
