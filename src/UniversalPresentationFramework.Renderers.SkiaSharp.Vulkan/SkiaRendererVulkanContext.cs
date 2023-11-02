@@ -184,17 +184,19 @@ namespace Wodsoft.UI.Renderers
             {
                 if (_renderTarget != null)
                     _renderTarget.Dispose();
-                if (_image != null)
-                    _image.Dispose();
-                if (_swapchain != null)
-                    _swapchain.Dispose();
-                _renderFinishedSemaphore.Dispose();
+                _presentQueue.WaitIdle();
+                _device.WaitIdle();
                 _renderFinishedSemaphore.Dispose();
                 _imageAvailableSemaphore.Dispose();
+                if (_surface != null)
+                    _surface.Dispose();
+                if (_image != null)
+                    _image.Dispose();
+                //if (_swapchain != null)
+                //    _swapchain.Dispose();
                 _backendContext.Dispose();
-                _device.Dispose();
-                _surface.Dispose();
-                _instance.Dispose();
+                //_device.Dispose();
+                //_instance.Dispose();
             }
         }
 
