@@ -26,7 +26,7 @@ namespace Wodsoft.UI.Renderers
             _FpsPaint.Style = SKPaintStyle.Fill;
             _FpsPaint.TextAlign = SKTextAlign.Left;
             var rect = new SKRect();
-            var measure = _FpsPaint.MeasureText("0", ref rect);
+            _FpsPaint.MeasureText("0", ref rect);
             _FpsPoint = new SKPoint(10 - rect.Left, 10 - rect.Top);
         }
 
@@ -38,11 +38,10 @@ namespace Wodsoft.UI.Renderers
 
         protected GRContext? GRContext => _grContext;
 
+        public SKSurface? Surface => _surface;
+
         public void Render(Visual visual)
         {
-            if (_grContext == null)
-                throw new InvalidOperationException("Skia renderer context not initialized.");
-
             var size = visual.GetVisualSize();
             var dpi = visual.GetDpi();
             int width = (int)(size.Width * dpi.DpiScaleX);
