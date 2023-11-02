@@ -194,10 +194,11 @@ namespace Wodsoft.UI.Platforms.Win32
 
         private void DestoryWindow()
         {
-            if (!_hwnd.IsNull)
+            var hwnd = _hwnd;
+            if (!hwnd.IsNull)
             {
-                PInvoke.DestroyWindow(_hwnd);
                 _hwnd = HWND.Null;
+                PInvoke.DestroyWindow(hwnd);
                 Closed?.Invoke(this);
             }
         }
@@ -254,7 +255,6 @@ namespace Wodsoft.UI.Platforms.Win32
 
         private void ProcessUI()
         {
-            //var hdc = PInvoke.GetDC(_hwnd);
             var rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
             PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1000d / 60d));
             try
@@ -262,10 +262,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 //PAINTSTRUCT paint;
                 while (!_disposed && !_hwnd.IsNull)
                 {
-                    //PInvoke.BeginPaint(_hwnd, out paint);
                     rendererContext.Render(_window);
-                    //PInvoke.EndPaint(_hwnd, paint);
-                    //PInvoke.SwapBuffers(hdc);
                     //timer.WaitForNextTickAsync().AsTask().Wait();
                     Thread.Sleep(10);
                 }
@@ -277,7 +274,6 @@ namespace Wodsoft.UI.Platforms.Win32
 #endif
             }
             rendererContext.Dispose();
-            //PInvoke.ReleaseDC(_hwnd, hdc);
         }
 
         private bool _locationChanged, _sizeChanged;
