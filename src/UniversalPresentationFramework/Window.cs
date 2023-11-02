@@ -148,6 +148,11 @@ namespace Wodsoft.UI
                 new FrameworkPropertyMetadata(false));
         public bool AllowsTransparency { get { return (bool)GetValue(AllowsTransparencyProperty)!; } set { SetValue(AllowsTransparencyProperty, value); } }
 
+
+        private static readonly DependencyPropertyKey _IsActivePropertyKey = DependencyProperty.RegisterReadOnly("IsActive", typeof(bool), typeof(Window), new FrameworkPropertyMetadata(false));
+        public static readonly DependencyProperty IsActiveProperty = _IsActivePropertyKey.DependencyProperty;
+        public bool IsActive { get { return (bool)GetValue(IsActiveProperty)!; } }
+
         #endregion
 
         #region Events
@@ -202,11 +207,13 @@ namespace Wodsoft.UI
 
         private void Context_Deactivated(IWindowContext context)
         {
+            SetValue(_IsActivePropertyKey, false);
             Deactivated?.Invoke(this, EventArgs.Empty);
         }
 
         private void Context_Activated(IWindowContext context)
         {
+            SetValue(_IsActivePropertyKey, true);
             Activated?.Invoke(this, EventArgs.Empty);
         }
 

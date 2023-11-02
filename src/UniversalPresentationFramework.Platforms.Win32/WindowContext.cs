@@ -25,7 +25,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private HWND _hwnd;
 
         private string _className;
-        private bool _disposed, _topMost, _inputProcessing;
+        private bool _disposed, _topMost, _inputProcessing, _isActivated;
         private string _title = string.Empty;
         private Thread _windowThread, _uiThread, _inputThread;
         private int _x, _y, _width, _height;
@@ -216,7 +216,7 @@ namespace Wodsoft.UI.Platforms.Win32
         public event WindowContextEventHandler? Disposed;
         public event WindowContextEventHandler? Opened;
         public event WindowContextEventHandler<DpiScale>? DpiChanged;
-        public event WindowContextEventHandler<Size>? SizeChanged;
+        public event WindowContextEventHandler<Size>? SizeChanged;        
 
         #endregion
 
@@ -374,9 +374,17 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                 case PInvoke.WM_SIZE:
                     {
-                        _width = (int)(lParam.Value & 0xffff);
-                        _height = (int)(lParam.Value >> 16);
-                        _sizeChanged = true;
+                        if (_isActivated)
+                        {
+                            _width = (int)(lParam.Value & 0xffff);
+                            _height = (int)(lParam.Value >> 16);
+                            _sizeChanged = true;
+                        }
+                        break;
+                    }
+                case PInvoke.WM_NCACTIVATE:
+                    {
+                        _isActivated = wParam == 1;
                         break;
                     }
             }
