@@ -184,8 +184,7 @@ namespace Wodsoft.UI
                     _context.Closing += Context_Closing;
                     _context.LocationChanged += Context_LocationChanged;
                     _context.StateChanged += Context_StateChanged;
-                    _context.Activated += Context_Activated;
-                    _context.Deactivated += Context_Deactivated;
+                    _context.IsActivatedChanged += Context_IsActivatedChanged;
                     _context.DpiChanged += Context_DpiChanged;
                     _context.SizeChanged += Context_SizeChanged;
                 }
@@ -205,15 +204,10 @@ namespace Wodsoft.UI
             _dpiScale = e;
         }
 
-        private void Context_Deactivated(IWindowContext context)
-        {
-            SetValue(_IsActivePropertyKey, false);
-            Deactivated?.Invoke(this, EventArgs.Empty);
-        }
 
-        private void Context_Activated(IWindowContext context)
+        private void Context_IsActivatedChanged(IWindowContext context)
         {
-            SetValue(_IsActivePropertyKey, true);
+            SetValue(_IsActivePropertyKey, context.IsActivated);
             Activated?.Invoke(this, EventArgs.Empty);
         }
 
@@ -242,8 +236,7 @@ namespace Wodsoft.UI
                 context.Closing -= Context_Closing;
                 context.LocationChanged -= Context_LocationChanged;
                 context.StateChanged -= Context_StateChanged;
-                context.Activated -= Context_Activated;
-                context.Deactivated -= Context_Deactivated;
+                context.IsActivatedChanged -= Context_IsActivatedChanged;
                 context.DpiChanged -= Context_DpiChanged;
                 context.SizeChanged -= Context_SizeChanged;
                 context.Dispose();

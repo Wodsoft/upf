@@ -143,6 +143,8 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public bool IsInputProcessing => _inputProcessing;
 
+        public bool IsActivated => _isActivated;
+
         #endregion
 
         #region Window Operations
@@ -209,8 +211,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public event CancelEventHandler? Closing;
         public event WindowContextEventHandler? Closed;
-        public event WindowContextEventHandler? Activated;
-        public event WindowContextEventHandler? Deactivated;
+        public event WindowContextEventHandler? IsActivatedChanged;
         public event WindowContextEventHandler? LocationChanged;
         public event WindowContextEventHandler? StateChanged;
         public event WindowContextEventHandler? Disposed;
@@ -276,7 +277,7 @@ namespace Wodsoft.UI.Platforms.Win32
             rendererContext.Dispose();
         }
 
-        private bool _locationChanged, _sizeChanged;
+        private bool _locationChanged, _sizeChanged, _isActivatedChanged;
         private void ProcessInput()
         {
             while (!_disposed && !_hwnd.IsNull)
@@ -291,6 +292,12 @@ namespace Wodsoft.UI.Platforms.Win32
                 {
                     _sizeChanged = false;
                     SizeChanged?.Invoke(this, new Size(_width, _height));
+                }
+                if (_isActivatedChanged)
+                {
+                    _isActivatedChanged = false;
+                    if (_isActivated)
+                        IsActivatedChanged?.Invoke(this);
                 }
                 _inputProcessing = false;
                 Thread.Sleep(10);
@@ -385,6 +392,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 case PInvoke.WM_NCACTIVATE:
                     {
                         _isActivated = wParam == 1;
+                        _isActivatedChanged = true;
                         break;
                     }
             }

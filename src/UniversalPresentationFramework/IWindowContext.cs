@@ -37,10 +37,11 @@ namespace Wodsoft.UI
 
         bool IsInputProcessing { get; }
 
+        bool IsActivated { get; }
+
         public event CancelEventHandler Closing;
         public event WindowContextEventHandler Closed;
-        public event WindowContextEventHandler Activated;
-        public event WindowContextEventHandler Deactivated;
+        public event WindowContextEventHandler IsActivatedChanged;
         public event WindowContextEventHandler LocationChanged;
         public event WindowContextEventHandler StateChanged;
         public event WindowContextEventHandler<DpiScale> DpiChanged;
