@@ -28,7 +28,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private bool _disposed, _topMost, _inputProcessing, _isActivated;
         private string _title = string.Empty;
         private Thread _windowThread, _uiThread, _inputThread;
-        private int _x, _y, _width, _height;
+        private int _x, _y, _width, _height, _clientWidth, _clientHeight;
         private WindowState _state;
         private WindowStyle _style;
         private readonly Window _window;
@@ -118,6 +118,10 @@ namespace Wodsoft.UI.Platforms.Win32
                 _height = value;
             }
         }
+
+        public int ClientWidth => _clientWidth;
+
+        public int ClientHeight => _clientHeight;
 
         public WindowStartupLocation StartupLocation { get; set; }
 
@@ -217,7 +221,7 @@ namespace Wodsoft.UI.Platforms.Win32
         public event WindowContextEventHandler? Disposed;
         public event WindowContextEventHandler? Opened;
         public event WindowContextEventHandler<DpiScale>? DpiChanged;
-        public event WindowContextEventHandler<Size>? SizeChanged;
+        public event WindowContextEventHandler? SizeChanged;
 
         #endregion
 
@@ -291,7 +295,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 if (_sizeChanged)
                 {
                     _sizeChanged = false;
-                    SizeChanged?.Invoke(this, new Size(_width, _height));
+                    SizeChanged?.Invoke(this);
                 }
                 if (_isActivateChanged)
                 {
@@ -411,8 +415,11 @@ namespace Wodsoft.UI.Platforms.Win32
                         }
                         if (_isActivated && lParam.Value != 0)
                         {
-                            _width = (int)(lParam.Value & 0xffff);
-                            _height = (int)(lParam.Value >> 16);
+                            PInvoke.GetWindowRect(hwnd, out var rect);
+                            _width = rect.Width;
+                            _height = rect.Height;
+                            _clientWidth = (int)(lParam.Value & 0xffff);
+                            _clientHeight = (int)(lParam.Value >> 16);
                             _sizeChanged = true;
                         }
                         break;

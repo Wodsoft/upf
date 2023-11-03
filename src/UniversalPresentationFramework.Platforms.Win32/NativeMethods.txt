@@ -18,3 +18,4 @@ GetClientRect
 SwapBuffers
 BeginPaint
 EndPaint
+GetWindowRect

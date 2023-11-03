@@ -27,6 +27,10 @@ namespace Wodsoft.UI
 
         int Height { get; set; }
 
+        int ClientWidth { get; }
+
+        int ClientHeight { get; }
+
         WindowState State { get; set; }
 
         WindowStartupLocation StartupLocation { get; set; }
@@ -45,6 +49,6 @@ namespace Wodsoft.UI
         public event WindowContextEventHandler LocationChanged;
         public event WindowContextEventHandler StateChanged;
         public event WindowContextEventHandler<DpiScale> DpiChanged;
-        public event WindowContextEventHandler<Size> SizeChanged;
+        public event WindowContextEventHandler SizeChanged;
     }
 }
