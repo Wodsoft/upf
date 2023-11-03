@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
 {
@@ -11,6 +12,6 @@ namespace Wodsoft.UI
     /// </summary>
     public interface IRendererProvider
     {
-        IRendererContext CreateContext();
+        DrawingContext GetDrawingContext(Visual visual)；
     }
 }

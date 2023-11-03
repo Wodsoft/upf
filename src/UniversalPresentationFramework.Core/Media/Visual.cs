@@ -56,10 +56,7 @@ namespace Wodsoft.UI.Media
 
         #region Render
 
-        public virtual void RenderContext(RenderContext renderContext)
-        {
-
-        }
+        public abstract void RenderContext(RenderContext renderContext);
 
         public virtual Size GetVisualSize()
         {

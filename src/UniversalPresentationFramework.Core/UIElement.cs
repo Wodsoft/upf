@@ -54,9 +54,7 @@ namespace Wodsoft.UI
         public override void RenderContext(RenderContext renderContext)
         {
             if (_drawingContent != null)
-            {
-
-            }
+                renderContext.Render(_drawingContent);
         }
 
         #endregion

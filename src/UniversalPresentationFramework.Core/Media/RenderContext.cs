@@ -8,5 +8,6 @@ namespace Wodsoft.UI.Media
 {
     public abstract class RenderContext
     {
+        public abstract void Render(IDrawingContent drawingContent);
     }
 }

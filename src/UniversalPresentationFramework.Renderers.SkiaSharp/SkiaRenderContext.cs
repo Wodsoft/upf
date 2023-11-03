@@ -18,5 +18,12 @@ namespace Wodsoft.UI.Renderers
             _surface = surface;
             _canvas = surface.Canvas;
         }
+
+        public override void Render(IDrawingContent drawingContent)
+        {
+            if (drawingContent is SkiaDrawingContent skiaDrawingContent)
+                _canvas.DrawDrawable(skiaDrawingContent.Drawable, skiaDrawingContent.OriginalPoint);
+            throw new NotSupportedException("Only support skia drawing content.");
+        }
     }
 }

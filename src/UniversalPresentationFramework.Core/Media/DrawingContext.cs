@@ -8,5 +8,6 @@ namespace Wodsoft.UI.Media
 {
     public abstract class DrawingContext
     {
+        public abstract IDrawingContent Close();
     }
 }
