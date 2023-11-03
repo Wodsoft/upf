@@ -148,10 +148,9 @@ namespace Wodsoft.UI
                 new FrameworkPropertyMetadata(false));
         public bool AllowsTransparency { get { return (bool)GetValue(AllowsTransparencyProperty)!; } set { SetValue(AllowsTransparencyProperty, value); } }
 
-
         private static readonly DependencyPropertyKey _IsActivePropertyKey = DependencyProperty.RegisterReadOnly("IsActive", typeof(bool), typeof(Window), new FrameworkPropertyMetadata(false));
         public static readonly DependencyProperty IsActiveProperty = _IsActivePropertyKey.DependencyProperty;
-        public bool IsActive { get { return (bool)GetValue(IsActiveProperty)!; } }
+        public bool IsActive { get { return (bool)GetValue(IsActiveProperty)!; } private set { SetValue(_IsActivePropertyKey, value); } }
 
         #endregion
 
@@ -184,7 +183,7 @@ namespace Wodsoft.UI
                     _context.Closing += Context_Closing;
                     _context.LocationChanged += Context_LocationChanged;
                     _context.StateChanged += Context_StateChanged;
-                    _context.IsActivatedChanged += Context_IsActivatedChanged;
+                    _context.IsActivateChanged += Context_IsActivatedChanged;
                     _context.DpiChanged += Context_DpiChanged;
                     _context.SizeChanged += Context_SizeChanged;
                 }
@@ -207,12 +206,13 @@ namespace Wodsoft.UI
 
         private void Context_IsActivatedChanged(IWindowContext context)
         {
-            SetValue(_IsActivePropertyKey, context.IsActivated);
+            IsActive = context.IsActivated;
             Activated?.Invoke(this, EventArgs.Empty);
         }
 
         private void Context_StateChanged(IWindowContext context)
         {
+            WindowState = context.State;
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -236,7 +236,7 @@ namespace Wodsoft.UI
                 context.Closing -= Context_Closing;
                 context.LocationChanged -= Context_LocationChanged;
                 context.StateChanged -= Context_StateChanged;
-                context.IsActivatedChanged -= Context_IsActivatedChanged;
+                context.IsActivateChanged -= Context_IsActivatedChanged;
                 context.DpiChanged -= Context_DpiChanged;
                 context.SizeChanged -= Context_SizeChanged;
                 context.Dispose();

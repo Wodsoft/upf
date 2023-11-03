@@ -211,13 +211,13 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public event CancelEventHandler? Closing;
         public event WindowContextEventHandler? Closed;
-        public event WindowContextEventHandler? IsActivatedChanged;
+        public event WindowContextEventHandler? IsActivateChanged;
         public event WindowContextEventHandler? LocationChanged;
         public event WindowContextEventHandler? StateChanged;
         public event WindowContextEventHandler? Disposed;
         public event WindowContextEventHandler? Opened;
         public event WindowContextEventHandler<DpiScale>? DpiChanged;
-        public event WindowContextEventHandler<Size>? SizeChanged;        
+        public event WindowContextEventHandler<Size>? SizeChanged;
 
         #endregion
 
@@ -277,7 +277,7 @@ namespace Wodsoft.UI.Platforms.Win32
             rendererContext.Dispose();
         }
 
-        private bool _locationChanged, _sizeChanged, _isActivatedChanged;
+        private bool _locationChanged, _sizeChanged, _isActivateChanged, _stateChanged;
         private void ProcessInput()
         {
             while (!_disposed && !_hwnd.IsNull)
@@ -293,11 +293,15 @@ namespace Wodsoft.UI.Platforms.Win32
                     _sizeChanged = false;
                     SizeChanged?.Invoke(this, new Size(_width, _height));
                 }
-                if (_isActivatedChanged)
+                if (_isActivateChanged)
                 {
-                    _isActivatedChanged = false;
-                    if (_isActivated)
-                        IsActivatedChanged?.Invoke(this);
+                    _isActivateChanged = false;
+                    IsActivateChanged?.Invoke(this);
+                }
+                if (_stateChanged)
+                {
+                    _stateChanged = false;
+                    StateChanged?.Invoke(this);
                 }
                 _inputProcessing = false;
                 Thread.Sleep(10);
@@ -381,7 +385,31 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                 case PInvoke.WM_SIZE:
                     {
-                        if (_isActivated)
+                        switch (wParam.Value)
+                        {
+                            case 2:
+                                if (_state != WindowState.Maximized)
+                                {
+                                    _state = WindowState.Maximized;
+                                    _stateChanged = true;
+                                }
+                                break;
+                            case 1:
+                                if (_state != WindowState.Minimized)
+                                {
+                                    _state = WindowState.Minimized;
+                                    _stateChanged = true;
+                                }
+                                break;
+                            case 0:
+                                if (_state != WindowState.Normal)
+                                {
+                                    _state = WindowState.Normal;
+                                    _stateChanged = true;
+                                }
+                                break;
+                        }
+                        if (_isActivated && lParam.Value != 0)
                         {
                             _width = (int)(lParam.Value & 0xffff);
                             _height = (int)(lParam.Value >> 16);
@@ -392,7 +420,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 case PInvoke.WM_NCACTIVATE:
                     {
                         _isActivated = wParam == 1;
-                        _isActivatedChanged = true;
+                        _isActivateChanged = true;
                         break;
                     }
             }
