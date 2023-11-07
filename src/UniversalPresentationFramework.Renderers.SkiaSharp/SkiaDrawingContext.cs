@@ -8,11 +8,11 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Renderers
 {
-    public class SkiaDrawingContext : DrawingContext, IDisposable
+    public class SkiaDrawingContext : VisualDrawingContext, IDisposable
     {
         private readonly SKPictureRecorder _recorder;
         private readonly SKCanvas _canvas;
-        private bool _disposed;
+        private bool _disposed, _closed, _hasContent;
 
         internal SkiaDrawingContext(int width, int height)
         {
@@ -20,8 +20,17 @@ namespace Wodsoft.UI.Renderers
             _canvas = _recorder.BeginRecording(new SKRect(0, 0, width, height));
         }
 
-        public override IDrawingContent Close()
-        {            
+        private void CheckClosed()
+        {
+            if (_closed)
+                throw new InvalidOperationException("Could not use a closed drawing context.");
+            _hasContent = true;
+        }
+
+        public override IDrawingContent? Close()
+        {
+            if (!_hasContent)
+                return null;
             return new SkiaDrawingContent(_recorder.EndRecordingAsDrawable(), new SKPoint());
         }
 

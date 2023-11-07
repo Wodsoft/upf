@@ -17,5 +17,10 @@ namespace Wodsoft.UI.Media
         {
             return visual.VisualChildrenCount;
         }
+
+        public static Visual? GetParent(Visual visual)
+        {
+            return visual.VisualParent;
+        }
     }
 }

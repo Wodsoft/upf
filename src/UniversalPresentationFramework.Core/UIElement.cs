@@ -11,35 +11,170 @@ namespace Wodsoft.UI
     {
         #region Layout
 
+        private Size _previousAvailableSize;
+        private bool _isMeasuring, _isMeasuringDuringArrange;
         public void Measure(Size availableSize)
         {
-            throw new NotImplementedException();
+            if (float.IsNaN(availableSize.Width) || float.IsNaN(availableSize.Height))
+                throw new InvalidOperationException("Width and height can not be NaN.");
+
+            if (Visibility == Visibility.Collapsed)
+                return;
+
+            bool isCloseToPreviousMeasure = FloatUtil.AreClose(availableSize, _previousAvailableSize);
+            if (isCloseToPreviousMeasure)
+                return;
+
+            _isMeasuring = true;
+            var previousSize = _desiredSize;
+            Size desiredSize;
+            try
+            {
+                desiredSize = MeasureCore(availableSize);
+            }
+            finally
+            {
+                _isMeasuring = false;
+            }
+            if (float.IsPositiveInfinity(desiredSize.Width) || float.IsPositiveInfinity(desiredSize.Height))
+                throw new InvalidOperationException("Measure size can not be positive infinity.");
+            if (float.IsNaN(desiredSize.Width) || float.IsNaN(desiredSize.Height))
+                throw new InvalidOperationException("Measure size can not be NaN.");
+            _previousAvailableSize = availableSize;
+            _desiredSize = desiredSize;
+            IsMeasureValid = true;
+
+            if (!_isMeasuringDuringArrange && !FloatUtil.AreClose(_desiredSize, previousSize))
+            {
+                var parent = VisualParent as UIElement;
+                if (parent != null && !parent._isMeasuring)
+                    parent.OnChildDesiredSizeChanged(this);
+            }
         }
 
+        private Rect _previousFinalRect;
+        private bool _isArranging, _isRenderValid;
         public void Arrange(Rect finalRect)
         {
-            throw new NotImplementedException();
+            if (float.IsPositiveInfinity(finalRect.Width)
+                || float.IsPositiveInfinity(finalRect.Height)
+                || float.IsNaN(finalRect.Width)
+                || float.IsNaN(finalRect.Height))
+                throw new InvalidOperationException("Width and height can not be positive infinity and NaN.");
+
+            if (Visibility == Visibility.Collapsed)
+                return;
+
+            if (!IsMeasureValid)
+            {
+                _isMeasuringDuringArrange = true;
+                try
+                {
+                    Measure(finalRect.Size);
+                }
+                finally
+                {
+                    _isMeasuringDuringArrange = false;
+                }
+            }
+
+            if (!IsArrangeValid || !FloatUtil.AreClose(finalRect, _previousFinalRect))
+            {
+                _isArranging = true;
+                var oldRenderSize = RenderSize;
+                try
+                {
+                    ArrangeCore(finalRect);
+                }
+                finally
+                {
+                    _isArranging = false;
+                }
+                _previousFinalRect = finalRect;
+                IsArrangeValid = true;
+
+                if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize)|| !_isRenderValid) )
+                {
+                    if (RendererProvider.Current == null)
+                        throw new InvalidOperationException("Could not find renderer provider.");
+                    var drawingContext = RendererProvider.Current.GetDrawingContext(this);
+                    try
+                    {
+                        OnRender(drawingContext);
+                    }
+                    finally
+                    {
+                        _drawingContent = drawingContext.Close();
+                        _isRenderValid = true;
+                    }
+                }
+            }
         }
 
         protected virtual Size MeasureCore(Size availableSize)
         {
-            throw new NotImplementedException();
+            return new Size();
         }
 
         protected virtual void ArrangeCore(Rect finalRect)
         {
-            throw new NotImplementedException();
+            RenderSize = finalRect.Size;
         }
 
         public void InvalidateMeasure()
         {
-
+            IsMeasureValid = false;
         }
 
         public void InvalidateArrange()
         {
-
+            IsArrangeValid = false;
         }
+
+        public void InvalidateVisual()
+        {
+            _isRenderValid = false;
+        }
+
+        protected virtual void OnChildDesiredSizeChanged(UIElement child)
+        {
+            if (IsMeasureValid)
+            {
+                InvalidateMeasure();
+            }
+        }
+
+        private Size _desiredSize;
+        public Size DesiredSize
+        {
+            get
+            {
+                if (Visibility == Visibility.Collapsed)
+                    return new Size(0, 0);
+                else
+                    return _desiredSize;
+            }
+        }
+
+        private Size _renderSize;
+        public Size RenderSize
+        {
+            get
+            {
+                if (this.Visibility == Visibility.Collapsed)
+                    return new Size();
+                else
+                    return _renderSize;
+            }
+            set
+            {
+                _renderSize = value;
+            }
+        }
+
+        public bool IsMeasureValid { get; private set; }
+
+        public bool IsArrangeValid { get; private set; }
 
         #endregion
 

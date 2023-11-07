@@ -10,7 +10,7 @@ using Wodsoft.UI.Controls;
 
 namespace Wodsoft.UI
 {
-    public class Window : ContentControl
+    public abstract class Window : ContentControl
     {
         static Window()
         {

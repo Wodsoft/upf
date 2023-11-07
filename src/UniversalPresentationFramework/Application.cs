@@ -64,11 +64,14 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Can not start application because window provider is not set.");
             if (_lifecycleProvider == null)
                 throw new InvalidOperationException("Can not start application because lifecycle provider is not set.");
+            if (_rendererProvider == null)
+                throw new InvalidOperationException("Can not start application because renderer provider is not set.");
             if (_isRunning)
                 throw new InvalidOperationException("Application running already.");
             _isRunning = true;
             Current = this;
             _lifecycleProvider.Start();
+            Wodsoft.UI.RendererProvider.Current = _rendererProvider;
             if (window == null)
             {
 

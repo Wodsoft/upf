@@ -12,6 +12,6 @@ namespace Wodsoft.UI
     /// </summary>
     public interface IRendererProvider
     {
-        DrawingContext GetDrawingContext(Visual visual)；
+        VisualDrawingContext GetDrawingContext(Visual visual);
     }
 }

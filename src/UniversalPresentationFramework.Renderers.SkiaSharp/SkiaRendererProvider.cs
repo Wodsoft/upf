@@ -9,9 +9,9 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererProvider : IRendererProvider
     {
-        public DrawingContext GetDrawingContext(Visual visual)
+        public VisualDrawingContext GetDrawingContext(Visual visual)
         {
-
+            return new SkiaDrawingContext(0, 0);
         }
     }
 }

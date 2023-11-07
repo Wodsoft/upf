@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Media
 {
-    public class VisualDrawingContext : DrawingContext
+    public abstract class VisualDrawingContext : DrawingContext
     {
+        public abstract IDrawingContent? Close();
     }
 }
