@@ -95,17 +95,18 @@ namespace Wodsoft.UI
 
                 if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize)|| !_isRenderValid) )
                 {
-                    if (RendererProvider.Current == null)
-                        throw new InvalidOperationException("Could not find renderer provider.");
-                    var drawingContext = RendererProvider.Current.GetDrawingContext(this);
-                    try
+                    if (RendererProvider.Current != null)
                     {
-                        OnRender(drawingContext);
-                    }
-                    finally
-                    {
-                        _drawingContent = drawingContext.Close();
-                        _isRenderValid = true;
+                        var drawingContext = RendererProvider.Current.GetDrawingContext(this);
+                        try
+                        {
+                            OnRender(drawingContext);
+                        }
+                        finally
+                        {
+                            _drawingContent = drawingContext.Close();
+                            _isRenderValid = true;
+                        }
                     }
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,7 +44,7 @@ namespace Wodsoft.UI.Media
         protected internal virtual int VisualChildrenCount => 0;
 
         public Visual? VisualParent => _parent;
-        
+
         protected virtual void OnVisualChildrenChanged(Visual? visualAdded, Visual? visualRemoved) { }
 
         protected virtual void OnVisualParentChanged(Visual? oldParent) { }
@@ -61,6 +62,13 @@ namespace Wodsoft.UI.Media
         public virtual Size GetVisualSize()
         {
             return Size.Empty;
+        }
+
+        private Vector2 _visualOffset;
+        public Vector2 VisualOffset
+        {
+            get => _visualOffset;
+            protected set => _visualOffset = value;
         }
 
         public virtual DpiScale GetDpi()

@@ -28,7 +28,7 @@ namespace Wodsoft.UI.Controls
         /// <param name="logicalParent">The logicalParent of the elements of this collection. 
         /// if overriding Panel.CreateUIElementCollection, pass the logicalParent parameter of that method here.
         /// </param>
-        public UIElementCollection(UIElement visualParent, FrameworkElement logicalParent)
+        public UIElementCollection(UIElement visualParent, FrameworkElement? logicalParent)
         {
             if (visualParent == null)
             {
@@ -509,13 +509,13 @@ namespace Wodsoft.UI.Controls
             get { return (_visualParent); }
         }
 
-        internal FrameworkElement LogicalParent
+        internal FrameworkElement? LogicalParent
         {
             get { return _logicalParent; }
         }
 
         private readonly VisualCollection _visualChildren;
         private readonly UIElement _visualParent;
-        private readonly FrameworkElement _logicalParent;
+        private readonly FrameworkElement? _logicalParent;
     }
 }

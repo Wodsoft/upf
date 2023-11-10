@@ -19,7 +19,7 @@ namespace Wodsoft.UI
         /// </summary>
         /// <param name="str"> The string which will be tokenized. </param>
         /// <param name="formatProvider"> The IFormatProvider which controls this tokenization. </param>
-        internal TokenizerHelper(string? str, IFormatProvider formatProvider)
+        internal TokenizerHelper(string? str, IFormatProvider? formatProvider)
         {
             char numberSeparator = GetNumericListSeparator(formatProvider);
 

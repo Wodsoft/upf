@@ -179,14 +179,14 @@ namespace Wodsoft.UI
             //should disallow NaN in validation callbacks (same goes for negative values)
             if (goodString == "auto") return float.NaN;
 
-            for (int i = 0; i < PixelUnitStrings.Length; i++)
+            for (int i = 0; i < _PixelUnitStrings.Length; i++)
             {
                 // NOTE: This is NOT a culture specific comparison.
                 // This is by design: we want the same unit string table to work across all cultures.
-                if (goodString.EndsWith(PixelUnitStrings[i], StringComparison.Ordinal))
+                if (goodString.EndsWith(_PixelUnitStrings[i], StringComparison.Ordinal))
                 {
-                    strLenUnit = PixelUnitStrings[i].Length;
-                    unitFactor = PixelUnitFactors[i];
+                    strLenUnit = _PixelUnitStrings[i].Length;
+                    unitFactor = _PixelUnitFactors[i];
                     break;
                 }
             }
@@ -213,8 +213,8 @@ namespace Wodsoft.UI
         // This array contains strings for unit types 
         // These are effectively "TypeConverter only" units.
         // They are all expressable in terms of the Pixel unit type and a conversion factor.
-        static private string[] PixelUnitStrings = { "px", "in", "cm", "pt" };
-        static private float[] PixelUnitFactors =
+        static private string[] _PixelUnitStrings = { "px", "in", "cm", "pt" };
+        static private float[] _PixelUnitFactors =
         {
             1.0f,              // Pixel itself
             96.0f,             // Pixels per Inch
@@ -222,7 +222,7 @@ namespace Wodsoft.UI
             96.0f / 72.0f,      // Pixels per Point
         };
 
-        static internal string ToString(float l, CultureInfo cultureInfo)
+        static internal string ToString(float l, CultureInfo? cultureInfo)
         {
             if (float.IsNaN(l)) return "Auto";
             return Convert.ToString(l, cultureInfo);
