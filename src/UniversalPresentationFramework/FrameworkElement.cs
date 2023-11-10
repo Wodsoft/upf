@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
 {
@@ -392,6 +393,44 @@ namespace Wodsoft.UI
             internal float minHeight;
             internal float maxHeight;
         }
+
+        #endregion
+
+        #region PropertyChanged
+
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+
+            if (e.Metadata is FrameworkPropertyMetadata metadata)
+            {
+                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsMeasure))
+                    InvalidateMeasure();
+                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsArrange))
+                    InvalidateArrange();
+                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsRender))
+                    InvalidateVisual();
+                var affectParentMeasure = metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsParentMeasure);
+                var affectParentArrange = metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsParentArrange);
+                if (affectParentArrange || affectParentMeasure)
+                {
+                    for (Visual? v = VisualTreeHelper.GetParent(this);
+                         v != null;
+                         v = VisualTreeHelper.GetParent(v))
+                    {
+                        if (v is UIElement element)
+                        {
+                            if (affectParentMeasure)
+                                element.InvalidateMeasure();
+                            if (affectParentArrange)
+                                element.InvalidateArrange();
+                        }
+                    }
+                }
+            }
+        }
+
+
 
         #endregion
     }

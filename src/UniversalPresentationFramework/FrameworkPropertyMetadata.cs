@@ -168,7 +168,10 @@ namespace Wodsoft.UI
 
         private void TranslateFlags(FrameworkPropertyMetadataOptions flags)
         {
+            Flags = flags;
         }
+
+        public FrameworkPropertyMetadataOptions Flags { get; private set; }
     }
 
     [Flags]
