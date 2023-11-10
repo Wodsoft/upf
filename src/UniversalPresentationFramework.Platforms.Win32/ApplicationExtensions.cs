@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Renderers;
 
 namespace Wodsoft.UI.Platforms.Win32
 {
@@ -15,6 +16,7 @@ namespace Wodsoft.UI.Platforms.Win32
             var windowProvider = new WindowProvider();
             application.WindowProvider = windowProvider;
             application.LifecycleProvider = new LifecycleProvider(windowProvider);
+            application.RendererProvider = new SkiaRendererProvider();
         }
     }
 }
