@@ -10,21 +10,18 @@ namespace Wodsoft.UI
     {
         #region Constructors
 
-        /// <summary>
-        ///     Initializes a new instance of the DependencyPropertyChangedEventArgs class.
-        /// </summary>
-        /// <param name="property">
-        ///     The property whose value changed.
-        /// </param>
-        /// <param name="oldValue">
-        ///     The value of the property before the change.
-        /// </param>
-        /// <param name="newValue">
-        ///     The value of the property after the change.
-        /// </param>
         public DependencyPropertyChangedEventArgs(DependencyProperty property, object? oldValue, object? newValue)
         {
             _property = property;
+            _metadata = null;
+            _old = oldValue;
+            _new = newValue;
+        }
+
+        public DependencyPropertyChangedEventArgs(DependencyProperty property, PropertyMetadata? metadata, object? oldValue, object? newValue)
+        {
+            _property = property;
+            _metadata = metadata;
             _old = oldValue;
             _new = newValue;
         }
@@ -45,6 +42,8 @@ namespace Wodsoft.UI
         public object? OldValue => _old;
 
         public object? NewValue => _new;
+
+        public PropertyMetadata? Metadata => _metadata;
 
         #endregion Properties
 
@@ -79,10 +78,10 @@ namespace Wodsoft.UI
 
         #region Data
 
-        private DependencyProperty _property;
-
-        private object? _old;
-        private object? _new;
+        private readonly DependencyProperty _property;
+        private readonly PropertyMetadata? _metadata;
+        private readonly object? _old;
+        private readonly object? _new;
 
         #endregion Data
     }

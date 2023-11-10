@@ -99,8 +99,7 @@ namespace Wodsoft.UI
                 _valueStores.Add(dp.GlobalIndex, store);
             }
             store.Value = value;
-            if (metadata.PropertyChangedCallback != null)
-                metadata.PropertyChangedCallback(this, new DependencyPropertyChangedEventArgs(dp, oldValue, value));
+            OnPropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, value));
         }
 
         private PropertyMetadata GetMetadata(DependencyProperty dp)
@@ -117,6 +116,12 @@ namespace Wodsoft.UI
         protected virtual DependencyObject? GetInheritanceParent()
         {
             return null;
+        }
+
+        protected virtual void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (e.Metadata?.PropertyChangedCallback != null)
+                e.Metadata.PropertyChangedCallback(this, e);
         }
     }
 }
