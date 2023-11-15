@@ -40,6 +40,25 @@ namespace Wodsoft.UI
         }
 
         /// <summary>
+        /// Constructor which sets the initial values to the values of the parameters
+        /// </summary>
+        public Rect(Vector2 location,
+                    Size size)
+        {
+            if (size.IsEmpty)
+            {
+                this = _Empty;
+            }
+            else
+            {
+                _x = location.X;
+                _y = location.Y;
+                _width = size.Width;
+                _height = size.Height;
+            }
+        }
+
+        /// <summary>
         /// Constructor which sets the initial values to the values of the parameters.
         /// Width and Height must be non-negative
         /// </summary>

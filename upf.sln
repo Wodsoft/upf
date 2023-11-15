@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramew
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalPresentationFramework.LayoutTest", "test\UniversalPresentationFramework.LayoutTest\UniversalPresentationFramework.LayoutTest.csproj", "{47E5DEC5-B7B5-4BB7-B901-F90577F623F0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.SkiaRenderTest", "test\UniversalPresentationFramework.SkiaRenderTest\UniversalPresentationFramework.SkiaRenderTest.csproj", "{FDD2940C-8F38-4BB4-91D6-465144BF7745}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{47E5DEC5-B7B5-4BB7-B901-F90577F623F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47E5DEC5-B7B5-4BB7-B901-F90577F623F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47E5DEC5-B7B5-4BB7-B901-F90577F623F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +100,7 @@ Global
 		{58059534-46E6-41DD-8E82-1319B294CD9F} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{9A016301-E087-4097-A8ED-51411C07B10D} = {1D13C870-5312-4928-918C-B2B1F446DEA5}
 		{47E5DEC5-B7B5-4BB7-B901-F90577F623F0} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
+		{FDD2940C-8F38-4BB4-91D6-465144BF7745} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F56DE84-DAC8-4DF0-92EF-B337FDBDCE69}

@@ -8,18 +8,18 @@ namespace Wodsoft.UI.Media
 {
     public abstract class DrawingContext
     {
-        ///// <summary>
-        /////     DrawLine - 
-        /////     Draws a line with the specified pen.
-        /////     Note that this API does not accept a Brush, as there is no area to fill.
-        ///// </summary>
-        ///// <param name="pen"> The Pen with which to stroke the line. </param>
-        ///// <param name="point0"> The start Point for the line. </param>
-        ///// <param name="point1"> The end Point for the line. </param>
-        //public abstract void DrawLine(
-        //    Pen pen,
-        //    Point point0,
-        //    Point point1);
+        /// <summary>
+        ///     DrawLine - 
+        ///     Draws a line with the specified pen.
+        ///     Note that this API does not accept a Brush, as there is no area to fill.
+        /// </summary>
+        /// <param name="pen"> The Pen with which to stroke the line. </param>
+        /// <param name="point0"> The start Point for the line. </param>
+        /// <param name="point1"> The end Point for the line. </param>
+        public abstract void DrawLine(
+            Pen pen,
+            Point point0,
+            Point point1);
 
         ///// <summary>
         /////     DrawLine - 
@@ -38,24 +38,24 @@ namespace Wodsoft.UI.Media
         //    Point point1,
         //    AnimationClock point1Animations);
 
-        ///// <summary>
-        /////     DrawRectangle - 
-        /////     Draw a rectangle with the provided Brush and/or Pen.
-        /////     If both the Brush and Pen are null this call is a no-op.
-        ///// </summary>
-        ///// <param name="brush">
-        /////     The Brush with which to fill the rectangle.
-        /////     This is optional, and can be null, in which case no fill is performed.
-        ///// </param>
-        ///// <param name="pen">
-        /////     The Pen with which to stroke the rectangle.
-        /////     This is optional, and can be null, in which case no stroke is performed.
-        ///// </param>
-        ///// <param name="rectangle"> The Rect to fill and/or stroke. </param>
-        //public abstract void DrawRectangle(
-        //    Brush brush,
-        //    Pen pen,
-        //    Rect rectangle);
+        /// <summary>
+        ///     DrawRectangle - 
+        ///     Draw a rectangle with the provided Brush and/or Pen.
+        ///     If both the Brush and Pen are null this call is a no-op.
+        /// </summary>
+        /// <param name="brush">
+        ///     The Brush with which to fill the rectangle.
+        ///     This is optional, and can be null, in which case no fill is performed.
+        /// </param>
+        /// <param name="pen">
+        ///     The Pen with which to stroke the rectangle.
+        ///     This is optional, and can be null, in which case no stroke is performed.
+        /// </param>
+        /// <param name="rectangle"> The Rect to fill and/or stroke. </param>
+        public abstract void DrawRectangle(
+            Brush brush,
+            Pen pen,
+            Rect rectangle);
 
         ///// <summary>
         /////     DrawRectangle - 
@@ -78,34 +78,34 @@ namespace Wodsoft.UI.Media
         //    Rect rectangle,
         //    AnimationClock rectangleAnimations);
 
-        ///// <summary>
-        /////     DrawRoundedRectangle - 
-        /////     Draw a rounded rectangle with the provided Brush and/or Pen.
-        /////     If both the Brush and Pen are null this call is a no-op.
-        ///// </summary>
-        ///// <param name="brush">
-        /////     The Brush with which to fill the rectangle.
-        /////     This is optional, and can be null, in which case no fill is performed.
-        ///// </param>
-        ///// <param name="pen">
-        /////     The Pen with which to stroke the rectangle.
-        /////     This is optional, and can be null, in which case no stroke is performed.
-        ///// </param>
-        ///// <param name="rectangle"> The Rect to fill and/or stroke. </param>
-        ///// <param name="radiusX">
-        /////     The radius in the X dimension of the rounded corners of this
-        /////     rounded Rect.  This value will be clamped to the range [0..rectangle.Width/2]
-        ///// </param>
-        ///// <param name="radiusY">
-        /////     The radius in the Y dimension of the rounded corners of this
-        /////     rounded Rect.  This value will be clamped to the range [0..rectangle.Height/2].
-        ///// </param>
-        //public abstract void DrawRoundedRectangle(
-        //    Brush brush,
-        //    Pen pen,
-        //    Rect rectangle,
-        //    Double radiusX,
-        //    Double radiusY);
+        /// <summary>
+        ///     DrawRoundedRectangle - 
+        ///     Draw a rounded rectangle with the provided Brush and/or Pen.
+        ///     If both the Brush and Pen are null this call is a no-op.
+        /// </summary>
+        /// <param name="brush">
+        ///     The Brush with which to fill the rectangle.
+        ///     This is optional, and can be null, in which case no fill is performed.
+        /// </param>
+        /// <param name="pen">
+        ///     The Pen with which to stroke the rectangle.
+        ///     This is optional, and can be null, in which case no stroke is performed.
+        /// </param>
+        /// <param name="rectangle"> The Rect to fill and/or stroke. </param>
+        /// <param name="radiusX">
+        ///     The radius in the X dimension of the rounded corners of this
+        ///     rounded Rect.  This value will be clamped to the range [0..rectangle.Width/2]
+        /// </param>
+        /// <param name="radiusY">
+        ///     The radius in the Y dimension of the rounded corners of this
+        ///     rounded Rect.  This value will be clamped to the range [0..rectangle.Height/2].
+        /// </param>
+        public abstract void DrawRoundedRectangle(
+            Brush brush,
+            Pen pen,
+            Rect rectangle,
+            float radiusX,
+            float radiusY);
 
         ///// <summary>
         /////     DrawRoundedRectangle - 
@@ -137,41 +137,41 @@ namespace Wodsoft.UI.Media
         //    Pen pen,
         //    Rect rectangle,
         //    AnimationClock rectangleAnimations,
-        //    Double radiusX,
+        //    float radiusX,
         //    AnimationClock radiusXAnimations,
-        //    Double radiusY,
+        //    float radiusY,
         //    AnimationClock radiusYAnimations);
 
-        ///// <summary>
-        /////     DrawEllipse - 
-        /////     Draw an ellipse with the provided Brush and/or Pen.
-        /////     If both the Brush and Pen are null this call is a no-op.
-        ///// </summary>
-        ///// <param name="brush">
-        /////     The Brush with which to fill the ellipse.
-        /////     This is optional, and can be null, in which case no fill is performed.
-        ///// </param>
-        ///// <param name="pen">
-        /////     The Pen with which to stroke the ellipse.
-        /////     This is optional, and can be null, in which case no stroke is performed.
-        ///// </param>
-        ///// <param name="center">
-        /////     The center of the ellipse to fill and/or stroke.
-        ///// </param>
-        ///// <param name="radiusX">
-        /////     The radius in the X dimension of the ellipse.
-        /////     The absolute value of the radius provided will be used.
-        ///// </param>
-        ///// <param name="radiusY">
-        /////     The radius in the Y dimension of the ellipse.
-        /////     The absolute value of the radius provided will be used.
-        ///// </param>
-        //public abstract void DrawEllipse(
-        //    Brush brush,
-        //    Pen pen,
-        //    Point center,
-        //    Double radiusX,
-        //    Double radiusY);
+        /// <summary>
+        ///     DrawEllipse - 
+        ///     Draw an ellipse with the provided Brush and/or Pen.
+        ///     If both the Brush and Pen are null this call is a no-op.
+        /// </summary>
+        /// <param name="brush">
+        ///     The Brush with which to fill the ellipse.
+        ///     This is optional, and can be null, in which case no fill is performed.
+        /// </param>
+        /// <param name="pen">
+        ///     The Pen with which to stroke the ellipse.
+        ///     This is optional, and can be null, in which case no stroke is performed.
+        /// </param>
+        /// <param name="center">
+        ///     The center of the ellipse to fill and/or stroke.
+        /// </param>
+        /// <param name="radiusX">
+        ///     The radius in the X dimension of the ellipse.
+        ///     The absolute value of the radius provided will be used.
+        /// </param>
+        /// <param name="radiusY">
+        ///     The radius in the Y dimension of the ellipse.
+        ///     The absolute value of the radius provided will be used.
+        /// </param>
+        public abstract void DrawEllipse(
+            Brush brush,
+            Pen pen,
+            Point center,
+            float radiusX,
+            float radiusY);
 
         ///// <summary>
         /////     DrawEllipse - 
@@ -205,9 +205,9 @@ namespace Wodsoft.UI.Media
         //    Pen pen,
         //    Point center,
         //    AnimationClock centerAnimations,
-        //    Double radiusX,
+        //    float radiusX,
         //    AnimationClock radiusXAnimations,
-        //    Double radiusY,
+        //    float radiusY,
         //    AnimationClock radiusYAnimations);
 
         ///// <summary>
@@ -348,7 +348,7 @@ namespace Wodsoft.UI.Media
         ///// </param>
         ///// <param name="opacityAnimations"> Optional AnimationClock for opacity. </param>
         //public abstract void PushOpacity(
-        //    Double opacity,
+        //    float opacity,
         //    AnimationClock opacityAnimations);
 
         ///// <summary>
@@ -375,7 +375,7 @@ namespace Wodsoft.UI.Media
         ///// </summary>
         ///// <param name="coordinate"> The coordinate of leading guideline. </param>
         //internal abstract void PushGuidelineY1(
-        //    Double coordinate);
+        //    float coordinate);
 
         ///// <summary>
         /////     PushGuidelineY2 - 
@@ -388,8 +388,8 @@ namespace Wodsoft.UI.Media
         /////     The offset from leading guideline to driven guideline.
         ///// </param>
         //internal abstract void PushGuidelineY2(
-        //    Double leadingCoordinate,
-        //    Double offsetToDrivenCoordinate);
+        //    float leadingCoordinate,
+        //    float offsetToDrivenCoordinate);
 
         ///// <summary>
         ///// Pop

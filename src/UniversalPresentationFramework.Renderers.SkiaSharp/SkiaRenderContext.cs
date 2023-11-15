@@ -23,7 +23,8 @@ namespace Wodsoft.UI.Renderers
         {
             if (drawingContent is SkiaDrawingContent skiaDrawingContent)
                 _canvas.DrawDrawable(skiaDrawingContent.Drawable, skiaDrawingContent.OriginalPoint);
-            throw new NotSupportedException("Only support skia drawing content.");
+            else
+                throw new NotSupportedException("Only support skia drawing content.");
         }
     }
 }

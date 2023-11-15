@@ -15,7 +15,7 @@ namespace Wodsoft.UI
 
         public FrameworkElement? Parent { get; private set; }
 
-        protected override DependencyObject? GetInheritanceParent()
+        protected sealed override DependencyObject? GetInheritanceParent()
         {
             return Parent;
         }

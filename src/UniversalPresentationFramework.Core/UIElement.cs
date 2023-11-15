@@ -173,6 +173,11 @@ namespace Wodsoft.UI
             }
         }
 
+        public override Size GetVisualSize()
+        {
+            return _renderSize;
+        }
+
         public bool IsMeasureValid { get; private set; }
 
         public bool IsArrangeValid { get; private set; }
@@ -187,7 +192,7 @@ namespace Wodsoft.UI
 
         }
 
-        public override void RenderContext(RenderContext renderContext)
+        public sealed override void RenderContext(RenderContext renderContext)
         {
             if (_drawingContent != null)
                 renderContext.Render(_drawingContent);

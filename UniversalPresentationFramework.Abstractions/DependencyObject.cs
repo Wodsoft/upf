@@ -41,7 +41,7 @@ namespace Wodsoft.UI
                 throw new ArgumentNullException(nameof(dp));
             return GetValueCore(dp);
         }
-        private object? GetValueCore(DependencyProperty dp)
+        protected virtual object? GetValueCore(DependencyProperty dp)
         {
             if (!_valueStores.TryGetValue(dp.GlobalIndex, out var store))
             {
@@ -75,7 +75,7 @@ namespace Wodsoft.UI
                 throw new ArgumentNullException(nameof(key));
             SetValueCore(key.DependencyProperty, value);
         }
-        private void SetValueCore(DependencyProperty dp, object? value)
+        protected virtual void SetValueCore(DependencyProperty dp, object? value)
         {
             var metadata = GetMetadata(dp);
             if (metadata.CoerceValueCallback != null)

@@ -36,6 +36,8 @@ namespace Wodsoft.UI.Renderers
             _stopwatch = new Stopwatch();
         }
 
+        public bool IsShowFPS { get; set; }
+
         protected GRContext? GRContext => _grContext;
 
         public SKSurface? Surface => _surface;
@@ -62,8 +64,8 @@ namespace Wodsoft.UI.Renderers
             canvas.ResetMatrix();
             canvas.Scale(dpi.DpiScaleX, dpi.DpiScaleY);
             RenderCore(visual);
-            if (Debugger.IsAttached)
-            {                
+            if (Debugger.IsAttached && IsShowFPS)
+            {
                 var fps = (int)MathF.Round(1000f / _stopwatch.ElapsedMilliseconds);
                 fps = Math.Max(1, fps);
                 canvas.DrawText(fps.ToString(), _FpsPoint, _FpsPaint);
