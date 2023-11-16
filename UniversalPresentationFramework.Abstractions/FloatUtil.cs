@@ -10,7 +10,7 @@ namespace Wodsoft.UI
     internal static class FloatUtil
     {
         // Const values come from sdk\inc\crt\float.h
-        internal const float DBL_EPSILON = 2.2204460492503131e-08f; /* smallest such that 1.0+DBL_EPSILON != 1.0 */
+        internal const float FLT_EPSILON = 1.192092896e-07F; /* smallest such that 1.0+DBL_EPSILON != 1.0 */
         internal const float FLT_MIN = 1.175494351e-38F; /* Number close to zero, where float.MinValue is -float.MaxValue */
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Wodsoft.UI
             //in case they are Infinities (then epsilon check does not work)
             if (value1 == value2) return true;
             // This computes (|value1-value2| / (|value1| + |value2| + 10.0)) < DBL_EPSILON
-            float eps = (MathF.Abs(value1) + MathF.Abs(value2) + 10.0f) * DBL_EPSILON;
+            float eps = (MathF.Abs(value1) + MathF.Abs(value2) + 10.0f) * FLT_EPSILON;
             float delta = value1 - value2;
             return (-eps < delta) && (eps > delta);
         }
@@ -133,7 +133,7 @@ namespace Wodsoft.UI
         /// <param name="value"> The float to compare to 1. </param>
         public static bool IsOne(float value)
         {
-            return Math.Abs(value - 1.0) < 10.0 * DBL_EPSILON;
+            return Math.Abs(value - 1.0) < 10.0 * FLT_EPSILON;
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Wodsoft.UI
         /// <param name="value"> The float to compare to 0. </param>
         public static bool IsZero(float value)
         {
-            return Math.Abs(value) < 10.0 * DBL_EPSILON;
+            return Math.Abs(value) < 10.0 * FLT_EPSILON;
         }
 
         // The Point, Size, Rect and Matrix class have moved to WinCorLib.  However, we provide

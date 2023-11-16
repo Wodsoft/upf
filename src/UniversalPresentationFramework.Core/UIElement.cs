@@ -95,9 +95,9 @@ namespace Wodsoft.UI
 
                 if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize)|| !_isRenderValid) )
                 {
-                    if (RendererProvider.Current != null)
+                    if (FrameworkProvider.RendererProvider != null)
                     {
-                        var drawingContext = RendererProvider.Current.GetDrawingContext(this);
+                        var drawingContext = FrameworkProvider.RendererProvider.CreateDrawingContext(this);
                         try
                         {
                             OnRender(drawingContext);

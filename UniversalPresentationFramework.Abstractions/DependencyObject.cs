@@ -99,7 +99,8 @@ namespace Wodsoft.UI
                 _valueStores.Add(dp.GlobalIndex, store);
             }
             store.Value = value;
-            OnPropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, value));
+            if (oldValue != value)
+                OnPropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, value));
         }
 
         private PropertyMetadata GetMetadata(DependencyProperty dp)

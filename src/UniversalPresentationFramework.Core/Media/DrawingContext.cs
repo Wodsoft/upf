@@ -229,20 +229,20 @@ namespace Wodsoft.UI.Media
         //    Pen pen,
         //    Geometry geometry);
 
-        ///// <summary>
-        /////     DrawImage - 
-        /////     Draw an Image into the region specified by the Rect.
-        /////     The Image will potentially be stretched and distorted to fit the Rect.
-        /////     For more fine grained control, consider filling a Rect with an ImageBrush via 
-        /////     DrawRectangle.
-        ///// </summary>
-        ///// <param name="imageSource"> The ImageSource to draw. </param>
-        ///// <param name="rectangle">
-        /////     The Rect into which the ImageSource will be fit.
-        ///// </param>
-        //public abstract void DrawImage(
-        //    ImageSource imageSource,
-        //    Rect rectangle);
+        /// <summary>
+        ///     DrawImage - 
+        ///     Draw an Image into the region specified by the Rect.
+        ///     The Image will potentially be stretched and distorted to fit the Rect.
+        ///     For more fine grained control, consider filling a Rect with an ImageBrush via 
+        ///     DrawRectangle.
+        /// </summary>
+        /// <param name="imageSource"> The ImageSource to draw. </param>
+        /// <param name="rectangle">
+        ///     The Rect into which the ImageSource will be fit.
+        /// </param>
+        public abstract void DrawImage(
+            ImageSource imageSource,
+            Rect rectangle);
 
         ///// <summary>
         /////     DrawImage - 

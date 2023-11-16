@@ -17,7 +17,7 @@ namespace Wodsoft.UI.Test
     {
         public RenderTest()
         {
-            RendererProvider.Current = new SkiaRendererProvider();
+            FrameworkProvider.RendererProvider = new SkiaRendererProvider();
         }
 
         protected void RenderToBitmap(UPF.UIElement element)

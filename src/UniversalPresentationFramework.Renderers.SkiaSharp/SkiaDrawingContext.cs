@@ -72,9 +72,7 @@ namespace Wodsoft.UI.Renderers
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(null, pen);
-            ref var skPoint0 = ref Unsafe.As<Point, SKPoint>(ref point0);
-            ref var skPoint1 = ref Unsafe.As<Point, SKPoint>(ref point1);
-            _canvas.DrawLine(skPoint0, skPoint1, paint);
+            _canvas.DrawLine(point0.X, point0.Y, point1.X, point1.Y, paint);
         }
 
         public override void DrawEllipse(Brush brush, Pen pen, Point center, float radiusX, float radiusY)
@@ -82,7 +80,41 @@ namespace Wodsoft.UI.Renderers
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
             _canvas.DrawOval(center.X, center.Y, radiusX, radiusY, paint);
-            
+        }
+
+        public override void DrawImage(ImageSource imageSource, Rect rectangle)
+        {
+            if (imageSource.Context == null)
+                return;
+            if (imageSource.Context is not SkiaImageContext context)
+                throw new NotSupportedException("Only support skia image context.");
+            switch (context.Rotation)
+            {
+                case Media.Imaging.Rotation.Rotate0:
+                    _canvas.DrawImage(context.Image, new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom));
+                    break;
+                case Media.Imaging.Rotation.Rotate90:
+                    _canvas.Save();
+                    _canvas.Translate(rectangle.X + rectangle.Height, rectangle.Y);
+                    _canvas.RotateDegrees(90);
+                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height));
+                    _canvas.Restore();
+                    break;
+                case Media.Imaging.Rotation.Rotate180:
+                    _canvas.Save();
+                    _canvas.Translate(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height);
+                    _canvas.RotateDegrees(180);
+                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height));
+                    _canvas.Restore();
+                    break;
+                case Media.Imaging.Rotation.Rotate270:
+                    _canvas.Save();
+                    _canvas.Translate(rectangle.X, rectangle.Y + rectangle.Width);
+                    _canvas.RotateDegrees(270);
+                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height));
+                    _canvas.Restore();
+                    break;
+            }
         }
     }
 }

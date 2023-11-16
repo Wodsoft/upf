@@ -71,7 +71,7 @@ namespace Wodsoft.UI
             _isRunning = true;
             Current = this;
             _lifecycleProvider.Start();
-            Wodsoft.UI.RendererProvider.Current = _rendererProvider;
+            FrameworkProvider.RendererProvider = _rendererProvider;
             if (window == null)
             {
 
