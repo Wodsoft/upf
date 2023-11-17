@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Xaml", "src\UniversalPresentationFramework.Xaml\UniversalPresentationFramework.Xaml.csproj", "{3F4A31DC-8EE4-4657-932F-696E4E94EC7C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Abstractions", "UniversalPresentationFramework.Abstractions\UniversalPresentationFramework.Abstractions.csproj", "{CF42FD16-66F1-4347-A452-D62A0996D5D1}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F0420ED7-AFAE-488A-ACFC-533557A2ECEC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Test", "test\UniversalPresentationFramework.Test\UniversalPresentationFramework.Test.csproj", "{7614EC65-E615-41AB-B60F-424C8307E88B}"
@@ -29,9 +27,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan", "src\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan.csproj", "{9A016301-E087-4097-A8ED-51411C07B10D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalPresentationFramework.LayoutTest", "test\UniversalPresentationFramework.LayoutTest\UniversalPresentationFramework.LayoutTest.csproj", "{47E5DEC5-B7B5-4BB7-B901-F90577F623F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.LayoutTest", "test\UniversalPresentationFramework.LayoutTest\UniversalPresentationFramework.LayoutTest.csproj", "{47E5DEC5-B7B5-4BB7-B901-F90577F623F0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.SkiaRenderTest", "test\UniversalPresentationFramework.SkiaRenderTest\UniversalPresentationFramework.SkiaRenderTest.csproj", "{FDD2940C-8F38-4BB4-91D6-465144BF7745}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Abstractions", "src\UniversalPresentationFramework.Abstractions\UniversalPresentationFramework.Abstractions.csproj", "{2975A43F-367C-460D-A7E1-D0077DC894DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +59,6 @@ Global
 		{3F4A31DC-8EE4-4657-932F-696E4E94EC7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F4A31DC-8EE4-4657-932F-696E4E94EC7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F4A31DC-8EE4-4657-932F-696E4E94EC7C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF42FD16-66F1-4347-A452-D62A0996D5D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF42FD16-66F1-4347-A452-D62A0996D5D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF42FD16-66F1-4347-A452-D62A0996D5D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF42FD16-66F1-4347-A452-D62A0996D5D1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7614EC65-E615-41AB-B60F-424C8307E88B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7614EC65-E615-41AB-B60F-424C8307E88B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7614EC65-E615-41AB-B60F-424C8307E88B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -83,6 +79,10 @@ Global
 		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDD2940C-8F38-4BB4-91D6-465144BF7745}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,12 +95,12 @@ Global
 		{F5C8CC08-9E86-41C7-A2F4-F2382EE215FB} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
 		{22645D7F-CDDE-4E9F-9206-5FFE6A950666} = {F5C8CC08-9E86-41C7-A2F4-F2382EE215FB}
 		{3F4A31DC-8EE4-4657-932F-696E4E94EC7C} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
-		{CF42FD16-66F1-4347-A452-D62A0996D5D1} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
 		{7614EC65-E615-41AB-B60F-424C8307E88B} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{58059534-46E6-41DD-8E82-1319B294CD9F} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{9A016301-E087-4097-A8ED-51411C07B10D} = {1D13C870-5312-4928-918C-B2B1F446DEA5}
 		{47E5DEC5-B7B5-4BB7-B901-F90577F623F0} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{FDD2940C-8F38-4BB4-91D6-465144BF7745} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
+		{2975A43F-367C-460D-A7E1-D0077DC894DB} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F56DE84-DAC8-4DF0-92EF-B337FDBDCE69}
