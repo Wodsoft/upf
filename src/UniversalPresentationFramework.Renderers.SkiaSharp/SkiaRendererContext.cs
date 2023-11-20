@@ -48,7 +48,7 @@ namespace Wodsoft.UI.Renderers
             var dpi = visual.GetDpi();
             int width = (int)(size.Width * dpi.DpiScaleX);
             int height = (int)(size.Height * dpi.DpiScaleY);
-            if (_surface == null || _width != width || _height != height)
+            if (_surface == null || ShouldCreateNewSurface(width, height))
             {
                 if (_surface != null)
                     _surface.Dispose();
@@ -75,6 +75,11 @@ namespace Wodsoft.UI.Renderers
             AfterRender();
             _surface.Flush();
             _stopwatch.Restart();
+        }
+
+        protected virtual bool ShouldCreateNewSurface(int width, int height)
+        {
+            return _width != width || _height != height;
         }
 
         private void RenderCore(Visual visual, SkiaRenderContext renderContext)

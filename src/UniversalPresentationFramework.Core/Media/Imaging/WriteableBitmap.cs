@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Wodsoft.UI.Media.Imaging
 {
-    public class WriteableBitmap : BitmapSource
+    public sealed class WriteableBitmap : BitmapSource
     {
         private readonly IBitmapContext _context;
 

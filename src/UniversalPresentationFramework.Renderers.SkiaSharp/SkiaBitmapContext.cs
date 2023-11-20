@@ -50,6 +50,29 @@ namespace Wodsoft.UI.Renderers
             }
         }
 
+        public void CopyPixels(Int32Rect sourceRect, nint buffer, int bufferSize, int stride)
+        {
+            if (sourceRect.X < 0)
+                throw new ArgumentOutOfRangeException("Source rectangle x can not be negative.");
+            if (sourceRect.X >= _bitmap.Width)
+                throw new ArgumentOutOfRangeException("Source rectangle x can not large or equal than bitmap width.");
+            if (sourceRect.Y < 0)
+                throw new ArgumentOutOfRangeException("Source rectangle y can not be negative.");
+            if (sourceRect.Y >= _bitmap.Height)
+                throw new ArgumentOutOfRangeException("Source rectangle y can not large or equal than bitmap width.");
+
+            if (stride * (sourceRect.Height - 1) + sourceRect.Width * _bitmap.BytesPerPixel > bufferSize)
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), "Buffer size less than pxiels length.");
+            var imageInfo = new SKImageInfo(sourceRect.Width, sourceRect.Height);
+            imageInfo.ColorSpace = _bitmap.ColorSpace;
+            imageInfo.AlphaType = _bitmap.AlphaType;
+            imageInfo.ColorType = _bitmap.ColorType;
+            using (var pixmap = new SKPixmap(imageInfo, buffer, stride))
+            {
+                _bitmap.PeekPixels().ReadPixels(pixmap, sourceRect.X, sourceRect.Y);
+            }
+        }
+
         public unsafe void WritePixels(Int32Rect sourceRect, nint sourceBuffer, int sourceBufferSize, int sourceBufferStride, int destinationX, int destinationY)
         {
             lock (_lock)

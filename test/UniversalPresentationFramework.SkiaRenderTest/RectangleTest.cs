@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,8 +17,8 @@ namespace Wodsoft.UI.Test
             var rect = new UPF.Rectangle();
             rect.Width = 200;
             rect.Height = 100;
-            rect.Fill = new SolidColorBrush(Colors.Blue);
-            rect.Arrange(new Rect(0,0, 200, 100));
+            rect.Fill = new SolidColorBrush(new Color(0xa0, 0x80, 0x20));
+            rect.Arrange(new Rect(0, 0, 200, 100));
             RenderToBitmap(rect);
         }
     }

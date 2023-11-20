@@ -10,19 +10,36 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererSoftwareContext : SkiaRendererContext
     {
+        private readonly SKPixmap? _pixmap;
+
         public SkiaRendererSoftwareContext() : base(null)
         {
         }
 
+        public SkiaRendererSoftwareContext(SKPixmap pixmap) : base(null)
+        {
+            if (pixmap == null)
+                throw new ArgumentNullException(nameof(pixmap));
+            _pixmap = pixmap;
+        }
+
+        protected override bool ShouldCreateNewSurface(int width, int height)
+        {
+            return _pixmap == null;
+        }
+
         protected override SKSurface CreateSurface(int width, int height)
         {
-            return SKSurface.Create(new SKImageInfo
-            {
-                Width = width,
-                Height = height,
-                ColorType = SKColorType.Rgba8888,
-                AlphaType = SKAlphaType.Premul
-            });
+            if (_pixmap == null)
+                return SKSurface.Create(new SKImageInfo
+                {
+                    Width = width,
+                    Height = height,
+                    ColorType = SKColorType.Rgba8888,
+                    AlphaType = SKAlphaType.Premul
+                });
+            else
+                return SKSurface.Create(_pixmap);
         }
 
         public SKImage GetImage()

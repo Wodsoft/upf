@@ -11,8 +11,10 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererProvider : IRendererProvider
     {
-        public IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette palette)
+        public IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette? palette)
         {
+            if (pixelFormat.IsPalettized)
+                throw new NotSupportedException("Skia do not support palettized pixel format.");
             SKImageInfo info = new SKImageInfo();
             info.Width = pixelWidth;
             info.Height = pixelHeight;
@@ -54,6 +56,23 @@ namespace Wodsoft.UI.Renderers
                 image = SKImage.FromBitmap(resizedBitmap);
             }
             return new SkiaImageContext(image, rotation);
+        }
+
+        public IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
+        {
+            SKImageInfo info = new SKImageInfo();
+            info.Width = pixelWidth;
+            info.Height = pixelHeight;
+            info.ColorType = SkiaHelper.GetColorType(pixelFormat);
+            info.AlphaType = pixelFormat.IsPremultiplied ? SKAlphaType.Premul : SKAlphaType.Opaque;
+            switch (pixelFormat.ColorSpace)
+            {
+                case PixelFormatColorSpace.IsSRGB:
+                case PixelFormatColorSpace.IsScRGB:
+                    info.ColorSpace = pixelFormat.ColorSpace == PixelFormatColorSpace.IsSRGB ? SKColorSpace.CreateSrgb() : SKColorSpace.CreateSrgbLinear();
+                    break;
+            }
+            return new SkiaRenderBitmapContext(new SKBitmap(info));
         }
     }
 }

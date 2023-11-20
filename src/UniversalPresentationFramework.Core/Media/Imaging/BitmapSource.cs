@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -56,6 +57,52 @@ namespace Wodsoft.UI.Media.Imaging
 
         internal virtual void EnsureCreation()
         {
+
+        }
+
+        public virtual void CopyPixels(Int32Rect sourceRect, IntPtr buffer, int bufferSize, int stride)
+        {
+            if (sourceRect == Int32Rect.Empty)
+                sourceRect = new Int32Rect(0, 0, PixelWidth, PixelHeight);
+            Context.CopyPixels(sourceRect, buffer, bufferSize, stride);
+        }
+
+        public virtual void CopyPixels(Int32Rect sourceRect, Array pixels, int stride, int offset)
+        {
+            var elementSize = Marshal.SizeOf(pixels.GetValue(0)!);
+            if (offset >= pixels.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset is large or equal than pixels array.");
+            int bufferSize = (pixels.Length - offset) * elementSize;
+            GCHandle arrayHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+            try
+            {
+                IntPtr buffer = arrayHandle.AddrOfPinnedObject();
+                buffer = new IntPtr(((long)buffer) + (long)offset * elementSize);
+                CopyPixels(sourceRect, buffer, bufferSize, stride);
+            }
+            finally
+            {
+                arrayHandle.Free();
+            }
+        }
+
+        public virtual void CopyPixels(Array pixels, int stride, int offset)
+        {
+            var elementSize = Marshal.SizeOf(pixels.GetValue(0)!);
+            if (offset >= pixels.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset is large or equal than pixels array.");
+            int bufferSize = (pixels.Length - offset) * elementSize;
+            GCHandle arrayHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+            try
+            {
+                IntPtr buffer = arrayHandle.AddrOfPinnedObject();
+                buffer = new IntPtr(((long)buffer) + (long)offset * elementSize);
+                CopyPixels(new Int32Rect(0, 0, PixelWidth, PixelHeight), buffer, bufferSize, stride);
+            }
+            finally
+            {
+                arrayHandle.Free();
+            }
 
         }
     }

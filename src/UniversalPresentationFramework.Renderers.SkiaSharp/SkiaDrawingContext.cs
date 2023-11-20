@@ -130,7 +130,7 @@ namespace Wodsoft.UI.Renderers
             }
             else
             {
-                _canvas.ClipPath()
+                //_canvas.ClipPath();
             }
         }
 

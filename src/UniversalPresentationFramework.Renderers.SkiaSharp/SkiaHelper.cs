@@ -81,6 +81,8 @@ namespace Wodsoft.UI.Renderers
         //https://learn.microsoft.com/zh-cn/windows/win32/wic/-wic-codec-native-pixel-formats?redirectedfrom=MSDN
         public static SKColorType GetColorType(PixelFormat pixelFormat)
         {
+            if (pixelFormat == PixelFormats.Default)
+                return SKImageInfo.PlatformColorType;
             switch (pixelFormat.ChannelOrder)
             {
                 case PixelFormatChannelOrder.ChannelOrderBGRA:
@@ -139,10 +141,14 @@ namespace Wodsoft.UI.Renderers
             throw new NotSupportedException($"Skia renderer provider do not support pixel format. Color type \"{pixelFormat.ColorSpace}\". \"{string.Join('-', pixelFormat.ChannelBits)}\" Channels.");
         }
 
-        public static PixelFormat GetPixelFormat(SKColorType colorType, SKAlphaType alphaType, SKColorSpace colorSpace)
+        public static PixelFormat GetPixelFormat(SKColorType colorType, SKAlphaType alphaType, SKColorSpace? colorSpace)
         {
             byte[] channels;
-            PixelFormatColorSpace space = colorSpace.GammaIsLinear ? PixelFormatColorSpace.IsScRGB : PixelFormatColorSpace.IsSRGB;
+            PixelFormatColorSpace space;
+            if (colorSpace == null)
+                space = PixelFormatColorSpace.Unkonwn;
+            else
+                space = colorSpace.GammaIsLinear ? PixelFormatColorSpace.IsScRGB : PixelFormatColorSpace.IsSRGB;
             PixelFormatChannelOrder channelOrder;
             bool isFloat = false;
             bool isPremutilplied = alphaType == SKAlphaType.Premul;
@@ -170,7 +176,7 @@ namespace Wodsoft.UI.Renderers
                     break;
                 case SKColorType.Rgb888x:
                     channelOrder = PixelFormatChannelOrder.ChannelOrderRGB;
-                    channels = [8, 8, 8];
+                    channels = [8, 8, 8, 8];
                     break;
                 case SKColorType.Rgb101010x:
                     channelOrder = PixelFormatChannelOrder.ChannelOrderRGB;
@@ -217,7 +223,7 @@ namespace Wodsoft.UI.Renderers
                     break;
                 case SKColorType.Rg88:
                     channelOrder = PixelFormatChannelOrder.Unkonwn;
-                    channels = [8,8];
+                    channels = [8, 8];
                     break;
                 case SKColorType.Rg1616:
                     channelOrder = PixelFormatChannelOrder.Unkonwn;
@@ -231,6 +237,8 @@ namespace Wodsoft.UI.Renderers
                 default:
                     return new PixelFormat();
             }
+            var bitsPerPixel = (byte)channels.Sum(t => t);
+            bitsPerPixel += (byte)(8 - (bitsPerPixel % 8));
             return new PixelFormat((byte)channels.Sum(t => t), space, isPremutilplied, channelOrder, channels, isFloat);
         }
     }
