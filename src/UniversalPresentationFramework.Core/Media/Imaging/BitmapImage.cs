@@ -395,6 +395,16 @@ namespace Wodsoft.UI.Media.Imaging
 
         public override bool IsDownloading => _isDownloading;
 
+        public override PixelFormat Format
+        {
+            get
+            {
+                CheckState();
+                EnsureCreation();
+                return _context!.PixelFormat;
+            }
+        }
+
         #endregion
     }
 }

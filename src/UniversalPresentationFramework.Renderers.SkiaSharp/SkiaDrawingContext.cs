@@ -116,5 +116,27 @@ namespace Wodsoft.UI.Renderers
                     break;
             }
         }
+
+        public override void PushClip(Geometry clipGeometry)
+        {
+            _canvas.Save();
+            if (clipGeometry is RectangleGeometry rectangle)
+            {
+                var rect = new SKRect(rectangle.Rect.X, rectangle.Rect.Y, rectangle.Rect.Right, rectangle.Rect.Bottom);
+                if (rectangle.RadiusX == 0 && rectangle.RadiusY == 0)
+                    _canvas.ClipRect(rect);
+                else
+                    _canvas.ClipRoundRect(new SKRoundRect(rect, rectangle.RadiusX, rectangle.RadiusY));
+            }
+            else
+            {
+                _canvas.ClipPath()
+            }
+        }
+
+        public override void Pop()
+        {
+            _canvas.Restore();
+        }
     }
 }

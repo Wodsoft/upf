@@ -63,7 +63,8 @@ namespace Wodsoft.UI.Renderers
             canvas.Clear(new SKColor(255, 255, 255, 0));
             canvas.ResetMatrix();
             canvas.Scale(dpi.DpiScaleX, dpi.DpiScaleY);
-            RenderCore(visual);
+            SkiaRenderContext renderContext = new SkiaRenderContext(_surface!);
+            RenderCore(visual, renderContext);
             if (Debugger.IsAttached && IsShowFPS)
             {
                 var fps = (int)MathF.Round(1000f / _stopwatch.ElapsedMilliseconds);
@@ -76,17 +77,19 @@ namespace Wodsoft.UI.Renderers
             _stopwatch.Restart();
         }
 
-        private void RenderCore(Visual visual)
+        private void RenderCore(Visual visual, SkiaRenderContext renderContext)
         {
-            var currentMatrix = _surface!.Canvas.TotalMatrix;
-            SkiaRenderContext renderContext = new SkiaRenderContext(_surface!);
+            var canvas = _surface!.Canvas!;
+            canvas.Save();
+            var saveCount = canvas.SaveCount;
+            canvas.Translate(visual.VisualOffset.X, visual.VisualOffset.Y);
             visual.RenderContext(renderContext);
+            canvas.RestoreToCount(saveCount);
             int childrenCount = VisualTreeHelper.GetChildrenCount(visual);
             for (int i = 0; i < childrenCount; i++)
             {
-                RenderCore(VisualTreeHelper.GetVisualChild(visual, i));
+                RenderCore(VisualTreeHelper.GetVisualChild(visual, i), renderContext);
             }
-            _surface!.Canvas.SetMatrix(currentMatrix);
         }
 
         protected virtual void BeforeRender()

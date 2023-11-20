@@ -11,6 +11,28 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererProvider : IRendererProvider
     {
+        public IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette palette)
+        {
+            SKImageInfo info = new SKImageInfo();
+            info.Width = pixelWidth;
+            info.Height = pixelHeight;
+            info.ColorType = SkiaHelper.GetColorType(pixelFormat);
+            info.AlphaType = pixelFormat.IsPremultiplied ? SKAlphaType.Premul : SKAlphaType.Opaque;
+            switch (pixelFormat.ColorSpace)
+            {
+                case PixelFormatColorSpace.IsSRGB:
+                case PixelFormatColorSpace.IsScRGB:
+                    info.ColorSpace = pixelFormat.ColorSpace == PixelFormatColorSpace.IsSRGB ? SKColorSpace.CreateSrgb() : SKColorSpace.CreateSrgbLinear();
+                    break;
+            }
+            return new SkiaBitmapContext(new SKBitmap(info));
+        }
+
+        public IBitmapContext CreateBitmapContext(IImageContext context)
+        {
+            throw new NotImplementedException();
+        }
+
         public VisualDrawingContext CreateDrawingContext(Visual visual)
         {
             return new SkiaDrawingContext(0, 0);

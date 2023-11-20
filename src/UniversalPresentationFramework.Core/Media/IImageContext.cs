@@ -11,5 +11,7 @@ namespace Wodsoft.UI.Media
         int Width { get; }
 
         int Height { get; }
+
+        PixelFormat PixelFormat { get; }
     }
 }

@@ -12,11 +12,13 @@ namespace Wodsoft.UI.Renderers
     public class SkiaImageContext : IImageContext
     {
         private readonly SKImage _image;
+        private readonly PixelFormat _pixelFormat;
 
         public SkiaImageContext(SKImage image, Rotation rotation)
         {
             _image = image ?? throw new ArgumentNullException(nameof(image));
             Rotation = rotation;
+            _pixelFormat = SkiaHelper.GetPixelFormat(image.ColorType, image.AlphaType, image.ColorSpace);
         }
 
         public SKImage Image => _image;
@@ -26,5 +28,7 @@ namespace Wodsoft.UI.Renderers
         public int Height => _image.Height;
 
         public Rotation Rotation { get; }
+
+        public PixelFormat PixelFormat { get; private set; }
     }
 }

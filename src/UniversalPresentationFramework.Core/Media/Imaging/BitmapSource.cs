@@ -20,6 +20,8 @@ namespace Wodsoft.UI.Media.Imaging
 
         protected abstract bool DelayCreation { get; }
 
+        public abstract PixelFormat Format { get; }
+
         public event EventHandler? DownloadCompleted;
 
         public event EventHandler<ExceptionEventArgs>? DecodeFailed;
