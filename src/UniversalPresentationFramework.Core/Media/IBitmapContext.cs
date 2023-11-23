@@ -8,6 +8,10 @@ namespace Wodsoft.UI.Media
 {
     public interface IBitmapContext : IImageContext
     {
+        IntPtr BackBuffer { get; }
+
+        int BackBufferStride { get; }
+
         void Lock();
 
         void Unlock();

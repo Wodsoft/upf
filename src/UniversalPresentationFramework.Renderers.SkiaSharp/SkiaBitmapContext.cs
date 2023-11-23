@@ -28,7 +28,11 @@ namespace Wodsoft.UI.Renderers
 
         public int Height => _bitmap.Height;
 
-        public PixelFormat PixelFormat => throw new NotImplementedException();
+        public PixelFormat PixelFormat => _pixelFormat;
+
+        public nint BackBuffer => _bitmap.GetPixels();
+
+        public int BackBufferStride => _bitmap.RowBytes;
 
         public void Lock()
         {

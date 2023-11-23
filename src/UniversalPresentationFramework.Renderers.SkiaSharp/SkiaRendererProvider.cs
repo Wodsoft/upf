@@ -32,7 +32,12 @@ namespace Wodsoft.UI.Renderers
 
         public IBitmapContext CreateBitmapContext(IImageContext context)
         {
-            throw new NotImplementedException();
+            if (context is SkiaImageContext skiaImageContext)
+                return new SkiaBitmapContext(SKBitmap.FromImage(skiaImageContext.Image));
+            else if (context is SkiaBitmapContext skiaBitmapContext)
+                return new SkiaBitmapContext(skiaBitmapContext.Bitmap.Copy());
+            else
+                throw new NotSupportedException("Only support skia image context.");
         }
 
         public VisualDrawingContext CreateDrawingContext(Visual visual)

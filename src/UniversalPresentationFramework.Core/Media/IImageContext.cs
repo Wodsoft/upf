@@ -13,5 +13,7 @@ namespace Wodsoft.UI.Media
         int Height { get; }
 
         PixelFormat PixelFormat { get; }
+
+        void CopyPixels(Int32Rect sourceRect, IntPtr buffer, int bufferSize, int stride);
     }
 }
