@@ -309,14 +309,14 @@ namespace Wodsoft.UI.Media
         //    Rect rectangle,
         //    AnimationClock rectangleAnimations);
 
-        ///// <summary>
-        /////     PushClip - 
-        /////     Push a clip region, which will apply to all drawing primitives until the 
-        /////     corresponding Pop call.
-        ///// </summary>
-        ///// <param name="clipGeometry"> The Geometry to which we will clip. </param>
-        //public abstract void PushClip(
-        //    Geometry clipGeometry);
+        /// <summary>
+        ///     PushClip - 
+        ///     Push a clip region, which will apply to all drawing primitives until the 
+        ///     corresponding Pop call.
+        /// </summary>
+        /// <param name="clipGeometry"> The Geometry to which we will clip. </param>
+        public abstract void PushClip(
+            Geometry clipGeometry);
 
         ///// <summary>
         /////     PushOpacityMask - 
@@ -391,10 +391,9 @@ namespace Wodsoft.UI.Media
         //    float leadingCoordinate,
         //    float offsetToDrivenCoordinate);
 
-        ///// <summary>
-        ///// Pop
-        ///// </summary>
-        //public abstract void Pop(
-        //    );
+        /// <summary>
+        /// Pop
+        /// </summary>
+        public abstract void Pop();
     }
 }

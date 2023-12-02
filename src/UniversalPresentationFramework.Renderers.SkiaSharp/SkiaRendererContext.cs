@@ -48,6 +48,8 @@ namespace Wodsoft.UI.Renderers
             var dpi = visual.GetDpi();
             int width = (int)(size.Width * dpi.DpiScaleX);
             int height = (int)(size.Height * dpi.DpiScaleY);
+            if (width == 0 || height == 0)
+                return;
             if (_surface == null || ShouldCreateNewSurface(width, height))
             {
                 if (_surface != null)
@@ -93,7 +95,7 @@ namespace Wodsoft.UI.Renderers
             int childrenCount = VisualTreeHelper.GetChildrenCount(visual);
             for (int i = 0; i < childrenCount; i++)
             {
-                RenderCore(VisualTreeHelper.GetVisualChild(visual, i), renderContext);
+                RenderCore(VisualTreeHelper.GetChild(visual, i), renderContext);
             }
         }
 

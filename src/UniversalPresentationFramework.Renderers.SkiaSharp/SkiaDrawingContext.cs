@@ -88,6 +88,7 @@ namespace Wodsoft.UI.Renderers
                 return;
             if (imageSource.Context is not SkiaImageContext context)
                 throw new NotSupportedException("Only support skia image context.");
+            CheckClosed();
             switch (context.Rotation)
             {
                 case Media.Imaging.Rotation.Rotate0:
@@ -119,6 +120,7 @@ namespace Wodsoft.UI.Renderers
 
         public override void PushClip(Geometry clipGeometry)
         {
+            CheckClosed();
             _canvas.Save();
             if (clipGeometry is RectangleGeometry rectangle)
             {
