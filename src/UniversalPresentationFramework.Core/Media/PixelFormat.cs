@@ -101,19 +101,19 @@ namespace Wodsoft.UI.Media
                     return PixelFormatFlags.BitsPerPixel32 | PixelFormatFlags.IsSRGB | PixelFormatFlags.ChannelOrderBGR;
                 case PixelFormatEnum.Bgra32:
                     channelBits = [8, 8, 8, 8];
-                    return PixelFormatFlags.BitsPerPixel32 | PixelFormatFlags.IsSRGB | PixelFormatFlags.ChannelOrderABGR;
+                    return PixelFormatFlags.BitsPerPixel32 | PixelFormatFlags.IsSRGB | PixelFormatFlags.ChannelOrderBGRA;
                 case PixelFormatEnum.Pbgra32:
                     channelBits = [8, 8, 8, 8];
-                    return PixelFormatFlags.BitsPerPixel32 | PixelFormatFlags.IsSRGB | PixelFormatFlags.Premultiplied | PixelFormatFlags.ChannelOrderABGR;
+                    return PixelFormatFlags.BitsPerPixel32 | PixelFormatFlags.IsSRGB | PixelFormatFlags.Premultiplied | PixelFormatFlags.ChannelOrderBGRA;
                 case PixelFormatEnum.Rgb48:
                     channelBits = [16, 16, 16];
                     return PixelFormatFlags.BitsPerPixel48 | PixelFormatFlags.IsSRGB | PixelFormatFlags.ChannelOrderRGB;
                 case PixelFormatEnum.Rgba64:
                     channelBits = [16, 16, 16, 16];
-                    return PixelFormatFlags.BitsPerPixel64 | PixelFormatFlags.IsSRGB | PixelFormatFlags.ChannelOrderARGB;
+                    return PixelFormatFlags.BitsPerPixel64 | PixelFormatFlags.IsSRGB | PixelFormatFlags.ChannelOrderRGBA;
                 case PixelFormatEnum.Prgba64:
                     channelBits = [16, 16, 16, 16];
-                    return PixelFormatFlags.BitsPerPixel64 | PixelFormatFlags.IsSRGB | PixelFormatFlags.Premultiplied | PixelFormatFlags.ChannelOrderARGB;
+                    return PixelFormatFlags.BitsPerPixel64 | PixelFormatFlags.IsSRGB | PixelFormatFlags.Premultiplied | PixelFormatFlags.ChannelOrderRGBA;
                 case PixelFormatEnum.Gray16:
                     channelBits = [16];
                     return PixelFormatFlags.BitsPerPixel16 | PixelFormatFlags.IsSRGB | PixelFormatFlags.IsGray;
@@ -125,10 +125,10 @@ namespace Wodsoft.UI.Media
                     return PixelFormatFlags.BitsPerPixel128 | PixelFormatFlags.IsScRGB | PixelFormatFlags.ChannelOrderRGB;
                 case PixelFormatEnum.Rgba128Float:
                     channelBits = [32, 32, 32, 32];
-                    return PixelFormatFlags.BitsPerPixel128 | PixelFormatFlags.IsScRGB | PixelFormatFlags.ChannelOrderARGB;
+                    return PixelFormatFlags.BitsPerPixel128 | PixelFormatFlags.IsScRGB | PixelFormatFlags.ChannelOrderRGBA;
                 case PixelFormatEnum.Prgba128Float:
                     channelBits = [32, 32, 32, 32];
-                    return PixelFormatFlags.BitsPerPixel128 | PixelFormatFlags.IsScRGB | PixelFormatFlags.Premultiplied | PixelFormatFlags.ChannelOrderARGB;
+                    return PixelFormatFlags.BitsPerPixel128 | PixelFormatFlags.IsScRGB | PixelFormatFlags.Premultiplied | PixelFormatFlags.ChannelOrderRGBA;
                 case PixelFormatEnum.Cmyk32:
                     channelBits = [8, 8, 8, 8];
                     return PixelFormatFlags.BitsPerPixel32 | PixelFormatFlags.IsCMYK;
