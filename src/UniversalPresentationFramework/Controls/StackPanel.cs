@@ -48,15 +48,15 @@ namespace Wodsoft.UI.Controls
                 var childSize = child.DesiredSize;
                 if (isHorizontal)
                 {
-                    desiredSize.Width += elementSize.Width;
-                    if (elementSize.Height > desiredSize.Height)
-                        desiredSize.Height = elementSize.Height;
+                    desiredSize.Width += childSize.Width;
+                    if (childSize.Height > desiredSize.Height)
+                        desiredSize.Height = childSize.Height;
                 }
                 else
                 {
-                    desiredSize.Height += elementSize.Height;
-                    if (elementSize.Width > desiredSize.Width)
-                        desiredSize.Width = elementSize.Width;
+                    desiredSize.Height += childSize.Height;
+                    if (childSize.Width > desiredSize.Width)
+                        desiredSize.Width = childSize.Width;
                 }
             }
             return desiredSize;

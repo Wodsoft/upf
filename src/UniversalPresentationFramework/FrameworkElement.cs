@@ -9,8 +9,28 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
 {
-    public class FrameworkElement : UIElement
+    public class FrameworkElement : UIElement, ISupportInitialize
     {
+        #region Initialize
+
+        public bool IsInitPending { get; private set; }
+
+        public virtual void BeginInit()
+        {
+            if (IsInitPending)
+                throw new InvalidOperationException("Element is initializing.");
+            IsInitPending = true;
+        }
+
+        public virtual void EndInit()
+        {
+            if (!IsInitPending)
+                throw new InvalidOperationException("Element is not initializing.");
+            IsInitPending = false;
+        }
+
+        #endregion
+
         #region Logical
 
         public FrameworkElement? Parent { get; private set; }
@@ -429,8 +449,6 @@ namespace Wodsoft.UI
                 }
             }
         }
-
-
 
         #endregion
     }

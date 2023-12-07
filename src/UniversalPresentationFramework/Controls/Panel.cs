@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls
 {
+    [ContentProperty("Children")]
     public class Panel : FrameworkElement
     {
         private UIElementCollection? _children;
@@ -23,6 +26,15 @@ namespace Wodsoft.UI.Controls
                 }
                 return _children;
             }
+        }
+
+        protected internal override int VisualChildrenCount => _children?.Count ?? 0;
+
+        protected internal override Visual GetVisualChild(int index)
+        {
+            if (_children == null)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            return _children[index]!;
         }
 
         public static readonly DependencyProperty IsItemsHostProperty =
