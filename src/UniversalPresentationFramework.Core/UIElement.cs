@@ -21,9 +21,12 @@ namespace Wodsoft.UI
             if (Visibility == Visibility.Collapsed)
                 return;
 
-            bool isCloseToPreviousMeasure = FloatUtil.AreClose(availableSize, _previousAvailableSize);
-            if (isCloseToPreviousMeasure)
-                return;
+            if (IsMeasureValid)
+            {
+                bool isCloseToPreviousMeasure = FloatUtil.AreClose(availableSize, _previousAvailableSize);
+                if (isCloseToPreviousMeasure)
+                    return;
+            }
 
             _isMeasuring = true;
             var previousSize = _desiredSize;
@@ -93,7 +96,7 @@ namespace Wodsoft.UI
                 _previousFinalRect = finalRect;
                 IsArrangeValid = true;
 
-                if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize)|| !_isRenderValid) )
+                if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize) || !_isRenderValid))
                 {
                     if (FrameworkProvider.RendererProvider != null)
                     {
