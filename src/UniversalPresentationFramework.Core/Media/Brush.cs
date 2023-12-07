@@ -1,17 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Media
 {
-    public abstract class Brush : DependencyObject
+    [TypeConverter(typeof(BrushConverter))]
+    public abstract class Brush : Freezable
     {
         static Brush()
         {
 
         }
+
+        #region Methods
+
+        internal static Brush? Parse(string value, ITypeDescriptorContext? context)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+            Brush brush = Parsers.ParseBrush(value, CultureInfo.InvariantCulture, context);
+            if (brush.CanFreeze)
+                brush.Freeze();
+            return brush;
+        }
+
+
+        #endregion
 
         #region Properties
 
