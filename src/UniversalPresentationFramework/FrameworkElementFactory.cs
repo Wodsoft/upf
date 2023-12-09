@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml;
+using System.Xaml.Markup;
 
 namespace Wodsoft.UI
 {
@@ -18,7 +19,7 @@ namespace Wodsoft.UI
 
         public Type Type { get => _type; set => _type = value; }
 
-        public FrameworkElement Create(out NameScope nameScope)
+        public FrameworkElement Create(out INameScope nameScope)
         {
             throw new NotImplementedException();
         }

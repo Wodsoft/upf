@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml;
+using System.Xaml.Markup;
 
 namespace Wodsoft.UI.Controls
 {
@@ -14,7 +15,7 @@ namespace Wodsoft.UI.Controls
         private ControlTemplate? _template;
         private bool _templateGenerated;
         private FrameworkElement? _templatedContent;
-        private NameScope? _templateNameScope;
+        private INameScope? _templateNameScope;
         public override bool ApplyTemplate()
         {
             OnPreApplyTemplate();

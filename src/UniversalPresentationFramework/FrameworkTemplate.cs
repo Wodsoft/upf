@@ -53,7 +53,7 @@ namespace Wodsoft.UI
             return LoadContent(out _);
         }
 
-        internal FrameworkElement? LoadContent(out NameScope? nameScope)
+        internal FrameworkElement? LoadContent(out INameScope? nameScope)
         {
             if (_visualTree != null)
             {

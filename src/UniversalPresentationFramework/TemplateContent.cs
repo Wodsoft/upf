@@ -48,18 +48,18 @@ namespace Wodsoft.UI
             _xamlReader = null;
         }
 
-        public FrameworkElement Create(out NameScope nameScope)
+        public FrameworkElement Create(out INameScope nameScope)
         {
             if (_xamlNodeList == null)
                 throw new InvalidOperationException("Xaml content not parse yet.");
-            var names = new NameScope();
-            nameScope = names;
+            //var names = new NameScope();
+            //nameScope = names;
             var settings = _factory.GetParentSettings();
-            settings.AfterPropertiesHandler = (_, e) =>
-            {
-                if (e.Instance is FrameworkElement element && element.Name != null)
-                    names.RegisterName(element.Name, element);
-            };
+            //settings.AfterPropertiesHandler = (_, e) =>
+            //{
+            //    if (e.Instance is FrameworkElement element && element.Name != null)
+            //        names.RegisterName(element.Name, element);
+            //};
             var reader = _xamlNodeList.GetReader();
             var writer = _factory.GetXamlObjectWriter(settings);
 
@@ -91,7 +91,10 @@ namespace Wodsoft.UI
                 //    //    break;
                 //}
             }
-            return (FrameworkElement)writer.Result;
+            var element = (FrameworkElement)writer.Result;
+            NameScope.SetNameScope(element, writer.RootNameScope);
+            nameScope = writer.RootNameScope;
+            return element;
         }
     }
 }

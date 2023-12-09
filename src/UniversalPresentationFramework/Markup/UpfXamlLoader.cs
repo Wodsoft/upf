@@ -51,6 +51,8 @@ namespace Wodsoft.UI.Markup
                 //stack, styleConnector
                 );
             xamlWriter.Close();
+            if (xamlWriter.Result is DependencyObject d)
+                NameScope.SetNameScope(d, xamlWriter.RootNameScope);
             return xamlWriter.Result;
             //}
             //catch (Exception e)

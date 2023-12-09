@@ -12,6 +12,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
 {
+    [RuntimeNamePropertyAttribute("Name")]
     public class FrameworkElement : UIElement, ISupportInitialize
     {
         #region Initialize
