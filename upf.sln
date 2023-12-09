@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Abstractions", "src\UniversalPresentationFramework.Abstractions\UniversalPresentationFramework.Abstractions.csproj", "{2975A43F-367C-460D-A7E1-D0077DC894DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalPersentationFramework.FrameworkTest", "test\UniversalPersentationFramework.FrameworkTest\UniversalPersentationFramework.FrameworkTest.csproj", "{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2975A43F-367C-460D-A7E1-D0077DC894DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +107,7 @@ Global
 		{47E5DEC5-B7B5-4BB7-B901-F90577F623F0} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{FDD2940C-8F38-4BB4-91D6-465144BF7745} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{2975A43F-367C-460D-A7E1-D0077DC894DB} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
+		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F56DE84-DAC8-4DF0-92EF-B337FDBDCE69}

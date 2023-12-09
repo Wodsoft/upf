@@ -31,33 +31,35 @@ using System.Xaml.Schema;
 
 namespace System.Xaml
 {
-	class NameScope : INameScope
-	{
-		Dictionary<string,object> table = new Dictionary<string,object> ();
-		// It is an external read-only namescope.
-		INameScope external;
+    internal class NameScope : INameScope
+    {
+        private readonly Dictionary<string, object> _table = new Dictionary<string, object>();
+        // It is an external read-only namescope.
+        private readonly INameScope _external;
 
-		public NameScope (INameScope external)
-		{
-			this.external = external;
-		}
+        public NameScope() { }
 
-		public object FindName (string name)
-		{
-			object obj = external != null ? external.FindName (name) : null;
-			if (obj != null)
-				return obj;
-			return table.TryGetValue (name, out obj) ? obj : null;
-		}
+        public NameScope(INameScope external)
+        {
+            this._external = external;
+        }
 
-		public void RegisterName (string name, object scopedElement)
-		{
-			table.Add (name, scopedElement);
-		}
+        public object FindName(string name)
+        {
+            object obj = _external != null ? _external.FindName(name) : null;
+            if (obj != null)
+                return obj;
+            return _table.TryGetValue(name, out obj) ? obj : null;
+        }
 
-		public void UnregisterName (string name)
-		{
-			table.Remove (name);
-		}
-	}
+        public void RegisterName(string name, object scopedElement)
+        {
+            _table.Add(name, scopedElement);
+        }
+
+        public void UnregisterName(string name)
+        {
+            _table.Remove(name);
+        }
+    }
 }

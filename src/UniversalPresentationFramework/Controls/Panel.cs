@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
+using Wodsoft.UI.Markup;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls
 {
     [ContentProperty("Children")]
-    public class Panel : FrameworkElement
+    public class Panel : FrameworkElement, IAddChild
     {
         private UIElementCollection? _children;
 
@@ -35,6 +36,19 @@ namespace Wodsoft.UI.Controls
             if (_children == null)
                 throw new ArgumentOutOfRangeException(nameof(index));
             return _children[index]!;
+        }
+
+        void IAddChild.AddChild(object value)
+        {
+            if (value is UIElement element)
+                Children.Add(element);
+            else
+                throw new NotSupportedException("Panel can add UIElement only.");
+        }
+
+        void IAddChild.AddText(string text)
+        {
+            throw new NotSupportedException("Panel doesn't support add text.");
         }
 
         public static readonly DependencyProperty IsItemsHostProperty =

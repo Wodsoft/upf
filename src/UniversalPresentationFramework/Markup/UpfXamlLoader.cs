@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime;
 using System.Text;
@@ -83,6 +84,16 @@ namespace Wodsoft.UI.Markup
                 }
                 switch (xamlReader.NodeType)
                 {
+                    case XamlNodeType.StartObject:
+                        {
+                            xamlWriter.WriteNode(xamlReader);
+                            break;
+                        }
+                    case XamlNodeType.EndObject:
+                        {
+                            xamlWriter.WriteNode(xamlReader);
+                            break;
+                        }
                     //case System.Xaml.XamlNodeType.NamespaceDeclaration:
                     //    xamlWriter.WriteNode(xamlReader);
                     //    if (stack.Depth == 0 || stack.CurrentFrame.Type != null)

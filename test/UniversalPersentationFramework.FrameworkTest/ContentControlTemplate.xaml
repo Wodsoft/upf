@@ -1,0 +1,7 @@
+﻿<ContentControl xmlns="http://schemas.wodsoft.com/upf/presentation">
+    <ContentControl.Template>
+        <ControlTemplate>
+            <Rectangle Name="test"/>
+        </ControlTemplate>
+    </ContentControl.Template>
+</ContentControl>

@@ -144,7 +144,6 @@ namespace System.Xaml
 			var assemblies =
 				GetAppDomainAssemblies()
 				?? GetReferencedAssemblies()
-				?? GetUwpAssemblies()
 				?? Enumerable.Empty<Assembly>();
 
 			cachedAssembliesInScope = assemblies.Distinct().ToList();
@@ -215,55 +214,6 @@ namespace System.Xaml
 		static IEnumerable<Assembly> GetStandardAssemblies()
 		{
 			yield return typeof(int).GetTypeInfo().Assembly; // System.Private.CoreLib
-		}
-
-		static IEnumerable<Assembly> GetUwpAssemblies()
-		{
-			try
-			{
-				// if we're running in UWP, get all assemblies in installed locationF
-				// an ugly hack, but there's no other option until maybe netstandard 2.0.
-				var packageType = Type.GetType("Windows.ApplicationModel.Package,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
-				if (packageType == null)
-					return null;
-				var current = packageType.GetRuntimeProperty("Current")?.GetValue(null);
-				if (current == null)
-					return null;
-				var installedLocation = current.GetType().GetRuntimeProperty("InstalledLocation")?.GetValue(current);
-				if (installedLocation == null)
-					return null;
-				var getFilesAsync = installedLocation.GetType().GetRuntimeMethod("GetFilesAsync", new Type[0])?.Invoke(installedLocation, null);
-				if (getFilesAsync == null)
-					return null;
-
-				var awaiterExtensions = Type.GetType("System.WindowsRuntimeSystemExtensions,System.Runtime.WindowsRuntime");
-				var interfaceType = Type.GetType("Windows.Foundation.IAsyncOperation`1,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
-				var storageType = Type.GetType("Windows.Storage.StorageFile,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
-				var resultType = typeof(IReadOnlyList<>).MakeGenericType(storageType);
-				var interfaceResultType = interfaceType?.MakeGenericType(resultType);
-				var getAwaiterMethod = awaiterExtensions.GetRuntimeMethods().First(m => m.Name == "GetAwaiter" && m.IsGenericMethod && m.ReturnType.GetTypeInfo().IsGenericType);
-				var awaiter = getAwaiterMethod.MakeGenericMethod(resultType).Invoke(null, new object[] { getFilesAsync });
-				var results = awaiter?.GetType().GetRuntimeMethod("GetResult", new Type[0])?.Invoke(awaiter, null);
-				var nameProperty = storageType.GetRuntimeProperty("Name");
-
-				var assemblies = new List<Assembly>();
-				foreach (var result in (results as IEnumerable))
-				{
-					var name = (string)nameProperty.GetValue(result);
-					if (string.Equals(Path.GetExtension(name), ".dll", StringComparison.OrdinalIgnoreCase)
-						|| string.Equals(Path.GetExtension(name), ".exe", StringComparison.OrdinalIgnoreCase))
-					{
-						try
-						{
-							assemblies.Add(Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(name))));
-						}
-						catch { }
-					}
-				}
-				return GetStandardAssemblies().Concat(assemblies);
-			}
-			catch { }
-			return null;
 		}
 
 		internal string GetXamlNamespace(string clrNamespace)

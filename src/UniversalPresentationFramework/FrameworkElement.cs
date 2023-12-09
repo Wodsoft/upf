@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -293,6 +294,8 @@ namespace Wodsoft.UI
 
         protected sealed override Size MeasureCore(Size availableSize)
         {
+            ApplyTemplate();
+
             Thickness margin = Margin;
             float marginWidth = margin.Left + margin.Right;
             float marginHeight = margin.Top + margin.Bottom;
@@ -450,6 +453,48 @@ namespace Wodsoft.UI
             }
         }
 
+        #endregion
+
+        #region Template
+
+        public virtual bool ApplyTemplate()
+        {
+            return false;
+        }
+
+        public static readonly DependencyProperty NameProperty =
+            DependencyProperty.Register(
+                        "Name",
+                        typeof(string),
+                        typeof(FrameworkElement),
+                        new FrameworkPropertyMetadata(
+                            string.Empty,                           // defaultValue
+                            FrameworkPropertyMetadataOptions.None,  // flags
+                            null,                                   // propertyChangedCallback
+                            null,                                   // coerceValueCallback
+                            true),                                  // isAnimationProhibited
+                        new ValidateValueCallback(NameValidationCallback));
+        public string? Name { get { return (string?)GetValue(NameProperty); } set { SetValue(NameProperty, value); } }
+        private static bool NameValidationCallback(object? candidateName)
+        {
+            string? name = candidateName as string;
+            if (name != null)
+            {
+                // Non-null string, ask the XAML validation code for blessing.
+                return NameScope.IsValidIdentifierName(name);
+            }
+            else if (candidateName == null)
+            {
+                // Null string is allowed
+                return true;
+            }
+            else
+            {
+                // candiateName is not a string object.
+                return false;
+            }
+        }
+        
         #endregion
     }
 }
