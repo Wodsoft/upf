@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +28,8 @@ namespace Wodsoft.UI.Controls
                 return _children;
             }
         }
+
+        protected override IEnumerable? LogicalChildren => _children;
 
         protected internal override int VisualChildrenCount => _children?.Count ?? 0;
 

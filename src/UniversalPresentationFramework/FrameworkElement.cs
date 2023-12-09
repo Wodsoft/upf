@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
+using Wodsoft.UI.Controls;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
@@ -60,6 +62,8 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("This element is not the parent of child.");
             child.Parent = null;
         }
+
+        protected virtual IEnumerable? LogicalChildren => null;
 
         #endregion
 
@@ -462,6 +466,10 @@ namespace Wodsoft.UI
             return false;
         }
 
+        #endregion
+
+        #region NameScope
+
         public static readonly DependencyProperty NameProperty =
             DependencyProperty.Register(
                         "Name",
@@ -474,7 +482,6 @@ namespace Wodsoft.UI
                             null,                                   // coerceValueCallback
                             true),                                  // isAnimationProhibited
                         new ValidateValueCallback(NameValidationCallback));
-        public string? Name { get { return (string?)GetValue(NameProperty); } set { SetValue(NameProperty, value); } }
         private static bool NameValidationCallback(object? candidateName)
         {
             string? name = candidateName as string;
@@ -494,7 +501,59 @@ namespace Wodsoft.UI
                 return false;
             }
         }
-        
+        public string? Name { get { return (string?)GetValue(NameProperty); } set { SetValue(NameProperty, value); } }
+
+        /// <summary>
+        /// Registers the name - element combination from the
+        /// NameScope that the current element belongs to.
+        /// </summary>
+        /// <param name="name">Name of the element</param>
+        /// <param name="scopedElement">Element where name is defined</param>
+        public void RegisterName(string name, object scopedElement)
+        {
+            INameScope? nameScope = FindScope();
+            if (nameScope == null)
+                throw new InvalidOperationException("NameScope not found.");
+            nameScope.RegisterName(name, scopedElement);
+        }
+
+        /// <summary>
+        /// Unregisters the name - element combination from the
+        /// NameScope that the current element belongs to.
+        /// </summary>
+        /// <param name="name">Name of the element</param>
+        public void UnregisterName(string name)
+        {
+            INameScope? nameScope = FindScope();
+            if (nameScope == null)
+                throw new InvalidOperationException("NameScope not found.");
+            nameScope.UnregisterName(name);
+        }
+
+        /// <summary>
+        /// Find the object with given name in the
+        /// NameScope that the current element belongs to.
+        /// </summary>
+        /// <param name="name">string name to index</param>
+        /// <returns>context if found, else null</returns>
+        public object? FindName(string name)
+        {
+            return FindScope()?.FindName(name);
+        }
+
+        private INameScope? FindScope()
+        {
+            FrameworkElement? element = this;
+            while (element != null)
+            {
+                INameScope? nameScope = NameScope.NameScopeFromObject(element);
+                if (nameScope != null)
+                    return nameScope;
+                element = element.Parent;
+            }
+            return null;
+        }
+
         #endregion
     }
 }
