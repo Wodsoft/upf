@@ -11,11 +11,11 @@ using Wodsoft.UI.Controls;
 namespace Wodsoft.UI
 {
     [ContentProperty("Template")]
-    public abstract class FrameworkTemplate : INameScope, IQueryAmbient, IHaveResources
+    public abstract class FrameworkTemplate : Sealable, INameScope, IQueryAmbient, IHaveResources
     {
         private readonly NameScope _nameScope = new NameScope();
         private ResourceDictionary? _resources;
-        private bool _isSealed, _hasTemplate;
+        private bool _hasTemplate;
         private TemplateContent? _template;
         private FrameworkElementFactory? _visualTree;
 
@@ -36,12 +36,6 @@ namespace Wodsoft.UI
             }
 
             return true;
-        }
-
-        protected void CheckSealed()
-        {
-            if (_isSealed)
-                throw new InvalidOperationException("Template can not change after sealed.");
         }
 
         /// <summary>
@@ -73,8 +67,6 @@ namespace Wodsoft.UI
         #endregion
 
         #region Properties
-
-        public bool IsSealed => _isSealed;
 
         [Ambient]
         public ResourceDictionary Resources
