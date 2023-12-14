@@ -9,9 +9,15 @@ namespace Wodsoft.UI.Markup
 {
     internal class UpfXamlSchemaContext : XamlSchemaContext
     {
-        //public override XamlType GetXamlType(Type type)
-        //{
-        //    return base.GetXamlType(type);
-        //}
+        private readonly Dictionary<Type, UpfXamlType> _xamlTypes = new Dictionary<Type, UpfXamlType>();
+
+        public override XamlType GetXamlType(Type type)
+        {
+            if (_xamlTypes.TryGetValue(type, out var xamlType))
+                return xamlType;
+            xamlType = new UpfXamlType(type, this);
+            _xamlTypes.Add(type, xamlType);
+            return xamlType;
+        }
     }
 }

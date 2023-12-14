@@ -18,6 +18,14 @@ namespace Wodsoft.UI.Markup
             XamlObjectWriterSettings settings = new XamlObjectWriterSettings();
             settings.IgnoreCanConvert = true;
             settings.PreferUnconvertedDictionaryKeys = true;
+            settings.XamlSetValueHandler = (sender, e) =>
+            {
+                if (sender is DependencyObject d && e.Member is UpfXamlMember upfXamlMember)
+                {
+                    d.SetValue(upfXamlMember.DependencyProperty, e.Value);
+                    e.Handled = true;
+                }
+            };
             object result = Load(xamlReader, null, skipJournaledProperties, null, settings);
             //EnsureXmlNamespaceMaps(result, xamlReader.SchemaContext);
             return result;
