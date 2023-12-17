@@ -55,11 +55,6 @@ namespace Wodsoft.UI
             //var names = new NameScope();
             //nameScope = names;
             var settings = _factory.GetParentSettings();
-            //settings.AfterPropertiesHandler = (_, e) =>
-            //{
-            //    if (e.Instance is FrameworkElement element && element.Name != null)
-            //        names.RegisterName(element.Name, element);
-            //};
             var reader = _xamlNodeList.GetReader();
             var writer = _factory.GetXamlObjectWriter(settings);
 

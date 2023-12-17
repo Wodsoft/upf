@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xaml;
 using System.Xaml.Markup;
+using System.Xaml.Schema;
 
 namespace Wodsoft.UI.Markup
 {
-    public class UpfXamlMember : XamlMember, IProvideValueTarget
+    internal class UpfXamlMember : XamlMember, IProvideValueTarget
     {
         public UpfXamlMember(XamlType xamlType, DependencyProperty dp, bool isAttachable) : base(dp.Name, xamlType, isAttachable)
         {
@@ -29,6 +30,14 @@ namespace Wodsoft.UI.Markup
         protected override bool LookupIsReadOnly()
         {
             return DependencyProperty.ReadOnly;
+        }
+
+        private XamlMemberInvoker? _invoker;
+        protected override XamlMemberInvoker LookupInvoker()
+        {
+            if (_invoker == null)
+                _invoker = new UpfXamlMemberInvoker(this);
+            return _invoker;
         }
     }
 }
