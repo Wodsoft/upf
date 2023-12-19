@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Media
 {
-    public abstract class Visual : DependencyObject
+    public abstract class Visual : LogicalObject
     {
         #region Tree
 
