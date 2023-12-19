@@ -13,43 +13,10 @@ namespace Wodsoft.UI.Controls
         #region Template
 
         private ControlTemplate? _template;
-        private bool _templateGenerated;
-        private FrameworkElement? _templatedContent;
-        private INameScope? _templateNameScope;
-        public override bool ApplyTemplate()
+
+        protected override FrameworkElement? LoadTemplate()
         {
-            OnPreApplyTemplate();
-
-            var result = false;
-
-            if (_template != null && !_templateGenerated)
-            {
-                if (_templatedContent != null)
-                {
-                    RemoveVisualChild(_templatedContent);
-                }
-                _templatedContent = _template.LoadContent(out _templateNameScope);
-                if (_templatedContent != null)
-                    AddVisualChild(_templatedContent);
-                OnApplyTemplate();
-            }
-
-            OnPostApplyTemplate();
-
-            return result;
-        }
-
-        protected virtual void OnPreApplyTemplate() { }
-
-        protected virtual void OnApplyTemplate() { }
-
-        protected virtual void OnPostApplyTemplate() { }
-
-        protected DependencyObject? GetTemplateChild(string childName)
-        {
-            if (_templateNameScope == null)
-                return null;
-            return _templateNameScope.FindName(childName) as DependencyObject;
+            return _template?.LoadContent();
         }
 
         #endregion
@@ -58,10 +25,10 @@ namespace Wodsoft.UI.Controls
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            if (_templatedContent == null)
+            if (TemplateChild == null)
                 return new Size(0.0f, 0.0f);
-            _templatedContent.Measure(availableSize);
-            return _templatedContent.DesiredSize;
+            TemplateChild.Measure(availableSize);
+            return TemplateChild.DesiredSize;
         }
 
         /// <summary>
@@ -71,9 +38,9 @@ namespace Wodsoft.UI.Controls
         /// <param name="arrangeBounds">The computed size.</param>
         protected override Size ArrangeOverride(Size finalSize)
         {
-            if (_templatedContent != null)
+            if (TemplateChild != null)
             {
-                _templatedContent.Arrange(new Rect(finalSize));
+                TemplateChild.Arrange(new Rect(finalSize));
             }
             return finalSize;
         }
@@ -82,7 +49,7 @@ namespace Wodsoft.UI.Controls
 
         #region Methods
 
-        public override void EndInit()
+        protected override void EndInit()
         {
             if (_template == null)
             {
@@ -113,7 +80,7 @@ namespace Wodsoft.UI.Controls
         {
             Control c = (Control)d;
             c._template = (ControlTemplate?)e.NewValue;
-            c._templateGenerated = false;
+            c.OnTemplateChanged();
             //StyleHelper.UpdateTemplateCache(c, (FrameworkTemplate)e.OldValue, (FrameworkTemplate)e.NewValue, TemplateProperty);
         }
 

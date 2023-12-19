@@ -29,7 +29,7 @@ namespace Wodsoft.UI.Controls
             }
         }
 
-        protected override IEnumerable? LogicalChildren => _children;
+        protected internal override IEnumerable<LogicalObject>? LogicalChildren => _children;
 
         protected internal override int VisualChildrenCount => _children?.Count ?? 0;
 

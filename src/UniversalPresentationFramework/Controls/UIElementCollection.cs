@@ -17,7 +17,7 @@ namespace Wodsoft.UI.Controls
     /// the collection from a different context than that of the owning Panel.
     /// </remarks>
     /// <seealso cref="System.Windows.Media.VisualCollection" />
-    public class UIElementCollection : IList
+    public class UIElementCollection : IList, IEnumerable<UIElement>
     {
         /// <summary>
         ///     The colleciton is the children collection of the visualParent. The logicalParent 
@@ -499,6 +499,11 @@ namespace Wodsoft.UI.Controls
             {
                 _logicalParent.RemoveLogicalChild(fe);
             }
+        }
+
+        IEnumerator<UIElement> IEnumerable<UIElement>.GetEnumerator()
+        {
+            return _visualChildren.Cast<UIElement>().GetEnumerator();
         }
 
         /// <summary>

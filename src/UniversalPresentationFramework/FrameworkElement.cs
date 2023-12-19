@@ -3,68 +3,63 @@ using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
 using Wodsoft.UI.Controls;
+using Wodsoft.UI.Data;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
 {
-    [RuntimeNamePropertyAttribute("Name")]
+    [RuntimeNameProperty("Name")]
     public class FrameworkElement : UIElement, ISupportInitialize
     {
         #region Initialize
 
         public bool IsInitPending { get; private set; }
 
-        public virtual void BeginInit()
+        void ISupportInitialize.BeginInit()
         {
             if (IsInitPending)
                 throw new InvalidOperationException("Element is initializing.");
             IsInitPending = true;
+            BeginInit();
         }
 
-        public virtual void EndInit()
+        void ISupportInitialize.EndInit()
         {
             if (!IsInitPending)
                 throw new InvalidOperationException("Element is not initializing.");
+            EndInit();
             IsInitPending = false;
+        }
+
+        protected virtual void BeginInit()
+        {
+        }
+
+        protected virtual void EndInit()
+        {
         }
 
         #endregion
 
         #region Logical
 
-        public FrameworkElement? Parent { get; private set; }
+        public LogicalObject? Parent => LogicalParent;
 
-        protected sealed override DependencyObject? GetInheritanceParent()
+        internal new void AddLogicalChild(LogicalObject child)
         {
-            return Parent;
+            base.AddLogicalChild(child);
         }
 
-        protected internal void AddLogicalChild(FrameworkElement child)
+        internal new void RemoveLogicalChild(LogicalObject child)
         {
-            if (child == null)
-                throw new ArgumentNullException(nameof(child));
-            if (child.Parent != null)
-                throw new InvalidOperationException("Child has its parent already.");
-            child.Parent = this;
+            base.RemoveLogicalChild(child);
         }
-
-        protected internal void RemoveLogicalChild(FrameworkElement child)
-        {
-            if (child == null)
-                throw new ArgumentNullException(nameof(child));
-            if (child.Parent == null)
-                throw new InvalidOperationException("Child has no parent.");
-            if (child.Parent != this)
-                throw new InvalidOperationException("This element is not the parent of child.");
-            child.Parent = null;
-        }
-
-        protected virtual IEnumerable? LogicalChildren => null;
 
         #endregion
 
@@ -462,9 +457,59 @@ namespace Wodsoft.UI
 
         #region Template
 
+        private ControlTemplate? _template;
+        private bool _templateGenerated;
+        private FrameworkElement? _templatedContent, _templatedParent;
+
+        public FrameworkElement? TemplatedParent => _templatedParent;
+
+        public FrameworkElement? TemplateChild => _templatedContent;
+
         public virtual bool ApplyTemplate()
         {
-            return false;
+            OnPreApplyTemplate();
+
+            var result = false;
+
+            if (_template != null && !_templateGenerated)
+            {
+                if (_templatedContent != null)
+                {
+                    _templatedContent._templatedParent = null;
+                    RemoveVisualChild(_templatedContent);
+                }
+                _templatedContent = _template.LoadContent();
+                if (_templatedContent != null)
+                {
+                    _templatedContent._templatedParent = this;
+                    AddVisualChild(_templatedContent);
+                }
+                OnApplyTemplate();
+            }
+
+            OnPostApplyTemplate();
+
+            return result;
+        }
+
+        protected virtual FrameworkElement? LoadTemplate() { return null; }
+
+        protected virtual void OnPreApplyTemplate() { }
+
+        protected virtual void OnApplyTemplate() { }
+
+        protected virtual void OnPostApplyTemplate() { }
+
+        protected DependencyObject? GetTemplateChild(string childName)
+        {
+            if (_templatedContent == null)
+                return null;
+            return _templatedContent.FindName(childName) as DependencyObject;
+        }
+
+        protected void OnTemplateChanged()
+        {
+            _templateGenerated = false;
         }
 
         #endregion
@@ -544,16 +589,86 @@ namespace Wodsoft.UI
 
         private INameScope? FindScope()
         {
-            FrameworkElement? element = this;
+            LogicalObject? element = this;
             while (element != null)
             {
                 INameScope? nameScope = NameScope.NameScopeFromObject(element);
                 if (nameScope != null)
                     return nameScope;
-                element = element.Parent;
+                element = LogicalTreeHelper.GetParent(element);
             }
             return null;
         }
+
+        #endregion
+
+        #region DependencyValue
+
+        public BindingExpressionBase? GetBindingExpression(DependencyProperty dp)
+        {
+            var binding = GetExpression(dp) as BindingExpressionBase;
+            return binding;
+        }
+
+        public BindingExpressionBase SetBinding(DependencyProperty dp, BindingBase binding)
+        {
+            if (dp == null)
+                throw new ArgumentNullException(nameof(dp));
+            if (binding == null)
+                throw new ArgumentNullException(nameof(binding));
+            var expression = binding.CreateBindingExpression(this, dp);
+            SetValueCore(dp, expression);
+            return expression;
+        }
+
+        public void UpdateBinding()
+        {
+            UpdateBinding(this);
+        }
+
+        private void UpdateBinding(LogicalObject obj)
+        {
+            var list = (List<BindingExpressionBase>?)obj.GetValue(BindingExpressionBase.BindingRetryProperty);
+            if (list != null)
+            {
+                foreach (var binding in list.ToArray())
+                {
+                    binding.RetryAttach();
+                }
+            }
+            var children = obj.LogicalChildren;
+            if (children != null)
+            {
+                foreach (var child in children)
+                    UpdateBinding(child);
+            }
+        }
+
+        //protected override void OnLogicalRootChanged(LogicObject oldRoot, LogicObject newRoot)
+        //{
+        //    base.OnLogicalRootChanged(oldRoot, newRoot);
+        //}
+
+        #endregion
+
+        #region Data
+
+        public static readonly DependencyProperty DataContextProperty =
+            DependencyProperty.Register(
+                        "DataContext",
+                        typeof(object),
+                        typeof(FrameworkElement),
+                        new FrameworkPropertyMetadata(null,
+                                FrameworkPropertyMetadataOptions.Inherits,
+                                new PropertyChangedCallback(OnDataContextChanged)));
+        private static void OnDataContextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            //if (e.NewValue == BindingExpressionBase.DisconnectedItem)
+            //    return;
+
+            //((FrameworkElement)d).RaiseDependencyPropertyChanged(DataContextChangedKey, e);
+        }
+        public object? DataContext { get { return GetValue(DataContextProperty); } set { SetValue(DataContextProperty, value); } }
 
         #endregion
     }

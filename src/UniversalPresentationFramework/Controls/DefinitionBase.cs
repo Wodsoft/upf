@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Controls
 {
-    public abstract class DefinitionBase : DependencyObject
+    public abstract class DefinitionBase : FrameworkContentElement
     {
         private Grid? _grid;
 
@@ -17,6 +17,7 @@ namespace Wodsoft.UI.Controls
             if (_grid != null)
                 throw new InvalidOperationException("Definition was connected to a grid.");
             _grid = grid;
+            _grid.AddLogicalChild(this);
         }
 
         internal void DisconnectParent(Grid grid)
@@ -25,6 +26,7 @@ namespace Wodsoft.UI.Controls
                 throw new InvalidOperationException("Definition haven't connect to a grid.");
             if (grid != _grid)
                 throw new InvalidOperationException("Definition not belong to this grid.");
+            grid.RemoveLogicalChild(this);
             _grid = null;
         }
 

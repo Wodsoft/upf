@@ -21,7 +21,7 @@ namespace Wodsoft.UI.Controls
 
         #region Initialize
 
-        public override void EndInit()
+        protected override void EndInit()
         {
             CalculateColumn();
             CalculateRow();
