@@ -27,10 +27,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="BindingTest1.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </None>
     <None Update="ContentControlTemplate.xaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator></Generator>
     </None>
   </ItemGroup>
 
