@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    public delegate void DependencyPropertyChangedEventHandler(object sender, DependencyPropertyChangedEventArgs e);
+    public delegate void DependencyPropertyChangedEventHandler(DependencyObject d, DependencyPropertyChangedEventArgs e);
 }

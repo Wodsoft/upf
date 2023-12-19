@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    internal class DependencyValueStore
+    [Flags]
+    public enum DependencyPropertyChangedEventFlags
     {
-        public object? Value = DependencyProperty.UnsetValue;
+        None = 0,
+        LocalValueChanged = 1
     }
 }

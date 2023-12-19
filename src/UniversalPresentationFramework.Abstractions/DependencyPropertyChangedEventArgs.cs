@@ -26,6 +26,15 @@ namespace Wodsoft.UI
             _new = newValue;
         }
 
+        public DependencyPropertyChangedEventArgs(DependencyProperty property, PropertyMetadata? metadata, object? oldValue, object? newValue, DependencyPropertyChangedEventFlags flags)
+        {
+            _property = property;
+            _metadata = metadata;
+            _old = oldValue;
+            _new = newValue;
+            _flags = flags;
+        }
+
         #endregion Constructors
 
 
@@ -44,6 +53,8 @@ namespace Wodsoft.UI
         public object? NewValue => _new;
 
         public PropertyMetadata? Metadata => _metadata;
+
+        public DependencyPropertyChangedEventFlags Flags => _flags;
 
         #endregion Properties
 
@@ -82,6 +93,7 @@ namespace Wodsoft.UI
         private readonly PropertyMetadata? _metadata;
         private readonly object? _old;
         private readonly object? _new;
+        private readonly DependencyPropertyChangedEventFlags _flags;
 
         #endregion Data
     }
