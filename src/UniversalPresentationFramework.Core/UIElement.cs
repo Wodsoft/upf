@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -203,6 +204,7 @@ namespace Wodsoft.UI
 
         #endregion
 
+        #region Visual
 
         public static readonly DependencyProperty VisibilityProperty =
         DependencyProperty.Register(
@@ -234,5 +236,162 @@ namespace Wodsoft.UI
             get { return _visibility; }
             set { SetValue(VisibilityProperty, value); }
         }
+
+        #endregion
+
+        #region Event
+
+        private readonly Dictionary<int, List<RoutedEventHandlerInfo>> _eventHandlers = new Dictionary<int, List<RoutedEventHandlerInfo>>();
+
+        public void AddHandler(RoutedEvent routedEvent, Delegate handler)
+        {
+            AddHandler(routedEvent, handler, false);
+        }
+
+        public void AddHandler(RoutedEvent routedEvent, Delegate handler, bool handledEventsToo)
+        {
+            if (routedEvent == null)
+                throw new ArgumentNullException(nameof(routedEvent));
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            if (!routedEvent.IsLegalHandler(handler))
+                throw new ArgumentException("Event handler type invalid.");
+
+            if (!_eventHandlers.TryGetValue(routedEvent.GlobalIndex, out var list))
+            {
+                list = new List<RoutedEventHandlerInfo>();
+                _eventHandlers.Add(routedEvent.GlobalIndex, list);
+            }
+            list.Add(new RoutedEventHandlerInfo(handler, handledEventsToo));
+        }
+
+        public void RemoveHandler(RoutedEvent routedEvent, Delegate handler)
+        {
+            if (routedEvent == null)
+                throw new ArgumentNullException(nameof(routedEvent));
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            if (!routedEvent.IsLegalHandler(handler))
+                throw new ArgumentException("Event handler type invalid.");
+
+            if (_eventHandlers.TryGetValue(routedEvent.GlobalIndex, out var list))
+            {
+                var i = list.FindIndex(t => t.Handler == handler);
+                if (i != -1)
+                    list.RemoveAt(i);
+            }
+        }
+
+        public void RaiseEvent(RoutedEventArgs e)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+            if (e.RoutedEvent == null)
+                throw new InvalidOperationException("RoutedEventArgs must have RoutedEvent.");
+            e.MarkAsUserInitiated();
+
+            e.Source = this;
+
+            List<Visual> list = new List<Visual>();
+            List<List<RoutedEventHandlerInfo>?> handlers = new List<List<RoutedEventHandlerInfo>?>();
+            Visual? visual = this;
+            while (visual != null)
+            {
+                list.Add(visual);
+                if (visual is UIElement element)
+                {
+                    handlers.Add(e.RoutedEvent.GetClassHandlers(visual.GetType()));
+                    if (element._eventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
+                        handlers.Add(delegates);
+                    else
+                        handlers.Add(null);
+                }
+                if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
+                    break;
+                visual = visual.VisualParent;
+                if (list.Count > 4096)
+                    throw new InvalidOperationException("Routed event have more than 4096 levels.");
+            }
+
+            if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Bubble || e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    e.Source = list[i];
+                    var classHandlers = handlers[i * 2];
+                    if (classHandlers != null)
+                    {
+                        for (int ii = 0; ii < classHandlers.Count; ii++)
+                        {
+                            var handler = classHandlers[ii];
+                            if (!e.Handled || handler.HandledEventsToo)
+                            {
+                                if (handler.Handler is RoutedEventHandler reh)
+                                    reh(this, e);
+                                else
+                                    e.InvokeHandler(handler.Handler, this);
+                            }
+                        }
+                    }
+                    var routedHandlers = handlers[i * 2 + 1];
+                    if (routedHandlers != null)
+                    {
+                        for (int ii = 0; ii < routedHandlers.Count; ii++)
+                        {
+                            var handler = routedHandlers[ii];
+                            if (!e.Handled || handler.HandledEventsToo)
+                            {
+                                if (handler.Handler is RoutedEventHandler reh)
+                                    reh(this, e);
+                                else
+                                    e.InvokeHandler(handler.Handler, this);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    e.Source = list[i];
+                    var classHandlers = handlers[i * 2];
+                    if (classHandlers != null)
+                    {
+                        for (int ii = 0; ii < classHandlers.Count; ii++)
+                        {
+                            var handler = classHandlers[ii];
+                            if (!e.Handled || handler.HandledEventsToo)
+                            {
+                                if (handler.Handler is RoutedEventHandler reh)
+                                    reh(this, e);
+                                else
+                                    e.InvokeHandler(handler.Handler, this);
+                            }
+                        }
+                    }
+                    var routedHandlers = handlers[i * 2 + 1];
+                    if (routedHandlers != null)
+                    {
+                        for (int ii = 0; ii < routedHandlers.Count; ii++)
+                        {
+                            var handler = routedHandlers[ii];
+                            if (!e.Handled || handler.HandledEventsToo)
+                            {
+                                if (handler.Handler is RoutedEventHandler reh)
+                                    reh(this, e);
+                                else
+                                    e.InvokeHandler(handler.Handler, this);
+                            }
+                        }
+                    }
+                }
+            }
+
+            e.Source = e.OriginalSource;
+            e.ClearUserInitiated();
+        }
+
+        #endregion
     }
 }
