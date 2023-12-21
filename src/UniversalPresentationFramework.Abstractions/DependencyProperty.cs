@@ -11,13 +11,13 @@ namespace Wodsoft.UI
 {
     public class DependencyProperty
     {
-        private DependencyPropertyKey? _key;
+        private readonly DependencyPropertyKey? _key;
         private bool _isNullable;
         private static int _Count;
-        private static object _GlobalLocker = new object();
-        private object _metadataLocker = new object();
-        private static Hashtable _NameTables = new Hashtable();
-        private TreeMap<TypeMetadata> _metadatas = new TreeMap<TypeMetadata>();
+        private readonly static object _GlobalLocker = new object();
+        private readonly object _metadataLocker = new object();
+        private readonly static Dictionary<FromNameKey, DependencyProperty> _NameTables = new Dictionary<FromNameKey, DependencyProperty>();
+        private readonly TreeMap<TypeMetadata> _metadatas = new TreeMap<TypeMetadata>();
         private int _index;
 
         private DependencyProperty(string name, Type propertyType, Type ownerType, PropertyMetadata metadata, ValidateValueCallback? validateValueCallback, bool isReadOnly, bool isNullable)
@@ -248,17 +248,18 @@ namespace Wodsoft.UI
             if (ownerType == null)
                 throw new ArgumentNullException(nameof(ownerType));
             Type? type = ownerType;
-            object? dp;
-            while (type != null)
+            DependencyProperty? dp;
+            lock (_GlobalLocker)
             {
-                var key = new FromNameKey(name, type);
-                lock (_GlobalLocker)
-                    dp = _NameTables[key];
-                if (dp != null)
-                    return (DependencyProperty)dp;
-                if (!inherited)
-                    return null;
-                type = type.BaseType;
+                while (type != null)
+                {
+                    var key = new FromNameKey(name, type);
+                    if (_NameTables.TryGetValue(key, out dp))
+                        return dp;
+                    if (!inherited)
+                        return null;
+                    type = type.BaseType;
+                }
             }
             return null;
         }

@@ -3,7 +3,7 @@
     public class DependencyObject
     {
         private Type? _type;
-        private SortedList<int, object?> _valueStores = new SortedList<int, object?>();
+        private Dictionary<int, object?> _valueStores = new Dictionary<int, object?>();
 
         public void ClearValue(DependencyProperty dp)
         {
