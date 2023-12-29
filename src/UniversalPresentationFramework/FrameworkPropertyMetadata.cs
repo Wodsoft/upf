@@ -172,6 +172,8 @@ namespace Wodsoft.UI
         }
 
         public FrameworkPropertyMetadataOptions Flags { get; private set; }
+
+        public override bool IsInherited => Flags.HasFlag(FrameworkPropertyMetadataOptions.Inherits);
     }
 
     [Flags]

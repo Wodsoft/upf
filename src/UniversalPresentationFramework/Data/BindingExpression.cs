@@ -169,6 +169,8 @@ namespace Wodsoft.UI.Data
         {
             _readonlyErrors = null;
             _errors = null;
+            if (value == DependencyProperty.UnsetValue)
+                value = Target!.GetMetadata(TargetProperty).DefaultValue;
             if (_binding.Converter != null)
             {
                 try

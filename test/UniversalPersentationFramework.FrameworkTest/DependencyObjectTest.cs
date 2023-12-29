@@ -18,5 +18,15 @@ namespace Wodsoft.UI.Test
             Assert.Equal("test value", d.LastChangedNewValue);
             Assert.Equal(MyObject.TextAProperty, d.LastChangedProperty);
         }
+
+        [Fact]
+        public void InheritedTest()
+        {
+            Grid parent = new Grid();
+            parent.DataContext = "test";
+            Control child = new Control();
+            parent.Children.Add(child);
+            Assert.Equal(parent.DataContext, child.DataContext);
+        }
     }
 }

@@ -1,9 +1,11 @@
-﻿namespace Wodsoft.UI
+﻿using System.Linq.Expressions;
+
+namespace Wodsoft.UI
 {
     public class DependencyObject
     {
         private Type? _type;
-        private Dictionary<int, object?> _valueStores = new Dictionary<int, object?>();
+        private Dictionary<int, DependencyEffectiveValue> _valueStores = new Dictionary<int, DependencyEffectiveValue>();
 
         public void ClearValue(DependencyProperty dp)
         {
@@ -19,12 +21,16 @@
         }
         protected virtual void ClearValueCore(DependencyProperty dp)
         {
-            if (_valueStores.TryGetValue(dp.GlobalIndex, out var storeValue))
+            if (_valueStores.TryGetValue(dp.GlobalIndex, out var effectiveValue))
             {
+                var newEffectiveValue = new DependencyEffectiveValue();
+                UpdateEffectiveValue(dp, GetMetadata(dp), ref effectiveValue, ref newEffectiveValue);
                 _valueStores.Remove(dp.GlobalIndex);
-                var metadata = GetMetadata(dp);
-                if (metadata.PropertyChangedCallback != null && storeValue != DependencyProperty.UnsetValue)
-                    metadata.PropertyChangedCallback(this, new DependencyPropertyChangedEventArgs(dp, metadata, storeValue, metadata.DefaultValue, DependencyPropertyChangedEventFlags.LocalValueChanged));
+                //if (effectiveValue.Source == DependencyEffectiveSource.Expression)
+                //    effectiveValue.Expression!.Detach();
+                //var metadata = GetMetadata(dp);
+                //if (metadata.PropertyChangedCallback != null && effectiveValue.Value != DependencyProperty.UnsetValue)
+                //    metadata.PropertyChangedCallback(this, new DependencyPropertyChangedEventArgs(dp, metadata, effectiveValue.Value, metadata.DefaultValue, DependencyPropertyChangedEventFlags.LocalValueChanged));
             }
         }
 
@@ -36,59 +42,61 @@
         }
         protected virtual object? GetValueCore(DependencyProperty dp)
         {
-            if (!_valueStores.TryGetValue(dp.GlobalIndex, out var storeValue))
+            _valueStores.TryGetValue(dp.GlobalIndex, out var effectiveValue);
+            return GetEffectiveValue(dp, ref effectiveValue, GetMetadata(dp));
+        }
+        private object? GetEffectiveValue(DependencyProperty dp, ref DependencyEffectiveValue effectiveValue, PropertyMetadata metadata)
+        {
+            var value = effectiveValue.Value;
+            if (value == DependencyProperty.UnsetValue)
             {
-                var metadata = GetMetadata(dp);
                 if (metadata.IsInherited)
                 {
                     var parent = GetInheritanceParent();
-                    if (parent == null)
-                        return metadata.DefaultValue;
-                    return parent.GetValueCore(dp);
+                    if (parent != null)
+                    {
+                        value = parent.GetValueCore(dp);
+                    }
+                    else
+                        value = metadata.DefaultValue;
                 }
-                return metadata.DefaultValue;
+                else
+                    value = metadata.DefaultValue;
             }
-            if (storeValue is Expression expression)
-                storeValue = expression.Value;
-            if (storeValue == DependencyProperty.UnsetValue)
-            {
-                var metadata = GetMetadata(dp);
-                return metadata.DefaultValue;
-            }
-            return storeValue;
+            return value;
         }
         public object? ReadLocalValue(DependencyProperty dp)
         {
-            if (_valueStores.TryGetValue(dp.GlobalIndex, out var storeValue))
+            if (_valueStores.TryGetValue(dp.GlobalIndex, out var effectiveValue))
             {
-                if (storeValue is Expression expression)
+                if (effectiveValue.Source == DependencyEffectiveSource.Expression)
                     //only one way to source will have local value
-                    if (!expression.CanUpdateSource || expression.CanUpdateTarget)
-                        return null;
+                    if (!effectiveValue.Expression!.CanUpdateSource || effectiveValue.Expression!.CanUpdateTarget)
+                        return DependencyProperty.UnsetValue;
                     else
-                        return expression.Value;
-                return storeValue;
+                        return effectiveValue.Value;
+                else if (effectiveValue.Source == DependencyEffectiveSource.Local)
+                    return effectiveValue.Value;
             }
-            return null;
+            return DependencyProperty.UnsetValue;
         }
         public bool HasLocalValue(DependencyProperty dp)
         {
-            if (_valueStores.TryGetValue(dp.GlobalIndex, out var storeValue))
+            if (_valueStores.TryGetValue(dp.GlobalIndex, out var effectiveValue))
             {
                 //only one way to source will have local value
-                if (storeValue is Expression expression && (!expression.CanUpdateSource || expression.CanUpdateTarget))
+                if (effectiveValue.Source == DependencyEffectiveSource.Expression && (!effectiveValue.Expression!.CanUpdateSource || effectiveValue.Expression!.CanUpdateTarget))
                     return false;
-                return true;
+                return effectiveValue.Source == DependencyEffectiveSource.Local && effectiveValue.Value != DependencyProperty.UnsetValue;
             }
             return false;
         }
 
         public Expression? GetExpression(DependencyProperty dp)
         {
-            if (_valueStores.TryGetValue(dp.GlobalIndex, out var storeValue))
+            if (_valueStores.TryGetValue(dp.GlobalIndex, out var effectiveValue))
             {
-                if (storeValue is Expression expression)
-                    return expression;
+                return effectiveValue.Expression;
             }
             return null;
         }
@@ -107,97 +115,28 @@
         }
         protected virtual void SetValueCore(DependencyProperty dp, object? value)
         {
-            object? storeValue, oldValue;
-            PropertyMetadata metadata;
+            DependencyEffectiveValue oldValue, newValue;
+            _valueStores.TryGetValue(dp.GlobalIndex, out oldValue);
             if (value is Expression expression)
             {
-                //Always attach again
-                expression.Attach(this, dp);
-                if (expression.CanUpdateTarget)
-                {
-                    //Detach old expression
-                    if (_valueStores.TryGetValue(dp.GlobalIndex, out storeValue))
-                    {
-                        if (storeValue is Expression oldExpression)
-                        {
-                            oldValue = oldExpression.Value;
-                            oldExpression.Detach();
-                        }
-                        else
-                        {
-                            oldValue = storeValue;
-                        }
-                    }
-                    else
-                    {
-                        metadata = GetMetadata(dp);
-                        oldValue = metadata.DefaultValue;
-                    }
-                    //set old value to expression
-                    expression.Value = oldValue;
-                    expression.UpdateTarget();
-                }
-                else
-                {
-                    //One way to source expression
-                    //Set value to expression and return
-                    if (_valueStores.TryGetValue(dp.GlobalIndex, out storeValue))
-                    {
-                        if (storeValue is Expression oldExpression)
-                        {
-                            //Detach old expression
-                            oldExpression.Detach();
-                            //Do not use old expression value
-                            metadata = GetMetadata(dp);
-                            value = metadata.DefaultValue;
-                        }
-                        else
-                        {
-                            //Use old value
-                            value = storeValue;
-                        }
-                    }
-                    else
-                    {
-                        //Use default value
-                        metadata = GetMetadata(dp);
-                        value = metadata.DefaultValue;
-                    }
-                    expression.Value = value;
-                    expression.UpdateSource();
-                }
-                _valueStores[dp.GlobalIndex] = expression;
+                newValue = new DependencyEffectiveValue(expression);
+                UpdateEffectiveValue(dp, GetMetadata(dp), ref oldValue, ref newValue);
                 return;
             }
-            CoereceAndValidateValue(dp, ref value, true, out metadata);
-            if (_valueStores.TryGetValue(dp.GlobalIndex, out storeValue))
+            CoereceAndValidateValue(dp, ref value, true, out var metadata);
+
+            if (oldValue.Source == DependencyEffectiveSource.Expression && oldValue.Expression!.IsAttached && oldValue.Expression!.CanUpdateSource)
             {
-                if (storeValue is Expression oldExpression && oldExpression.IsAttached && oldExpression.CanUpdateSource)
-                {
-                    //get expression old value
-                    storeValue = oldExpression.Value;
-                    //set expression current value
-                    oldExpression.Value = value;
-                    //Update source
-                    oldExpression.UpdateSource();
-                }
-                else
-                {
-                    //Override express if can't set value to source
-                    _valueStores[dp.GlobalIndex] = value;
-                }
-                if (storeValue == DependencyProperty.UnsetValue)
-                    oldValue = metadata.DefaultValue;
-                else
-                    oldValue = storeValue;
+                newValue = new DependencyEffectiveValue(oldValue.Expression!);
+                newValue.ModifyValue(value);
             }
             else
             {
-                oldValue = metadata.DefaultValue;
-                _valueStores.Add(dp.GlobalIndex, value);
+                newValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Local);
             }
-            if (oldValue != value)
-                PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, value, DependencyPropertyChangedEventFlags.LocalValueChanged));
+            UpdateEffectiveValue(dp, metadata, ref oldValue, ref newValue);
+            //if (oldValue != value)
+            //    PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, value, DependencyPropertyChangedEventFlags.LocalValueChanged));
         }
 
         internal PropertyMetadata GetMetadata(DependencyProperty dp)
@@ -247,5 +186,92 @@
         }
 
         public event DependencyPropertyChangedEventHandler? DependencyPropertyChanged;
+
+        public void InvalidateProperty(DependencyProperty dp)
+        {
+            DependencyEffectiveValue oldValue, newValue;
+            if (_valueStores.TryGetValue(dp.GlobalIndex, out oldValue))
+            {
+                if (oldValue.Source == DependencyEffectiveSource.Local || oldValue.Source == DependencyEffectiveSource.Expression)
+                    newValue = oldValue;
+                else
+                    newValue = new DependencyEffectiveValue();
+            }
+            else
+                newValue = new DependencyEffectiveValue();
+            UpdateEffectiveValue(dp, GetMetadata(dp), ref oldValue, ref newValue);
+        }
+
+        private void UpdateEffectiveValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue oldEffectiveValue, ref DependencyEffectiveValue newEffectiveValue)
+        {
+            //Update value from source if there is difference expression
+            if (newEffectiveValue.Source == DependencyEffectiveSource.Expression)
+            {
+                if (newEffectiveValue.Expression != oldEffectiveValue.Expression)
+                {
+                    newEffectiveValue.Expression!.Attach(this, dp);
+                    if (newEffectiveValue.Expression!.CanUpdateTarget)
+                    {
+                        newEffectiveValue.Expression!.UpdateTarget();
+                    }
+                }
+            }
+
+            //Evaluate framework value
+            EvaluateBaseValue(dp, metadata, ref newEffectiveValue);
+
+            //Nothing happen, return
+            if (newEffectiveValue.Source == DependencyEffectiveSource.None && oldEffectiveValue.Source == DependencyEffectiveSource.None)
+                return;
+
+            //Save effective value
+            if (newEffectiveValue.Source == DependencyEffectiveSource.None || newEffectiveValue.Source == DependencyEffectiveSource.Inherited)
+            {
+                _valueStores.Remove(dp.GlobalIndex);
+            }
+            else
+            {
+                _valueStores[dp.GlobalIndex] = newEffectiveValue;
+            }
+
+            //Notify property changed
+            //Don't notify when value is inherited and there is no old value
+            if ((newEffectiveValue.Source == DependencyEffectiveSource.Inherited && oldEffectiveValue.Source != DependencyEffectiveSource.None) &&
+                oldEffectiveValue.Value != newEffectiveValue.Value)
+            {
+                var oldValue = GetEffectiveValue(dp, ref oldEffectiveValue, metadata);
+                var newValue = GetEffectiveValue(dp, ref newEffectiveValue, metadata);
+                if (oldValue != newValue)
+                    PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, newValue));
+            }
+
+            //Update value to source if there is same expression
+            //Only a old expression that can update source may equal to new value expression
+            if (oldEffectiveValue.Source == DependencyEffectiveSource.Expression)
+            {
+                if (oldEffectiveValue.Expression == newEffectiveValue.Expression)
+                {
+                    newEffectiveValue.Expression!.UpdateSource();
+                }
+                else
+                {
+                    oldEffectiveValue.Expression!.Detach();
+                }
+            }
+            if (newEffectiveValue.Source == DependencyEffectiveSource.Expression)
+            {
+                if (oldEffectiveValue.Expression != newEffectiveValue.Expression && newEffectiveValue.Expression!.CanUpdateSource)
+                {
+                    //One way to source expression
+                    //Set value to expression and return
+                    newEffectiveValue.Expression!.UpdateSource();
+                }
+            }
+        }
+
+        protected virtual void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
+        {
+            
+        }
     }
 }

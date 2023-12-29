@@ -15,6 +15,8 @@ namespace Wodsoft.UI
         private DependencyObject? _object;
         private DependencyProperty? _property;
 
+        public static readonly object NoValue = new object();
+
         /// <summary>
         /// Get a expression is attached or not.
         /// </summary>

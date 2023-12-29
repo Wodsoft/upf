@@ -10,6 +10,8 @@ namespace Wodsoft.UI.Data
     /// </summary>
     public enum BindingMode
     {
+        /// <summary> Data flow is obtained from target property default </summary>
+        Default,
         /// <summary> Data flows from source to target and vice-versa </summary>
         TwoWay,
         /// <summary> Data flows from source to target, source changes cause data flow </summary>
@@ -17,8 +19,6 @@ namespace Wodsoft.UI.Data
         /// <summary> Data flows from source to target once, source changes are ignored </summary>
         OneTime,
         /// <summary> Data flows from target to source, target changes cause data flow </summary>
-        OneWayToSource,
-        /// <summary> Data flow is obtained from target property default </summary>
-        Default
+        OneWayToSource
     }
 }
