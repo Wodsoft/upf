@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace Wodsoft.UI.Test
 {
     public class BaseTest

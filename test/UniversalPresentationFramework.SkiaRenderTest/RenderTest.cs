@@ -11,6 +11,7 @@ using Wodsoft.UI.Renderers;
 using UPF = Wodsoft.UI;
 using WPF = System.Windows;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace Wodsoft.UI.Test
 {
     public class RenderTest
