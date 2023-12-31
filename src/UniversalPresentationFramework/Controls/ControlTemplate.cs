@@ -46,6 +46,8 @@ namespace Wodsoft.UI.Controls
             }
         }
 
+        protected internal override Type TargetTypeInternal => TargetType;
+
         #endregion
     }
 }

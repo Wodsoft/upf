@@ -33,6 +33,8 @@ namespace Wodsoft.UI
         {
             if (!IsInitPending)
                 throw new InvalidOperationException("Element is not initializing.");
+            if (_style == null)
+                InvalidateProperty(StyleProperty);
             EndInit();
             IsInitPending = false;
         }
@@ -457,7 +459,6 @@ namespace Wodsoft.UI
 
         #region Template
 
-        private ControlTemplate? _template;
         private bool _templateGenerated;
         private FrameworkElement? _templatedContent, _templatedParent;
 
@@ -471,14 +472,14 @@ namespace Wodsoft.UI
 
             var result = false;
 
-            if (_template != null && !_templateGenerated)
+            if (!_templateGenerated)
             {
                 if (_templatedContent != null)
                 {
                     _templatedContent._templatedParent = null;
                     RemoveVisualChild(_templatedContent);
                 }
-                _templatedContent = _template.LoadContent();
+                _templatedContent = LoadTemplate();
                 if (_templatedContent != null)
                 {
                     _templatedContent._templatedParent = this;
@@ -606,8 +607,7 @@ namespace Wodsoft.UI
 
         public BindingExpressionBase? GetBindingExpression(DependencyProperty dp)
         {
-            var binding = GetExpression(dp) as BindingExpressionBase;
-            return binding;
+            return GetExpression(dp) as BindingExpressionBase;
         }
 
         public BindingExpressionBase SetBinding(DependencyProperty dp, BindingBase binding)
@@ -649,6 +649,22 @@ namespace Wodsoft.UI
         //    base.OnLogicalRootChanged(oldRoot, newRoot);
         //}
 
+        protected sealed override void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
+        {
+            if (effectiveValue.Source == DependencyEffectiveSource.Local || effectiveValue.Source == DependencyEffectiveSource.Expression)
+                return;
+            if (dp == StyleProperty)
+            {
+                InitializeStyle(ref effectiveValue);
+                return;
+            }
+            else
+            {
+                if (_style != null && _style.TryApplyProperty(dp, ref effectiveValue))
+                    return;
+            }
+        }
+
         #endregion
 
         #region Data
@@ -669,6 +685,52 @@ namespace Wodsoft.UI
             //((FrameworkElement)d).RaiseDependencyPropertyChanged(DataContextChangedKey, e);
         }
         public object? DataContext { get { return GetValue(DataContextProperty); } set { SetValue(DataContextProperty, value); } }
+
+        private ResourceDictionary? _resources;
+        public ResourceDictionary? Resources
+        {
+            get
+            {
+                if (_resources == null)
+                    _resources = new ResourceDictionary();
+                return _resources;
+            }
+            set
+            {
+                _resources = value;
+            }
+        }
+
+        #endregion
+
+        #region Style
+
+        public static readonly DependencyProperty StyleProperty =
+                DependencyProperty.Register(
+                        "Style",
+                        typeof(Style),
+                        typeof(FrameworkElement),
+                        new FrameworkPropertyMetadata(
+                                null,   // default value
+                                FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                new PropertyChangedCallback(OnStyleChanged)));
+        private static void OnStyleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            FrameworkElement fe = (FrameworkElement)d;
+            fe._style = (Style?)e.NewValue;
+            if (fe._style != null)
+                fe._style.Seal();
+            Style.ApplyStyle(fe, (Style?)e.OldValue, fe._style);
+        }
+        private Style? _style;
+        public Style? Style { get { return _style; } set { SetValue(StyleProperty, value); } }
+
+        private void InitializeStyle(ref DependencyEffectiveValue effectiveValue)
+        {
+            var style = ResourceHelper.FindResource(this, GetType()) as Style;
+            if (style != null)
+                effectiveValue = new DependencyEffectiveValue(style, DependencyEffectiveSource.Internal);
+        }
 
         #endregion
     }

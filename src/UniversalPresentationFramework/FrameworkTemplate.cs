@@ -106,7 +106,7 @@ namespace Wodsoft.UI
                     throw new InvalidOperationException("Template content can not set twice.");
                 if (value == null)
                     return;
-                //value.OwnerTemplate = this;
+                value.OwnerTemplate = this;
                 value.Parse();
                 _template = value;
                 _hasTemplate = true;
@@ -130,6 +130,8 @@ namespace Wodsoft.UI
                 _visualTree = value;
             }
         }
+
+        protected internal abstract Type TargetTypeInternal { get; }
 
         #endregion
 
@@ -158,7 +160,7 @@ namespace Wodsoft.UI
         /// Find the element given name
         /// </summary>
         /// <param name="name">Name of the element</param>
-        object INameScope.FindName(string name)
+        object? INameScope.FindName(string name)
         {
             return _nameScope.FindName(name);
         }

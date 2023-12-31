@@ -11,6 +11,8 @@ namespace Wodsoft.UI
         private bool _isRunning;
         public static Application? Current { get; private set; }
 
+        public ResourceDictionary? Resources { get; set; }
+
         public bool IsRunning => _isRunning;
 
         #region Providers

@@ -1,0 +1,10 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<FrameworkElement.Resources>
+		<Style TargetType="{x:Type local:MyObject}">
+			<Setter Property="TextA" Value="test"/>
+		</Style>
+	</FrameworkElement.Resources>
+	<local:MyObject Name="target"/>
+</Grid>
