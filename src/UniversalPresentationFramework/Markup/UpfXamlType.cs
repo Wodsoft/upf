@@ -42,7 +42,7 @@ namespace Wodsoft.UI.Markup
 
         protected override XamlMember LookupAttachableMember(string name)
         {
-            if (_members.TryGetValue(name, out XamlMember? member))
+            if (!_members.TryGetValue(name, out XamlMember? member))
                 member = FindMember(name, true);
             if (member == null)
                 return base.LookupAttachableMember(name);
