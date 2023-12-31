@@ -18,12 +18,14 @@ namespace Wodsoft.UI
         private readonly IXamlObjectWriterFactory _factory;
         private readonly IServiceProvider _serviceProvider;
         private XamlNodeList? _xamlNodeList;
+        private readonly Dictionary<string, Type> _nameTypes;
 
         internal TemplateContent(XamlReader xamlReader, IXamlObjectWriterFactory factory, IServiceProvider serviceProvider)
         {
             _xamlReader = xamlReader;
             _factory = factory;
             _serviceProvider = serviceProvider;
+            _nameTypes = new Dictionary<string, Type>();
         }
 
         internal void Parse()
@@ -40,8 +42,35 @@ namespace Wodsoft.UI
             if (lineInfo != null)
                 lineInfoConsumer = writer as IXamlLineInfoConsumer;
 
+            XamlMember nameMember = _xamlReader.SchemaContext.GetXamlType(typeof(FrameworkElement)).GetMember("Name")!;
+
+            Stack<XamlType> objectStack = new Stack<XamlType>();
+            bool isNameMember = false;
             while (_xamlReader.Read())
             {
+                switch (_xamlReader.NodeType)
+                {
+                    case XamlNodeType.StartObject:
+                        objectStack.Push(_xamlReader.Type);
+                        break;
+                    case XamlNodeType.EndObject:
+                        objectStack.Pop();
+                        break;
+                    case XamlNodeType.StartMember:
+                        if (_xamlReader.Member == nameMember)
+                            isNameMember = true;
+                        break;
+                    case XamlNodeType.EndMember:
+                        isNameMember = false;
+                        break;
+                    case XamlNodeType.Value:
+                        if (isNameMember && _xamlReader.Value is string nameValue)
+                        {
+                            var type = objectStack.Peek();
+                            _nameTypes[nameValue] = type.UnderlyingType;
+                        }
+                        break;
+                }
                 writer.WriteNode(_xamlReader);
             }
             writer.Close();
@@ -79,7 +108,7 @@ namespace Wodsoft.UI
                 //switch (reader.NodeType)
                 //{
                 //    case XamlNodeType.EndMember:
-                        
+
                 //        break;
                 //    //case System.Xaml.XamlNodeType.EndObject:
                 //    //    if (writer.Result is )
@@ -91,5 +120,13 @@ namespace Wodsoft.UI
             nameScope = writer.RootNameScope;
             return element;
         }
+
+        internal Type? GetTypeForName(string name)
+        {
+            _nameTypes.TryGetValue(name, out var type);
+            return type;
+        }
+
+        internal FrameworkTemplate? OwnerTemplate;
     }
 }
