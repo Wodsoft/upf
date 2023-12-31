@@ -610,7 +610,7 @@ namespace System.Xaml
 
 			var argv = new object[argt.Count];
 			for (int i = 0; i < argv.Length; i++)
-				argv[i] = GetCorrectlyTypedValue(args[i], argt[i], i < contents.Count ? contents[i] : null);
+				argv[i] = GetCorrectlyTypedValue(args[i], argt[i], i < contents.Count ? contents[i] : null, out _);
 			state.Value = state.Type.Invoker.CreateInstance(argv);
 			state.IsInstantiated = true;
 			HandleBeginInit(state.Value);
@@ -647,32 +647,43 @@ namespace System.Xaml
 			var parent = state.Value;
 			var xt = state.Type;
 			var xm = ms.Member;
-			if (ReferenceEquals(xm, XamlLanguage.Initialization))
-			{
-				state.Value = GetCorrectlyTypedValue(null, xt, obj);
-				state.IsInstantiated = true;
-			}
-			else if (xm.Type.IsXData)
-			{
-				var xdata = (XData)obj;
-				var ixser = xm.Invoker.GetValue (state.Value) as IXmlSerializable;
-				if (ixser != null)
-					ixser.ReadXml ((XmlReader) xdata.XmlReader);
-			}
-			else if (ReferenceEquals(xm, XamlLanguage.Base))
-				ms.Value = GetCorrectlyTypedValue (null, xm.Type, obj);
-			else if (ReferenceEquals(xm, XamlLanguage.Name) || xm == xt.GetAliasedProperty (XamlLanguage.Name))
-				ms.Value = GetCorrectlyTypedValue (xm, XamlLanguage.String, obj);
-			else if (ReferenceEquals(xm, XamlLanguage.Key) || xm == xt.GetAliasedProperty(XamlLanguage.Key)) {
-				var keyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
-				state.KeyValue = keyValue;
-				ms.Value = keyValue;
-			} else {
-				if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
-					if (!xm.IsReadOnly || xm.IsConstructorArgument)
-						ms.Value = GetCorrectlyTypedValue (xm, xm.Type, obj);
-				}
-			}
+            if (ReferenceEquals(xm, XamlLanguage.Initialization))
+            {
+                state.Value = GetCorrectlyTypedValue(null, xt, obj, out _);
+                state.IsInstantiated = true;
+            }
+            else if (xm.Type.IsXData)
+            {
+                var xdata = (XData)obj;
+                var ixser = xm.Invoker.GetValue(state.Value) as IXmlSerializable;
+                if (ixser != null)
+                    ixser.ReadXml((XmlReader)xdata.XmlReader);
+            }
+            else if (ReferenceEquals(xm, XamlLanguage.Base))
+            {
+                ms.Value = GetCorrectlyTypedValue(null, xm.Type, obj, out var isAlreadySet);
+                ms.IsAlreadySet = isAlreadySet;
+            }
+            else if (ReferenceEquals(xm, XamlLanguage.Name) || xm == xt.GetAliasedProperty(XamlLanguage.Name))
+                ms.Value = GetCorrectlyTypedValue(xm, XamlLanguage.String, obj, out var isAlreadySet);
+            else if (ReferenceEquals(xm, XamlLanguage.Key) || xm == xt.GetAliasedProperty(XamlLanguage.Key))
+            {
+                var keyValue = GetCorrectlyTypedValue(null, xt.KeyType, obj, out var isAlreadySet);
+                state.KeyValue = keyValue;
+                ms.Value = keyValue;
+                ms.IsAlreadySet = isAlreadySet;
+            }
+            else
+            {
+                if (!AddToCollectionIfAppropriate(xt, xm, parent, obj, keyObj))
+                {
+                    if (!xm.IsReadOnly || xm.IsConstructorArgument)
+                    {
+                        ms.Value = GetCorrectlyTypedValue(xm, xm.Type, obj, out var isAlreadySet);
+                        ms.IsAlreadySet = isAlreadySet;
+                    }
+                }
+            }
 		}
 
 		bool AddToCollectionIfAppropriate (XamlType xt, XamlMember xm, object parent, object obj, object keyObj)
@@ -683,9 +694,9 @@ namespace System.Xaml
 				ReferenceEquals(xm, XamlLanguage.Arguments)) {
 
 				if (xt.IsDictionary)
-					mt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj), GetCorrectlyTypedValue(null, xt.ItemType, obj));
+					mt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj, out _), GetCorrectlyTypedValue(null, xt.ItemType, obj, out _));
 				else // collection. Note that state.Type isn't usable for PositionalParameters to identify collection kind.
-					mt.Invoker.AddToCollection(parent, GetCorrectlyTypedValue(null, xt.ItemType, obj, true));
+					mt.Invoker.AddToCollection(parent, GetCorrectlyTypedValue(null, xt.ItemType, obj, out _, true));
 				return true;
 			}
 			else
@@ -698,9 +709,10 @@ namespace System.Xaml
 		// When it is passed null, then it returns a default instance.
 		// For example, passing null as Int32 results in 0.
 		// But do not immediately try to instantiate with the type, since the type might be abstract.
-		object GetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value, bool fallbackToString = false)
+		object GetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value, out bool isAlreadySet, bool fallbackToString = false)
 		{
-			try
+            isAlreadySet = false;
+            try
 			{
 				if (value == null)
 				{
@@ -738,7 +750,19 @@ namespace System.Xaml
 						value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
 					return value;
 				}
-			}
+
+                var typeConverterHandler = xm?.DeclaringType.SetTypeConverterHandler;
+                if (typeConverterHandler != null)
+                {
+                    var e = new XamlSetTypeConverterEventArgs(xm, xtc?.ConverterInstance, value, service_provider, CultureInfo.InvariantCulture);
+                    typeConverterHandler(object_states.Peek().Value, e);
+                    if (e.Handled)
+                    {
+                        isAlreadySet = true;
+                        return null;
+                    }
+                }
+            }
 			catch (Exception ex)
 			{
 				// For + ex.Message, the runtime should print InnerException message like .NET does.
