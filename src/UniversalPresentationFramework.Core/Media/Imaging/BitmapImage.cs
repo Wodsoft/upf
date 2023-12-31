@@ -95,6 +95,7 @@ namespace Wodsoft.UI.Media.Imaging
                 }
                 else
                 {
+                    _downloader = downloader;
                     HandleDownloadCompleted();
                 }
             }
