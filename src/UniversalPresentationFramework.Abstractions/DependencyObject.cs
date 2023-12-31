@@ -236,7 +236,7 @@ namespace Wodsoft.UI
 
             //Notify property changed
             //Don't notify when value is inherited and there is no old value
-            if ((newEffectiveValue.Source == DependencyEffectiveSource.Inherited && oldEffectiveValue.Source != DependencyEffectiveSource.None) &&
+            if (!(newEffectiveValue.Source == DependencyEffectiveSource.Inherited && oldEffectiveValue.Source == DependencyEffectiveSource.None) &&
                 oldEffectiveValue.Value != newEffectiveValue.Value)
             {
                 var oldValue = GetEffectiveValue(dp, ref oldEffectiveValue, metadata);
