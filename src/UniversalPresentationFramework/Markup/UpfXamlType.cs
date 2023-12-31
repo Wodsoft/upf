@@ -57,7 +57,7 @@ namespace Wodsoft.UI.Markup
             if (dp == null)
                 member = null;
             else
-                member = new UpfXamlMember(this, dp, isAttachable);
+                member = new UpfXamlMember(this, dp, SchemaContext.GetXamlType(dp.PropertyType), isAttachable);
             _members.Add(name, member);
             return member;
         }

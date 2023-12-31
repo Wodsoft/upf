@@ -11,9 +11,10 @@ namespace Wodsoft.UI.Markup
 {
     internal class UpfXamlMember : XamlMember, IProvideValueTarget
     {
-        public UpfXamlMember(XamlType xamlType, DependencyProperty dp, bool isAttachable) : base(dp.Name, xamlType, isAttachable)
+        public UpfXamlMember(XamlType xamlType, DependencyProperty dp, XamlType memberType, bool isAttachable) : base(dp.Name, xamlType, isAttachable)
         {
             DependencyProperty = dp;
+            _memberType = memberType;
         }
 
         public DependencyProperty DependencyProperty { get; }
@@ -32,7 +33,14 @@ namespace Wodsoft.UI.Markup
             return DependencyProperty.ReadOnly;
         }
 
+        protected override XamlType LookupType()
+        {
+            return _memberType;
+        }
+
         private XamlMemberInvoker? _invoker;
+        private readonly XamlType _memberType;
+
         protected override XamlMemberInvoker LookupInvoker()
         {
             if (_invoker == null)
