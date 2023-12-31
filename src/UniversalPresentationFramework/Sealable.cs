@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    public class Sealable
+    public class Sealable : ISealable
     {
         #region Seal
 
