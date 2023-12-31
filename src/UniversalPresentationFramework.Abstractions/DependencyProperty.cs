@@ -140,7 +140,7 @@ namespace Wodsoft.UI
                 return _isNullable;
             return value.GetType().IsAssignableFrom(PropertyType);
         }
-        public bool IsValidValue(object value)
+        public bool IsValidValue(object? value)
         {
             if (ValidateValueCallback == null)
                 return true;
