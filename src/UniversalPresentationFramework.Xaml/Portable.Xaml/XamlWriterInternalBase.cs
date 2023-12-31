@@ -416,9 +416,6 @@ namespace System.Xaml
             {
                 foreach (var state in object_states)
                 {
-                    if (ceilingTypes != null && ceilingTypes.Contains(state.Type))
-                        yield break;
-
                     if (types != null)
                     {
                         if (types.Any(xt => xt.UnderlyingType != null && state.Type.CanAssignTo(xt)))
@@ -435,6 +432,9 @@ namespace System.Xaml
                             yield return new AmbientPropertyValue(prop, value);
                         }
                     }
+
+                    if (ceilingTypes != null && ceilingTypes.Contains(state.Type))
+                        yield break;
                 }
             }
 
