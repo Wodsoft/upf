@@ -25,10 +25,10 @@ namespace Wodsoft.UI.Controls
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            if (TemplateChild == null)
+            if (TemplatedChild == null)
                 return new Size(0.0f, 0.0f);
-            TemplateChild.Measure(availableSize);
-            return TemplateChild.DesiredSize;
+            TemplatedChild.Measure(availableSize);
+            return TemplatedChild.DesiredSize;
         }
 
         /// <summary>
@@ -38,9 +38,9 @@ namespace Wodsoft.UI.Controls
         /// <param name="arrangeBounds">The computed size.</param>
         protected override Size ArrangeOverride(Size finalSize)
         {
-            if (TemplateChild != null)
+            if (TemplatedChild != null)
             {
-                TemplateChild.Arrange(new Rect(finalSize));
+                TemplatedChild.Arrange(new Rect(finalSize));
             }
             return finalSize;
         }

@@ -464,7 +464,7 @@ namespace Wodsoft.UI
 
         public FrameworkElement? TemplatedParent => _templatedParent;
 
-        public FrameworkElement? TemplateChild => _templatedContent;
+        public FrameworkElement? TemplatedChild => _templatedContent;
 
         public virtual bool ApplyTemplate()
         {
