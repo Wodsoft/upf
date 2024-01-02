@@ -11,6 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Page Remove="GridDefaultCellTest.xaml" />
 	  <Page Remove="GridTest.xaml" />
 	</ItemGroup>
 
@@ -33,6 +34,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="GridDefaultCellTest.xaml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <SubType>Designer</SubType>
+	    <Generator>MSBuild:Compile</Generator>
+	  </None>
 	  <None Include="GridTest.xaml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

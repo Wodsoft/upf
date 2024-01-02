@@ -1,0 +1,3 @@
+﻿<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+    <Rectangle Margin="25" Fill="Red"/>
+</Grid>

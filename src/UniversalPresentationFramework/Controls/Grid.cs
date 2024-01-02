@@ -221,6 +221,7 @@ namespace Wodsoft.UI.Controls
         {
             if (Children.Count != 0)
             {
+                bool hasColumn = _columns.Count != 0, hasRow = _rows.Count != 0;
                 for (int i = 0; i < Children.Count; i++)
                 {
                     var child = Children[i]!;
@@ -229,13 +230,31 @@ namespace Wodsoft.UI.Controls
                     var row = GetRow(child);
                     var rowSpan = GetRowSpan(child);
 
-                    var x = _columns[column].Offset;
-                    var y = _rows[row].Offset;
-                    float width = _columns[column].ActualWidth, height = _rows[row].ActualHeight;
-                    for (int ii = 1; ii < columnSpan; ii++)
-                        width += _columns[column + ii].ActualWidth;
-                    for (int ii = 1; ii < rowSpan; ii++)
-                        height += _rows[row + ii].ActualHeight;
+                    float x, y, width, height;
+                    if (hasColumn)
+                    {
+                        x = _columns[column].Offset;
+                        width = _columns[column].ActualWidth;
+                        for (int ii = 1; ii < columnSpan; ii++)
+                            width += _columns[column + ii].ActualWidth;
+                    }
+                    else
+                    {
+                        x = 0f;
+                        width = finalSize.Width;
+                    }
+                    if (hasRow)
+                    {
+                        y = _rows[row].Offset;
+                        height = _rows[row].ActualHeight;
+                        for (int ii = 1; ii < rowSpan; ii++)
+                            height += _rows[row + ii].ActualHeight;
+                    }
+                    else
+                    {
+                        y = 0f;
+                        height = finalSize.Height;
+                    }
                     child.Arrange(new Rect(x, y, width, height));
                 }
             }
@@ -295,6 +314,7 @@ namespace Wodsoft.UI.Controls
                 }
             }
             ChildCell[]? children;
+            bool hasColumn = _columns.Count != 0, hasRow = _rows.Count != 0;
             if (Children.Count == 0)
             {
                 children = null;
@@ -306,26 +326,34 @@ namespace Wodsoft.UI.Controls
                 for (int i = 0; i < Children.Count; i++)
                 {
                     var child = Children[i]!;
-                    var column = GetColumn(child);
-                    var columnSpan = GetColumnSpan(child);
-                    var row = GetRow(child);
-                    var rowSpan = GetRowSpan(child);
-                    if (column + columnSpan > _columns.Count)
-                        columnSpan = _columns.Count - column;
-                    if (row + rowSpan > _rows.Count)
-                        rowSpan = _rows.Count - row;
-                    children[i] = new ChildCell
+                    var cell = new ChildCell
                     {
-                        Column = column,
-                        ColumnSpan = columnSpan,
-                        Row = row,
-                        RowSpan = rowSpan,
-                        IsAutoColumn = _columns[column].Width.IsAuto,
-                        IsAutoRow = _rows[row].Height.IsAuto,
                         Element = child
                     };
+                    if (hasColumn)
+                    {
+                        var column = GetColumn(child);
+                        var columnSpan = GetColumnSpan(child);
+                        if (column + columnSpan > _columns.Count)
+                            columnSpan = _columns.Count - column;
+                        cell.Column = column;
+                        cell.ColumnSpan = columnSpan;
+                        cell.IsAutoColumn = _columns[column].Width.IsAuto;
+                    }
+                    if (hasRow)
+                    {
+                        var row = GetRow(child);
+                        var rowSpan = GetRowSpan(child);
+                        if (row + rowSpan > _rows.Count)
+                            rowSpan = _rows.Count - row;
+                        cell.Row = row;
+                        cell.RowSpan = rowSpan;
+                        cell.IsAutoRow = _rows[row].Height.IsAuto;
+                    }
+                    children[i] = cell;
                 }
-                Array.Sort(children, new ChildCellComparer());
+                if (_columns.Count != 0 || _rows.Count != 0)
+                    Array.Sort(children, new ChildCellComparer());
 
                 //Measure children size to get max size for each auto cell
                 for (int i = 0; i < children.Length; i++)
@@ -335,59 +363,64 @@ namespace Wodsoft.UI.Controls
                         continue;
                     if (child.IsAutoColumn || child.IsAutoRow)
                     {
-                        var column = _columns[child.Column];
-                        var row = _rows[child.Row];
-                        //float width, height;
-                        //if (column.Width.IsAbsolute)
-                        //    width = column.ActualWidth;
-                        //else
-                        //    width = MathF.Min(column.MaxWidth, column.ActualWidth + availableWidth);
-                        //if (row.Height.IsAbsolute)
-                        //    height = row.ActualHeight;
-                        //else
-                        //    height = MathF.Min(row.MaxHeight, row.ActualHeight + availableHeight);
-                        ////no more space, skip
-                        //if (FloatUtil.IsZero(width) && FloatUtil.IsZero(height))
-                        //    break;
-                        //child.Element.Measure(new Size(width, height));
                         child.Element.Measure(new Size());
                         var desiredSize = child.Element.DesiredSize;
-                        if (child.IsAutoColumn && desiredSize.Width > column.ActualWidth)
+                        if (hasColumn)
                         {
-                            availableWidth -= desiredSize.Width - column.ActualWidth;
-                            column.ActualWidth = desiredSize.Width;
+                            var column = _columns[child.Column];
+                            if (child.IsAutoColumn && desiredSize.Width > column.ActualWidth)
+                            {
+                                availableWidth -= desiredSize.Width - column.ActualWidth;
+                                column.ActualWidth = desiredSize.Width;
+                            }
                         }
-                        if (child.IsAutoRow && desiredSize.Height > row.ActualHeight)
+                        if (hasRow)
                         {
-                            availableHeight -= desiredSize.Height - row.ActualHeight;
-                            row.ActualHeight = desiredSize.Height;
+                            var row = _rows[child.Row];
+                            if (child.IsAutoRow && desiredSize.Height > row.ActualHeight)
+                            {
+                                availableHeight -= desiredSize.Height - row.ActualHeight;
+                                row.ActualHeight = desiredSize.Height;
+                            }
                         }
                     }
                 }
             }
 
-            float columnOffset = 0f;
-            bool haveAvaliableWidth = !FloatUtil.IsZero(availableWidth);
-            bool haveAvaliableHeight = !FloatUtil.IsZero(availableHeight);
-            for (int i = 0; i < _columns.Count; i++)
+            float columnOffset;
+            float rowOffset;
+            if (hasColumn)
             {
-                var column = _columns[i];
-                //Calculate column of star if there have available width
-                if (haveAvaliableWidth && column.Width.IsStar)
-                    column.ActualWidth = availableWidth * column.Percent;
-                column.Offset = columnOffset;
-                columnOffset += column.ActualWidth;
+                columnOffset = 0f;
+                bool haveAvaliableWidth = !FloatUtil.IsZero(availableWidth);
+                for (int i = 0; i < _columns.Count; i++)
+                {
+                    var column = _columns[i];
+                    //Calculate column of star if there have available width
+                    if (haveAvaliableWidth && column.Width.IsStar)
+                        column.ActualWidth = availableWidth * column.Percent;
+                    column.Offset = columnOffset;
+                    columnOffset += column.ActualWidth;
+                }
             }
-            float rowOffset = 0f;
-            for (int i = 0; i < _rows.Count; i++)
+            else
+                columnOffset = availableWidth;
+            if (hasRow)
             {
-                var row = _rows[i];
-                //Calculate row of star if there have avaliable height
-                if (haveAvaliableHeight && row.Height.IsStar)
-                    row.ActualHeight = availableHeight * row.Percent;
-                row.Offset = rowOffset;
-                rowOffset += row.ActualHeight;
+                rowOffset = 0f;
+                bool haveAvaliableHeight = !FloatUtil.IsZero(availableHeight);
+                for (int i = 0; i < _rows.Count; i++)
+                {
+                    var row = _rows[i];
+                    //Calculate row of star if there have avaliable height
+                    if (haveAvaliableHeight && row.Height.IsStar)
+                        row.ActualHeight = availableHeight * row.Percent;
+                    row.Offset = rowOffset;
+                    rowOffset += row.ActualHeight;
+                }
             }
+            else
+                rowOffset = availableHeight;
 
             //Measure children
             if (children != null)
@@ -398,11 +431,23 @@ namespace Wodsoft.UI.Controls
                     ////If in a auto cell, don't need measure again
                     //if (child.IsAutoColumn && child.IsAutoRow && child.ColumnSpan == 1 && child.RowSpan == 1)
                     //    continue;
-                    float width = _columns[child.Column].ActualWidth, height = _rows[child.Row].ActualHeight;
-                    for (int ii = 1; ii < child.ColumnSpan; ii++)
-                        width += _columns[child.Column + ii].ActualWidth;
-                    for (int ii = 1; ii < child.RowSpan; ii++)
-                        height += _rows[child.Row + ii].ActualHeight;
+                    float width, height;
+                    if (hasColumn)
+                    {
+                        width = _columns[child.Column].ActualWidth;
+                        for (int ii = 1; ii < child.ColumnSpan; ii++)
+                            width += _columns[child.Column + ii].ActualWidth;
+                    }
+                    else
+                        width = availableWidth;
+                    if (hasRow)
+                    {
+                        height = _rows[child.Row].ActualHeight;
+                        for (int ii = 1; ii < child.RowSpan; ii++)
+                            height += _rows[child.Row + ii].ActualHeight;
+                    }
+                    else
+                        height = availableHeight;
                     child.Element.Measure(new Size(width, height));
                 }
             }

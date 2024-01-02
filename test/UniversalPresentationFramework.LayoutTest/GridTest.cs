@@ -22,5 +22,17 @@ namespace Wodsoft.UI.Test
 
             LayoutComparer.ComparerUIElement(upfGrid, wpfGrid);
         }
+
+        [WpfFact]
+        public void DefaultCellTest()
+        {
+            var xaml = File.ReadAllText("GridDefaultCellTest.xaml");
+            var upfGrid = LoadUpfWithWpfXaml<UPFControls.Grid>(xaml);
+            var wpfGrid = (WPFControls.Grid)System.Windows.Markup.XamlReader.Parse(xaml);
+            upfGrid.Arrange(new Rect(0, 0, 400, 400));
+            wpfGrid.Arrange(new System.Windows.Rect(0, 0, 400, 400));
+
+            LayoutComparer.ComparerUIElement(upfGrid, wpfGrid);
+        }
     }
 }
