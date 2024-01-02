@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
 
 namespace Wodsoft.UI
 {
@@ -40,5 +41,22 @@ namespace Wodsoft.UI
             }
         }
         public string? Name { get { return (string?)GetValue(NameProperty); } set { SetValue(NameProperty, value); } }
+
+
+        private ResourceDictionary? _resources;
+        [Ambient]
+        public ResourceDictionary? Resources
+        {
+            get
+            {
+                if (_resources == null)
+                    _resources = new ResourceDictionary();
+                return _resources;
+            }
+            set
+            {
+                _resources = value;
+            }
+        }
     }
 }

@@ -51,7 +51,14 @@ namespace Wodsoft.UI
                 switch (_xamlReader.NodeType)
                 {
                     case XamlNodeType.StartObject:
-                        objectStack.Push(_xamlReader.Type);
+                        if (_xamlReader.Type.UnderlyingType == typeof(StaticResourceExtension))
+                        {
+                            var obj = LoadTimeBindUnshareableStaticResource(_xamlReader);
+                            writer.WriteValue(obj);
+                            continue;
+                        }
+                        else
+                            objectStack.Push(_xamlReader.Type);
                         break;
                     case XamlNodeType.EndObject:
                         objectStack.Pop();
@@ -75,6 +82,36 @@ namespace Wodsoft.UI
             }
             writer.Close();
             _xamlReader = null;
+        }
+
+
+        private StaticResourceExtension LoadTimeBindUnshareableStaticResource(XamlReader xamlReader)
+        {
+            var settings = _factory.GetParentSettings();
+            XamlObjectWriter writer = _factory.GetXamlObjectWriter(settings);
+            settings.SkipProvideValueOnRoot = true;
+
+            int elementDepth = 0;
+            do
+            {
+                writer.WriteNode(xamlReader);
+                switch (xamlReader.NodeType)
+                {
+                    case XamlNodeType.StartObject:
+                    case XamlNodeType.GetObject:
+                        elementDepth++;
+                        break;
+                    case XamlNodeType.EndObject:
+                        elementDepth--;
+                        break;
+                }
+            }
+            while (elementDepth > 0 && xamlReader.Read());
+
+            StaticResourceExtension resource = (StaticResourceExtension)writer.Result;
+
+            object? value = resource.TryFindValue(_serviceProvider);
+            return new Markup.DeferredStaticResource(resource.ResourceKey!, value);
         }
 
         public FrameworkElement Create(out INameScope nameScope)

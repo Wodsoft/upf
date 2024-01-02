@@ -22,7 +22,7 @@ namespace Wodsoft.UI
             {
                 if (_dictionary.TryGetValue(key, out object? value))
                     return value;
-                return null;
+                return DependencyProperty.UnsetValue;
             }
             set
             {

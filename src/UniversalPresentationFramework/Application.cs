@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
 
 namespace Wodsoft.UI
 {
@@ -11,6 +12,7 @@ namespace Wodsoft.UI
         private bool _isRunning;
         public static Application? Current { get; private set; }
 
+        [Ambient]
         public ResourceDictionary? Resources { get; set; }
 
         public bool IsRunning => _isRunning;

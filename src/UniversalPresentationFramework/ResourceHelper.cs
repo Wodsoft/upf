@@ -12,7 +12,7 @@ namespace Wodsoft.UI
         public static object? FindResource(FrameworkElement element, object key)
         {
             var value = FindResourceInTree(element, key);
-            if (value != null)
+            if (value != DependencyProperty.UnsetValue)
                 return value;
             value = FindResourceInApplication(key);
             return value;
@@ -30,7 +30,7 @@ namespace Wodsoft.UI
                         return value;
                 }
                 if (logicalObject.LogicalParent == null)
-                    return null;
+                    return DependencyProperty.UnsetValue;
                 logicalObject = logicalObject.LogicalParent;
             }
         }
@@ -39,7 +39,7 @@ namespace Wodsoft.UI
         {
             var app = Application.Current;
             if (app == null || app.Resources == null)
-                return null;
+                return DependencyProperty.UnsetValue;
             return app.Resources[key];
         }
     }

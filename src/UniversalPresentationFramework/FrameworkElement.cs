@@ -687,6 +687,7 @@ namespace Wodsoft.UI
         public object? DataContext { get { return GetValue(DataContextProperty); } set { SetValue(DataContextProperty, value); } }
 
         private ResourceDictionary? _resources;
+        [Ambient]
         public ResourceDictionary? Resources
         {
             get

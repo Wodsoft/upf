@@ -14,7 +14,7 @@ namespace Wodsoft.UI.Test
             var xaml = File.ReadAllText("ContentControlTemplate.xaml");
             var contentControl = LoadUpfXaml<ContentControl>(xaml);
             contentControl.Arrange(new Rect(0, 0, 100, 100));
-            Assert.NotNull(contentControl.TemplateChild!.FindName("test"));
+            Assert.NotNull(contentControl.TemplatedChild!.FindName("test"));
         }
     }
 }

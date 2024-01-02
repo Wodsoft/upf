@@ -421,6 +421,19 @@ namespace Wodsoft.UI
                 element.InvalidateProperty(property);
         }
 
+        internal ResourceDictionary? FindResourceDictionary(object resourceKey)
+        {
+            if (_resources != null && _resources.Contains(resourceKey))
+            {
+                return _resources;
+            }
+            if (_basedOn != null)
+            {
+                return _basedOn.FindResourceDictionary(resourceKey);
+            }
+            return null;
+        }
+
         #endregion
     }
 }
