@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
+using System.Xml.Linq;
 using Wodsoft.UI.Controls;
 using Wodsoft.UI.Data;
 using Wodsoft.UI.Media;
@@ -33,8 +34,7 @@ namespace Wodsoft.UI
         {
             if (!IsInitPending)
                 throw new InvalidOperationException("Element is not initializing.");
-            if (_style == null)
-                InvalidateProperty(StyleProperty);
+            Initialize();
             EndInit();
             IsInitPending = false;
         }
@@ -47,20 +47,21 @@ namespace Wodsoft.UI
         {
         }
 
+        private void Initialize()
+        {
+            if (_style == null)
+                InvalidateProperty(StyleProperty);
+        }
+
         #endregion
 
         #region Logical
 
         public LogicalObject? Parent => LogicalParent;
 
-        internal new void AddLogicalChild(LogicalObject child)
+        protected override void OnLogicalRootChanged(LogicalObject oldRoot, LogicalObject newRoot)
         {
-            base.AddLogicalChild(child);
-        }
-
-        internal new void RemoveLogicalChild(LogicalObject child)
-        {
-            base.RemoveLogicalChild(child);
+            Initialize();
         }
 
         #endregion
@@ -636,7 +637,7 @@ namespace Wodsoft.UI
                     binding.RetryAttach();
                 }
             }
-            var children = obj.LogicalChildren;
+            var children = LogicalTreeHelper.GetChildren(obj);
             if (children != null)
             {
                 foreach (var child in children)
@@ -686,6 +687,10 @@ namespace Wodsoft.UI
         }
         public object? DataContext { get { return GetValue(DataContextProperty); } set { SetValue(DataContextProperty, value); } }
 
+        #endregion
+
+        #region Resources
+
         private ResourceDictionary? _resources;
         [Ambient]
         public ResourceDictionary? Resources
@@ -700,6 +705,27 @@ namespace Wodsoft.UI
             {
                 _resources = value;
             }
+        }
+
+
+        public object? FindResource(object resourceKey)
+        {
+            if (resourceKey == null)
+                throw new ArgumentNullException("resourceKey");
+            var value = ResourceHelper.FindResource(this, resourceKey);
+            if (value == DependencyProperty.UnsetValue)
+                throw new InvalidOperationException("Resource key not found.");
+            return value;
+        }
+
+        public object? TryFindResource(object resourceKey)
+        {
+            if (resourceKey == null)
+                throw new ArgumentNullException("resourceKey");
+            var value = ResourceHelper.FindResource(this, resourceKey);
+            if (value == DependencyProperty.UnsetValue)
+                return null;
+            return value;
         }
 
         #endregion
