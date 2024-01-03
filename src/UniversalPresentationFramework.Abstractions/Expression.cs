@@ -81,9 +81,9 @@ namespace Wodsoft.UI
                 OnDetach();
             lock (_locker)
             {
-                OnAttach();
                 _object = d;
                 _property = dp;
+                OnAttach();
                 _isAttached = true;
             }
         }
