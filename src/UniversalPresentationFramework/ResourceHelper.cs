@@ -26,7 +26,7 @@ namespace Wodsoft.UI
                 if (logicalObject is FrameworkElement element && element.Resources != null)
                 {
                     var value = element.Resources[key];
-                    if (value != null)
+                    if (value != DependencyProperty.UnsetValue)
                         return value;
                 }
                 if (logicalObject.LogicalParent == null)
