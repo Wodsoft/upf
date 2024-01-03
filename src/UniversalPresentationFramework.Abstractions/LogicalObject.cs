@@ -16,16 +16,20 @@ namespace Wodsoft.UI
         private ReadOnlyCollection<LogicalObject>? _readonlyChildren;
         private LogicalObject? _root, _parent;
 
+        public event EventHandler<LogicalParentChangedEventArgs>? LogicalParentChanged;
+
         protected internal LogicalObject? LogicalParent => _parent;
 
         protected internal LogicalObject? LogicalRoot => _root;
+
+        protected internal IEnumerable<LogicalObject>? LogicalChildren => _readonlyChildren;
 
         protected override DependencyObject? GetInheritanceParent()
         {
             return _parent;
         }
 
-        protected void AddLogicalChild(LogicalObject child)
+        protected internal void AddLogicalChild(LogicalObject child)
         {
             if (child == null)
                 throw new ArgumentNullException(nameof(child));
@@ -40,10 +44,11 @@ namespace Wodsoft.UI
                 _readonlyChildren = _children.AsReadOnly();
             }
             _children.Add(child);
+            child.LogicalParentChanged?.Invoke(child, new LogicalParentChangedEventArgs(null, this));
             child.RootChanged(_root ?? this);
         }
 
-        protected void RemoveLogicalChild(LogicalObject child)
+        protected internal void RemoveLogicalChild(LogicalObject child)
         {
             if (child == null)
                 throw new ArgumentNullException(nameof(child));
@@ -58,10 +63,9 @@ namespace Wodsoft.UI
                 _children = null;
                 _readonlyChildren = null;
             }
+            child.LogicalParentChanged?.Invoke(child, new LogicalParentChangedEventArgs(this, null));
             child.RootChanged(null);
         }
-
-        protected internal virtual IEnumerable<LogicalObject>? LogicalChildren => _readonlyChildren;
 
         private void RootChanged(LogicalObject? root)
         {
