@@ -17,6 +17,7 @@ namespace Wodsoft.UI
         {
             _expression = expression;
             _source = DependencyEffectiveSource.Expression;
+            _value = DependencyProperty.UnsetValue;
         }
 
         public DependencyEffectiveValue(object? value, DependencyEffectiveSource source)
