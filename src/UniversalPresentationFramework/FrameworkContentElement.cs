@@ -45,7 +45,7 @@ namespace Wodsoft.UI
 
         private ResourceDictionary? _resources;
         [Ambient]
-        public ResourceDictionary? Resources
+        public ResourceDictionary Resources
         {
             get
             {
