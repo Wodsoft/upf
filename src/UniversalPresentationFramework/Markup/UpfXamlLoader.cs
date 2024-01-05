@@ -23,6 +23,15 @@ namespace Wodsoft.UI.Markup
             return result;
         }
 
+        public static void Load(System.Xaml.XamlReader xamlReader, bool skipJournaledProperties, object? rootObject)
+        {
+            XamlObjectWriterSettings settings = new XamlObjectWriterSettings();
+            settings.IgnoreCanConvert = true;
+            settings.PreferUnconvertedDictionaryKeys = true;
+            settings.RootObjectInstance = rootObject;
+            Load(xamlReader, null, skipJournaledProperties, rootObject, settings);
+        }
+
         private static object Load(System.Xaml.XamlReader xamlReader, IXamlObjectWriterFactory? writerFactory,
             bool skipJournaledProperties, object? rootObject, XamlObjectWriterSettings settings)
         {
@@ -31,7 +40,7 @@ namespace Wodsoft.UI.Markup
                 xamlWriter = new System.Xaml.XamlObjectWriter(xamlReader.SchemaContext, settings);
             else
                 xamlWriter = writerFactory.GetXamlObjectWriter(settings);
-
+            
             IXamlLineInfo? xamlLineInfo = null;
             //try
             //{
