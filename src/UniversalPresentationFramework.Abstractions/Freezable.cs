@@ -27,5 +27,39 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Object is frozen.");
             base.SetValueCore(dp, value);
         }
+
+        #region InheritanceContext
+
+        private List<(DependencyObject, DependencyProperty)>? _inheritanceContext;
+
+        public override DependencyObject? InheritanceContext
+        {
+            get
+            {
+                if (_inheritanceContext == null || _inheritanceContext.Count != 1)
+                    return null;
+                return _inheritanceContext[0].Item1;
+            }
+        }
+
+        public override event EventHandler? InheritanceContextChanged;
+
+        protected override void AddInheritanceContext(DependencyObject context, DependencyProperty property)
+        {
+            if (_inheritanceContext == null)
+                _inheritanceContext = new List<(DependencyObject, DependencyProperty)>();
+            _inheritanceContext.Add((context, property));
+            InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected override void RemoveInheritanceContext(DependencyObject context, DependencyProperty property)
+        {
+            if (_inheritanceContext == null)
+                return;
+            _inheritanceContext.Remove((context, property));
+            InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
     }
 }

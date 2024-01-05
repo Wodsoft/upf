@@ -4,6 +4,8 @@ namespace Wodsoft.UI
 {
     public class DependencyObject
     {
+        #region Values
+
         private Type? _type;
         private Dictionary<int, DependencyEffectiveValue> _valueStores = new Dictionary<int, DependencyEffectiveValue>();
 
@@ -234,6 +236,20 @@ namespace Wodsoft.UI
                 _valueStores[dp.GlobalIndex] = newEffectiveValue;
             }
 
+            if (CanBeInheritanceContext)
+            {
+                if (oldEffectiveValue.Source == DependencyEffectiveSource.Local)
+                {
+                    if (oldEffectiveValue.Value is DependencyObject oldValue && ShouldProvideInheritanceContext(oldValue, dp))
+                        oldValue.RemoveInheritanceContext(this, dp);
+                }
+                if (newEffectiveValue.Source == DependencyEffectiveSource.Local)
+                {
+                    if (newEffectiveValue.Value is DependencyObject newValue && ShouldProvideInheritanceContext(newValue, dp))
+                        newValue.AddInheritanceContext(this, dp);
+                }
+            }
+
             //Notify property changed
             //Don't notify when value is inherited and there is no old value
             if (!(newEffectiveValue.Source == DependencyEffectiveSource.Inherited && oldEffectiveValue.Source == DependencyEffectiveSource.None) &&
@@ -271,7 +287,25 @@ namespace Wodsoft.UI
 
         protected virtual void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
         {
-            
+
         }
+
+        #endregion
+
+        #region InheritanceContext
+
+        public virtual DependencyObject? InheritanceContext => null;
+
+        public virtual event EventHandler? InheritanceContextChanged;
+
+        protected virtual void AddInheritanceContext(DependencyObject context, DependencyProperty property) { }
+
+        protected virtual void RemoveInheritanceContext(DependencyObject context, DependencyProperty property) { }
+
+        protected virtual bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty property) => false;
+
+        protected virtual bool CanBeInheritanceContext => false;
+
+        #endregion
     }
 }

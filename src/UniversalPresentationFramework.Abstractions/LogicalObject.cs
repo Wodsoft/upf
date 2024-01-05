@@ -18,6 +18,8 @@ namespace Wodsoft.UI
 
         public event EventHandler<LogicalParentChangedEventArgs>? LogicalParentChanged;
 
+        public event EventHandler<LogicalRootChangedEventArgs>? LogicalRootChanged;
+
         protected internal LogicalObject? LogicalParent => _parent;
 
         protected internal LogicalObject? LogicalRoot => _root;
@@ -76,12 +78,24 @@ namespace Wodsoft.UI
                 foreach (var child in _children)
                     child.RootChanged(root ?? this);
             }
+            LogicalRootChanged?.Invoke(this, new LogicalRootChangedEventArgs(oldRoot ?? this, root ?? this));
             OnLogicalRootChanged(oldRoot ?? this, root ?? this);
         }
 
         protected virtual void OnLogicalRootChanged(LogicalObject oldRoot, LogicalObject newRoot)
         {
 
+        }
+
+        #endregion
+
+        #region InheritanceContext
+
+        protected override bool CanBeInheritanceContext => true;
+
+        protected override bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty property)
+        {
+            return target is not LogicalObject;
         }
 
         #endregion
