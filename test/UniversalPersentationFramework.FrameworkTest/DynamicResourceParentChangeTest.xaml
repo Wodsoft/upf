@@ -1,0 +1,16 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<Grid Name="container1">
+		<FrameworkElement.Resources>
+			<sys:String x:Key="value">text1</sys:String>
+		</FrameworkElement.Resources>
+		<local:MyObject Name="object" TextA="{DynamicResource value}"/>
+	</Grid>
+	<Grid Name="container2">
+		<FrameworkElement.Resources>
+			<sys:String x:Key="value">text2</sys:String>
+		</FrameworkElement.Resources>
+	</Grid>
+</Grid>
