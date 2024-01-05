@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
+    [TypeConverter("Wodsoft.UI.Markup.RoutedEventConverter, UniversalPresentationFramework")]
     public class RoutedEvent
     {
         private readonly string _name;

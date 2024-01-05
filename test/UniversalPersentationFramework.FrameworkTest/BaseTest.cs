@@ -14,6 +14,11 @@ namespace Wodsoft.UI.Test
             return (T)Wodsoft.UI.Markup.XamlReader.Parse(xaml);
         }
 
+        protected void LoadUpfXaml<T>(T root, string xaml)
+        {
+            Wodsoft.UI.Markup.XamlReader.Parse(xaml, root);
+        }
+
         protected T LoadUpfWithWpfXaml<T>(string xaml)
         {
             return LoadUpfXaml<T>(ConvertToUpfXaml(xaml));

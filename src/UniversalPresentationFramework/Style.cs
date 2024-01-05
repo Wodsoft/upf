@@ -334,8 +334,9 @@ namespace Wodsoft.UI
                         //}
                     }
                 }
-                else
+                else if (setterBase is EventSetter eventSetter)
                 {
+                    _eventSetters.Add(eventSetter);
                     //// Add this to the _eventHandlersStore
 
                     //EventSetter eventSetter = (EventSetter)setterBase;
@@ -395,6 +396,7 @@ namespace Wodsoft.UI
         #region Style
 
         private Dictionary<DependencyProperty, object?> _propertySetters = new Dictionary<DependencyProperty, object?>();
+        private List<EventSetter> _eventSetters = new List<EventSetter>();
 
         internal bool TryApplyProperty(DependencyProperty dp, ref DependencyEffectiveValue effectiveValue)
         {
@@ -419,6 +421,12 @@ namespace Wodsoft.UI
                 properties = oldStyle._propertySetters.Keys.Concat(newStyle._propertySetters.Keys).Distinct();
             foreach (var property in properties)
                 element.InvalidateProperty(property);
+            if (oldStyle != null)
+                foreach (var eventSetter in oldStyle._eventSetters)
+                    element.RemoveHandler(eventSetter.Event!, eventSetter.Handler!);
+            if (newStyle != null)
+                foreach (var eventSetter in newStyle._eventSetters)
+                    element.AddHandler(eventSetter.Event!, eventSetter.Handler!, eventSetter.HandledEventsToo);
         }
 
         internal ResourceDictionary? FindResourceDictionary(object resourceKey)
