@@ -478,12 +478,16 @@ namespace Wodsoft.UI
                 if (_templatedContent != null)
                 {
                     _templatedContent._templatedParent = null;
+                    RemoveLogicalChild(_templatedContent);
                     RemoveVisualChild(_templatedContent);
                 }
-                _templatedContent = LoadTemplate();
+                var template = GetTemplate();
+                if (template != null)
+                    _templatedContent = template.LoadContent();
                 if (_templatedContent != null)
                 {
                     _templatedContent._templatedParent = this;
+                    AddLogicalChild(_templatedContent);
                     AddVisualChild(_templatedContent);
                 }
                 OnApplyTemplate();
@@ -494,7 +498,9 @@ namespace Wodsoft.UI
             return result;
         }
 
-        protected virtual FrameworkElement? LoadTemplate() { return null; }
+        protected virtual FrameworkTemplate? GetTemplate() => null;
+
+        internal FrameworkTemplate? GetTemplateInternal() => GetTemplate();
 
         protected virtual void OnPreApplyTemplate() { }
 
@@ -693,7 +699,7 @@ namespace Wodsoft.UI
 
         private ResourceDictionary? _resources;
         [Ambient]
-        public ResourceDictionary? Resources
+        public ResourceDictionary Resources
         {
             get
             {

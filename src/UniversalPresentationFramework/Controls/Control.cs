@@ -14,10 +14,7 @@ namespace Wodsoft.UI.Controls
 
         private ControlTemplate? _template;
 
-        protected override FrameworkElement? LoadTemplate()
-        {
-            return _template?.LoadContent();
-        }
+        protected override FrameworkTemplate? GetTemplate() => _template;
 
         #endregion
 
