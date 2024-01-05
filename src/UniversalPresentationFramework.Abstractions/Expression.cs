@@ -81,9 +81,18 @@ namespace Wodsoft.UI
                 OnDetach();
             lock (_locker)
             {
-                _object = d;
-                _property = dp;
-                OnAttach();
+                try
+                {
+                    _object = d;
+                    _property = dp;
+                    OnAttach();
+                }
+                catch(Exception ex)
+                {
+                    _object = null;
+                    _property = null;
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw();
+                }
                 _isAttached = true;
             }
         }
