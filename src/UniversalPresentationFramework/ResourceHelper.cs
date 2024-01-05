@@ -9,23 +9,40 @@ namespace Wodsoft.UI
 {
     internal static class ResourceHelper
     {
-        public static object? FindResource(FrameworkElement element, object key)
+        public static object? FindResource(LogicalObject logicalObject, object key)
         {
-            var value = FindResourceInTree(element, key);
+            var value = FindResourceInTree(logicalObject, key);
             if (value != DependencyProperty.UnsetValue)
                 return value;
             value = FindResourceInApplication(key);
             return value;
         }
 
-        public static object? FindResourceInTree(FrameworkElement fe, object key)
+        public static object? FindResourceInTree(LogicalObject logicalObject, object key)
         {
-            LogicalObject logicalObject = fe;
             while (true)
             {
-                if (logicalObject is FrameworkElement element && element.Resources != null)
+                if (logicalObject is FrameworkElement fe)
                 {
-                    var value = element.Resources[key];
+                    var value = fe.Resources[key];
+                    if (value != DependencyProperty.UnsetValue)
+                        return value;
+                    if (fe.TemplatedParent != null)
+                    {
+                        var template = fe.TemplatedParent.GetTemplateInternal();
+                        if (template != null)
+                        {
+                            value = template.Resources[key];
+                            if (value != DependencyProperty.UnsetValue)
+                                return value;
+                        }
+                        logicalObject = fe.TemplatedParent;
+                        continue;
+                    }
+                }
+                if (logicalObject is FrameworkContentElement fce)
+                {
+                    var value = fce.Resources[key];
                     if (value != DependencyProperty.UnsetValue)
                         return value;
                 }
