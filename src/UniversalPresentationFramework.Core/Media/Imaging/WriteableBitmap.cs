@@ -10,7 +10,11 @@ namespace Wodsoft.UI.Media.Imaging
 {
     public sealed class WriteableBitmap : BitmapSource
     {
-        private readonly IBitmapContext _context;
+        private IBitmapContext _context;
+
+#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+        private WriteableBitmap() { }
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
         public WriteableBitmap(BitmapSource source)
         {
@@ -40,6 +44,7 @@ namespace Wodsoft.UI.Media.Imaging
 
         public void Lock()
         {
+            WritePreamble();
             _context.Lock();
         }
 
@@ -50,6 +55,7 @@ namespace Wodsoft.UI.Media.Imaging
 
         public void WritePixels(Int32Rect sourceRect, Array pixels, int stride, int offset)
         {
+            WritePreamble();
             if (pixels == null)
                 throw new ArgumentNullException(nameof(pixels));
             if (pixels.Length == 0)
@@ -75,6 +81,7 @@ namespace Wodsoft.UI.Media.Imaging
 
         public void WritePixels(Int32Rect sourceRect, Array sourceBuffer, int sourceBufferStride, int destinationX, int destinationY)
         {
+            WritePreamble();
             if (sourceBuffer == null)
                 throw new ArgumentNullException(nameof(sourceBuffer));
             if (sourceBuffer.Length == 0)
@@ -95,12 +102,42 @@ namespace Wodsoft.UI.Media.Imaging
 
         public void WritePixels(Int32Rect sourceRect, IntPtr buffer, int bufferSize, int stride)
         {
+            WritePreamble();
             _context.WritePixels(sourceRect, buffer, bufferSize, stride, 0, 0);
         }
 
         public void WritePixels(Int32Rect sourceRect, IntPtr sourceBuffer, int sourceBufferSize, int sourceBufferStride, int destinationX, int destinationY)
         {
+            WritePreamble();
             _context.WritePixels(sourceRect, sourceBuffer, sourceBufferSize, sourceBufferStride, destinationX, destinationY);
         }
+
+        #region Clone
+
+        public new WriteableBitmap Clone()
+        {
+            return (WriteableBitmap)base.Clone();
+        }
+
+        public new WriteableBitmap CloneCurrentValue()
+        {
+            return (WriteableBitmap)base.CloneCurrentValue();
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new WriteableBitmap();
+        }
+
+        protected override void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
+        {
+            var source = (WriteableBitmap)sourceFreezable;
+            if (source.IsFrozen)
+                _context = source._context;
+            else
+                _context = FrameworkProvider.RendererProvider!.CreateBitmapContext(source._context);
+        }
+
+        #endregion
     }
 }

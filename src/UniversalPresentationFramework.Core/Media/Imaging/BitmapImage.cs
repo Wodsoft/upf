@@ -407,5 +407,49 @@ namespace Wodsoft.UI.Media.Imaging
         }
 
         #endregion
+
+        #region Clone
+
+        public new BitmapImage Clone()
+        {
+            return (BitmapImage)base.Clone();
+        }
+
+        public new BitmapImage CloneCurrentValue()
+        {
+            return (BitmapImage)base.CloneCurrentValue();
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new BitmapImage();
+        }
+
+        protected override void CloneCore(Freezable sourceFreezable)
+        {
+            base.CloneCore(sourceFreezable);
+            var sourceBitmap = (BitmapImage)sourceFreezable;
+            _isInInit = sourceBitmap._isInInit;
+            _isInitialized = sourceBitmap._isInitialized;
+            _delayCreation = sourceBitmap._delayCreation;
+            _downloader = sourceBitmap._downloader;
+            if (_downloader != null)
+            {
+                _isDownloading = true;
+                _downloader.DownloadProgress += Downloader_DownloadProgress;
+                _downloader.DownloadFailed += Downloader_DownloadFailed;
+                _downloader.DownloadCompleted += Downloader_DownloadCompleted;
+            }
+            _context = sourceBitmap._context;
+            if (_context != null && _downloader != null)
+            {
+                _isDownloading = false;
+                _downloader.DownloadProgress -= Downloader_DownloadProgress;
+                _downloader.DownloadFailed -= Downloader_DownloadFailed;
+                _downloader.DownloadCompleted -= Downloader_DownloadCompleted;
+            }
+        }
+
+        #endregion
     }
 }

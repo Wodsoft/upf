@@ -21,5 +21,24 @@ namespace Wodsoft.UI.Media
                                    typeof(SolidColorBrush),
                                    new PropertyMetadata(Colors.Transparent));
         public Color Color { get { return (Color)GetValue(ColorProperty)!; } set { SetValue(ColorProperty, value); } }
+
+        #region Clone
+
+        public new SolidColorBrush Clone()
+        {
+            return (SolidColorBrush)base.Clone();
+        }
+
+        public new SolidColorBrush CloneCurrentValue()
+        {
+            return (SolidColorBrush)base.CloneCurrentValue();
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new SolidColorBrush();
+        }
+
+        #endregion
     }
 }

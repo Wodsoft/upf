@@ -57,5 +57,24 @@ namespace Wodsoft.UI.Media
         public FloatCollection Dashes { get { return (FloatCollection)GetValue(DashesProperty)!; } set { SetValue(DashesProperty, value); } }
 
         #endregion
+
+        #region Clone
+
+        public new DashStyle Clone()
+        {
+            return (DashStyle)base.Clone();
+        }
+
+        public new DashStyle CloneCurrentValue()
+        {
+            return (DashStyle)base.CloneCurrentValue();
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new DashStyle();
+        }
+
+        #endregion
     }
 }

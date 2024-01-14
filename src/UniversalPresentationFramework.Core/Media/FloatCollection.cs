@@ -4,12 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media.Imaging;
 
 namespace Wodsoft.UI.Media
 {
     public class FloatCollection : Freezable, IList<float>
     {
         private List<float> _list;
+
+        private FloatCollection(int capacity)
+        {
+            _list = new List<float>(capacity);
+        }
 
         public FloatCollection()
         {
@@ -103,5 +109,31 @@ namespace Wodsoft.UI.Media
         {
             return _list.GetEnumerator();
         }
+
+
+        #region Clone
+
+        public new FloatCollection Clone()
+        {
+            return (FloatCollection)base.Clone();
+        }
+
+        public new FloatCollection CloneCurrentValue()
+        {
+            return (FloatCollection)base.CloneCurrentValue();
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new FloatCollection(_list.Count);
+        }
+
+        protected override void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
+        {
+            var source = (FloatCollection)sourceFreezable;
+            _list.AddRange(source._list);
+        }
+
+        #endregion
     }
 }

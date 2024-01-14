@@ -9,12 +9,23 @@ namespace Wodsoft.UI.Media.Imaging
     public sealed class RenderTargetBitmap : BitmapSource
     {
         private readonly IRenderBitmapContext _context;
+        private readonly double _dpiX;
+        private readonly double _dpiY;
+
+        private RenderTargetBitmap(IRenderBitmapContext context, double dpiX, double dpiY)
+        {
+            _context = context;
+            _dpiX = dpiX;
+            _dpiY = dpiY;
+        }
 
         public RenderTargetBitmap(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
         {
             if (FrameworkProvider.RendererProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             _context = FrameworkProvider.RendererProvider.CreateRenderBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat);
+            _dpiX = dpiX;
+            _dpiY = dpiY;
         }
 
         public override int PixelWidth => _context.Width;
@@ -29,7 +40,36 @@ namespace Wodsoft.UI.Media.Imaging
 
         public void Render(Visual visual)
         {
+            WritePreamble();
             _context.Render(visual);
         }
+
+        #region Clone
+
+        public new RenderTargetBitmap Clone()
+        {
+            return (RenderTargetBitmap)base.Clone();
+        }
+
+        public new RenderTargetBitmap CloneCurrentValue()
+        {
+            return (RenderTargetBitmap)base.CloneCurrentValue();
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            if (IsFrozen)
+                return new RenderTargetBitmap(_context, _dpiX, _dpiY);
+            return new RenderTargetBitmap(_context.Width, _context.Height, _dpiX, _dpiY, _context.PixelFormat);
+        }
+
+        protected override void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
+        {
+            var source = (RenderTargetBitmap)sourceFreezable;
+            if (!source.IsFrozen)
+                _context.CopyPixels(source._context);
+        }
+
+        #endregion
     }
 }
