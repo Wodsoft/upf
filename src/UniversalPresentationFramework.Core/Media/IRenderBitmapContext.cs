@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Media
 {
-    public interface IRenderBitmapContext : IImageContext
+    public interface IRenderBitmapContext : IBitmapContext
     {
         void Render(Visual visual);
     }

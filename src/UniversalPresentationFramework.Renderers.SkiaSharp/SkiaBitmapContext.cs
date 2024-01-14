@@ -116,5 +116,15 @@ namespace Wodsoft.UI.Renderers
                 pixmap.Dispose();
             }
         }
+
+        public void CopyPixels(IImageContext imageContext)
+        {
+            if (imageContext is not SkiaImageContext skiaImageContext)
+                throw new NotSupportedException("Only support copy pixels from skia image context.");
+            var sourcePixmap = skiaImageContext.Image.PeekPixels();
+            var destPixmap = _bitmap.PeekPixels();
+            destPixmap.ReadPixels(sourcePixmap);
+            destPixmap.Dispose();
+        }
     }
 }

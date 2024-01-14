@@ -22,5 +22,7 @@ namespace Wodsoft.UI.Renderers
         {
             _rendererContext.Render(visual);
         }
+
+        
     }
 }
