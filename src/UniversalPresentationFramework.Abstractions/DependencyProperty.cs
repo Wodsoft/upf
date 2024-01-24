@@ -17,6 +17,7 @@ namespace Wodsoft.UI
         private readonly static object _GlobalLocker = new object();
         private readonly object _metadataLocker = new object();
         private readonly static Dictionary<FromNameKey, DependencyProperty> _NameTables = new Dictionary<FromNameKey, DependencyProperty>();
+        private readonly static List<DependencyProperty> _Properties = new List<DependencyProperty>();
         private readonly TreeMap<TypeMetadata> _metadatas = new TreeMap<TypeMetadata>();
         private int _index;
 
@@ -111,6 +112,7 @@ namespace Wodsoft.UI
                 }
                 var dp = new DependencyProperty(name, propertyType, ownerType, metadata, validateValueCallback, isReadOnly, isNullable);
                 dp._index = _Count++;
+                _Properties.Add(dp);
                 _NameTables[key] = dp;
                 return dp;
             }
@@ -263,6 +265,8 @@ namespace Wodsoft.UI
             }
             return null;
         }
+
+        internal static DependencyProperty GetProperty(int index) => _Properties[index];
 
         public Type PropertyType { get; }
         public Type OwnerType { get; }
