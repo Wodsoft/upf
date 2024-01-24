@@ -12,9 +12,10 @@ namespace Wodsoft.UI.Media.Imaging
     {
         private IBitmapContext _context;
 
-#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
-        private WriteableBitmap() { }
-#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+        private WriteableBitmap(IBitmapContext context)
+        {
+            _context = context;
+        }
 
         public WriteableBitmap(BitmapSource source)
         {
@@ -126,16 +127,10 @@ namespace Wodsoft.UI.Media.Imaging
 
         protected override Freezable CreateInstanceCore()
         {
-            return new WriteableBitmap();
-        }
-
-        protected override void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
-        {
-            var source = (WriteableBitmap)sourceFreezable;
-            if (source.IsFrozen)
-                _context = source._context;
+            if (IsFrozen)
+                return new WriteableBitmap(_context);
             else
-                _context = FrameworkProvider.RendererProvider!.CreateBitmapContext(source._context);
+                return new WriteableBitmap(FrameworkProvider.RendererProvider!.CreateBitmapContext(_context));
         }
 
         #endregion

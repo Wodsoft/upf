@@ -33,7 +33,9 @@ namespace Wodsoft.UI
             base.SetValueCore(dp, value);
         }
 
-        protected void WritePreamble()
+        protected virtual void ReadPreamble() { }
+
+        protected virtual void WritePreamble()
         {
             if (_isFrozen)
                 throw new InvalidOperationException("Object is frozen.");
@@ -78,7 +80,7 @@ namespace Wodsoft.UI
                 /* cloneFrozenValues = */ true);
         }
 
-        protected virtual void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
+        private void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
         {
             foreach (var entry in sourceFreezable.GetEffectiveValues())
             {
@@ -209,6 +211,8 @@ namespace Wodsoft.UI
 
         protected override void AddInheritanceContext(DependencyObject context, DependencyProperty property)
         {
+            if (IsInheritanceContextSealed)
+                return;
             if (_inheritanceContext == null)
                 _inheritanceContext = new List<(DependencyObject, DependencyProperty)>();
             _inheritanceContext.Add((context, property));
@@ -217,6 +221,8 @@ namespace Wodsoft.UI
 
         protected override void RemoveInheritanceContext(DependencyObject context, DependencyProperty property)
         {
+            if (IsInheritanceContextSealed)
+                return;
             if (_inheritanceContext == null)
                 return;
             _inheritanceContext.Remove((context, property));

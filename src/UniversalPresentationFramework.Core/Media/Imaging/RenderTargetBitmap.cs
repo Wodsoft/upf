@@ -60,14 +60,9 @@ namespace Wodsoft.UI.Media.Imaging
         {
             if (IsFrozen)
                 return new RenderTargetBitmap(_context, _dpiX, _dpiY);
-            return new RenderTargetBitmap(_context.Width, _context.Height, _dpiX, _dpiY, _context.PixelFormat);
-        }
-
-        protected override void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
-        {
-            var source = (RenderTargetBitmap)sourceFreezable;
-            if (!source.IsFrozen)
-                _context.CopyPixels(source._context);
+            var newBitmap = new RenderTargetBitmap(_context.Width, _context.Height, _dpiX, _dpiY, _context.PixelFormat);
+            newBitmap._context.CopyPixels(_context);
+            return newBitmap;
         }
 
         #endregion

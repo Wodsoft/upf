@@ -110,7 +110,6 @@ namespace Wodsoft.UI.Media
             return _list.GetEnumerator();
         }
 
-
         #region Clone
 
         public new FloatCollection Clone()
@@ -124,14 +123,8 @@ namespace Wodsoft.UI.Media
         }
 
         protected override Freezable CreateInstanceCore()
-        {
-            return new FloatCollection(_list.Count);
-        }
-
-        protected override void CloneCoreCommon(Freezable sourceFreezable, bool useCurrentValue, bool cloneFrozenValues)
-        {
-            var source = (FloatCollection)sourceFreezable;
-            _list.AddRange(source._list);
+        {            
+            return new FloatCollection(_list);
         }
 
         #endregion
