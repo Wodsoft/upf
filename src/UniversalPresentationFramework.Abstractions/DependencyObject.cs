@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+﻿using System.Runtime.InteropServices;
 
 namespace Wodsoft.UI
 {
@@ -130,7 +130,7 @@ namespace Wodsoft.UI
             if (oldValue.Source == DependencyEffectiveSource.Expression && oldValue.Expression!.IsAttached && oldValue.Expression!.CanUpdateSource)
             {
                 newValue = new DependencyEffectiveValue(oldValue.Expression!);
-                newValue.ModifyValue(value);
+                newValue.UpdateValue(value);
             }
             else
             {
@@ -206,7 +206,10 @@ namespace Wodsoft.UI
 
         private void UpdateEffectiveValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue oldEffectiveValue, ref DependencyEffectiveValue newEffectiveValue)
         {
-            //Update value from source if there is difference expression
+            //Evaluate framework value
+            EvaluateBaseValue(dp, metadata, ref newEffectiveValue);
+
+            //Attach expression if there is difference expression
             if (newEffectiveValue.Source == DependencyEffectiveSource.Expression)
             {
                 if (newEffectiveValue.Expression != oldEffectiveValue.Expression)
@@ -214,13 +217,10 @@ namespace Wodsoft.UI
                     newEffectiveValue.Expression!.Attach(this, dp);
                     if (newEffectiveValue.Expression!.CanUpdateTarget)
                     {
-                        newEffectiveValue.Expression!.UpdateTarget();
+                        newEffectiveValue.Expression!.UpdateValue();
                     }
                 }
             }
-
-            //Evaluate framework value
-            EvaluateBaseValue(dp, metadata, ref newEffectiveValue);
 
             //Nothing happen, return
             if (newEffectiveValue.Source == DependencyEffectiveSource.None && oldEffectiveValue.Source == DependencyEffectiveSource.None)
@@ -267,6 +267,7 @@ namespace Wodsoft.UI
             {
                 if (oldEffectiveValue.Expression == newEffectiveValue.Expression)
                 {
+                    newEffectiveValue.Expression!.Value = newEffectiveValue.Value;
                     newEffectiveValue.Expression!.UpdateSource();
                 }
                 else
@@ -280,6 +281,7 @@ namespace Wodsoft.UI
                 {
                     //One way to source expression
                     //Set value to expression and return
+                    newEffectiveValue.Expression!.Value = newEffectiveValue.Value;
                     newEffectiveValue.Expression!.UpdateSource();
                 }
             }
@@ -287,6 +289,47 @@ namespace Wodsoft.UI
 
         protected virtual void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
         {
+
+        }
+
+        protected Enumerable GetEffectiveValues()
+        {
+            return new Enumerable(_valueStores);
+        }
+
+        public ref struct Enumerable
+        {
+            private readonly Enumerator _enumerator;
+
+            public Enumerable(Dictionary<int, DependencyEffectiveValue> values)
+            {
+                _enumerator = new Enumerator(values);
+            }
+
+            public Enumerator GetEnumerator() => _enumerator;
+        }
+
+        public ref struct Enumerator
+        {
+            private Dictionary<int, DependencyEffectiveValue>.Enumerator _enumerator;
+            private readonly Dictionary<int, DependencyEffectiveValue> _values;
+            private DependencyEffectiveValueEntry _current;
+
+            public Enumerator(Dictionary<int, DependencyEffectiveValue> values)
+            {
+                _enumerator = values.GetEnumerator();
+                _values = values;
+            }
+
+            public DependencyEffectiveValueEntry Current => _current;
+
+            public bool MoveNext()
+            {
+                if (!_enumerator.MoveNext())
+                    return false;
+                _current = new DependencyEffectiveValueEntry(DependencyProperty.GetProperty(_enumerator.Current.Key), ref CollectionsMarshal.GetValueRefOrNullRef(_values, _enumerator.Current.Key));
+                return true;
+            }
 
         }
 
@@ -298,6 +341,8 @@ namespace Wodsoft.UI
 
         public virtual event EventHandler? InheritanceContextChanged;
 
+        public bool IsInheritanceContextSealed { get; set; }
+
         protected virtual void AddInheritanceContext(DependencyObject context, DependencyProperty property) { }
 
         protected virtual void RemoveInheritanceContext(DependencyObject context, DependencyProperty property) { }
@@ -305,6 +350,36 @@ namespace Wodsoft.UI
         protected virtual bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty property) => false;
 
         protected virtual bool CanBeInheritanceContext => false;
+
+        protected internal bool ProvideSelfAsInheritanceContext(DependencyObject d, DependencyProperty dp)
+        {
+            if (CanBeInheritanceContext && d != null && !d.IsInheritanceContextSealed && ShouldProvideInheritanceContext(d, dp))
+            {
+                if (d.InheritanceContext == this)
+                    return false;
+                d.AddInheritanceContext(this, dp);
+                return d.InheritanceContext == this;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        protected internal bool RemoveSelfAsInheritanceContext(DependencyObject d, DependencyProperty dp)
+        {
+            if (CanBeInheritanceContext && d != null && !d.IsInheritanceContextSealed && ShouldProvideInheritanceContext(d, dp))
+            {
+                if (d.InheritanceContext != this)
+                    return false;
+                d.RemoveInheritanceContext(this, dp);
+                return d.InheritanceContext != this;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         #endregion
     }

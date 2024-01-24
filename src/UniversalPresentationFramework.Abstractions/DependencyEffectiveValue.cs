@@ -9,9 +9,10 @@ namespace Wodsoft.UI
     public struct DependencyEffectiveValue
     {
         private DependencyEffectiveSource _source;
-        private bool _modified;
         private Expression? _expression;
         private object? _value;
+        private bool _hasValue;
+        private IDependencyModifiedValue? _modifiedValue;
 
         public DependencyEffectiveValue(Expression expression)
         {
@@ -20,8 +21,19 @@ namespace Wodsoft.UI
             _value = DependencyProperty.UnsetValue;
         }
 
+        public DependencyEffectiveValue(DependencyEffectiveSource source)
+        {
+            //if (source == DependencyEffectiveSource.None)
+            //    throw new ArgumentException("Could not create none source effective value.", "source");
+            if (source == DependencyEffectiveSource.Expression)
+                throw new InvalidOperationException("Could not create expression source effective value without expression.");
+            _source = source;
+        }
+
         public DependencyEffectiveValue(object? value, DependencyEffectiveSource source)
         {
+            if (source == DependencyEffectiveSource.None)
+                throw new ArgumentException("Could not create none source effective value.", "source");
             if (source == DependencyEffectiveSource.Expression)
                 throw new InvalidOperationException("Could not create expression source effective value without expression.");
             _source = source;
@@ -36,8 +48,10 @@ namespace Wodsoft.UI
             {
                 if (_source == DependencyEffectiveSource.None)
                     return DependencyProperty.UnsetValue;
-                else if (!_modified && _source == DependencyEffectiveSource.Expression && _expression!.Value != Expression.NoValue)
-                    return _expression!.Value;
+                else if (_modifiedValue != null)
+                    return _modifiedValue.GetValue(ref this);
+                else if (!_hasValue && _expression != null && _expression!.Value != Expression.NoValue)
+                    return _expression.Value;
                 else
                     return _value;
             }
@@ -45,11 +59,20 @@ namespace Wodsoft.UI
 
         public Expression? Expression => _expression;
 
-        public bool IsValueModified => _modified;
+        public bool HasValue => _hasValue;
 
-        public void ModifyValue(object? value)
+        public IDependencyModifiedValue? ModifiedValue => _modifiedValue;
+
+        public bool HasModifiedValue => _modifiedValue != null;
+
+        public void ModifyValue(IDependencyModifiedValue modifyedValue)
         {
-            _modified = true;
+            _modifiedValue = modifyedValue;
+        }
+
+        public void UpdateValue(object? value)
+        {
+            _hasValue = true;
             _value = value;
         }
     }

@@ -134,5 +134,10 @@ namespace Wodsoft.UI
                 return false;
             }
         }
+
+        internal void UpdateValue()
+        {
+            TryUpdateExpressionValue(GetSourceValue());
+        }
     }
 }
