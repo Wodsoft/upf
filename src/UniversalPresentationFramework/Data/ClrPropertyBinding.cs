@@ -59,7 +59,7 @@ namespace Wodsoft.UI.Data
         }
 
         private static Dictionary<PropertyInfo, MethodCache> _Caches = new Dictionary<PropertyInfo, MethodCache>();
-        private static MethodCache GetCache(PropertyInfo propertyInfo)
+        internal static MethodCache GetCache(PropertyInfo propertyInfo)
         {
             if (_Caches.TryGetValue(propertyInfo, out MethodCache cache)) { return cache; }
             cache = new MethodCache();
@@ -82,7 +82,7 @@ namespace Wodsoft.UI.Data
             return cache;
         }
 
-        private struct MethodCache
+        internal struct MethodCache
         {
             public Func<object, object?>? Get;
             public Action<object, object?>? Set;
