@@ -9,6 +9,18 @@ namespace Wodsoft.UI.Test
 {
     public class BaseTest
     {
+        private readonly TestClockProvider _clockProvider;
+        public BaseTest()
+        {
+            _clockProvider = new TestClockProvider();
+            FrameworkProvider.ClockProvider = _clockProvider;
+        }
+
+        protected void ApplyTick(TimeSpan tick)
+        {
+            _clockProvider.ApplyTick(tick);
+        }
+
         protected T LoadUpfXaml<T>(string xaml)
         {
             return (T)Wodsoft.UI.Markup.XamlReader.Parse(xaml);

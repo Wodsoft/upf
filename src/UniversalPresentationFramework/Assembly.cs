@@ -8,4 +8,5 @@ using System.Xaml.Markup;
 [assembly: XmlnsDefinition("http://schemas.wodsoft.com/upf/presentation", "Wodsoft.UI")]
 [assembly: XmlnsDefinition("http://schemas.wodsoft.com/upf/presentation", "Wodsoft.UI.Controls")]
 [assembly: XmlnsDefinition("http://schemas.wodsoft.com/upf/presentation", "Wodsoft.UI.Data")]
+[assembly: XmlnsDefinition("http://schemas.wodsoft.com/upf/presentation", "Wodsoft.UI.Media.Animation")]
 [assembly: XmlnsDefinition("http://schemas.wodsoft.com/upf/presentation", "Wodsoft.UI.Shapes")]

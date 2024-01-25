@@ -658,6 +658,7 @@ namespace Wodsoft.UI
 
         protected sealed override void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
         {
+            base.EvaluateBaseValue(dp, metadata, ref effectiveValue);
             if (effectiveValue.Source == DependencyEffectiveSource.Local || effectiveValue.Source == DependencyEffectiveSource.Expression)
                 return;
             if (dp == StyleProperty)
@@ -704,12 +705,16 @@ namespace Wodsoft.UI
             get
             {
                 if (_resources == null)
-                    _resources = new ResourceDictionary();
+                    _resources = new ResourceDictionary(this);
                 return _resources;
             }
             set
             {
+                if (_resources == value)
+                    return;
+                _resources?.RemoveOwner(this);
                 _resources = value;
+                value?.AddOwner(this);
             }
         }
 

@@ -10,6 +10,6 @@ namespace Wodsoft.UI
     {
         internal static IRendererProvider? RendererProvider;
 
-        
+        internal static IClockProvider? ClockProvider;
     }
 }

@@ -12,7 +12,16 @@ namespace Wodsoft.UI
     [Ambient]
     public class ResourceDictionary : IDictionary, ISupportInitialize, INameScope
     {
-        private Dictionary<object, object?> _dictionary = new Dictionary<object, object?>();
+        private static readonly DependencyProperty _ContextProperty = DependencyProperty.Register("Context", typeof(object), typeof(ResourceDictionary));
+        private readonly Dictionary<object, object?> _dictionary = new Dictionary<object, object?>();
+        private DependencyObject? _owner;
+
+        public ResourceDictionary() { }
+
+        public ResourceDictionary(DependencyObject owner)
+        {
+            _owner = owner;
+        }
 
         #region Dictionary
 
@@ -26,7 +35,14 @@ namespace Wodsoft.UI
             }
             set
             {
+                if (_dictionary.TryGetValue(key, out var oldValue))
+                {
+                    if (oldValue == value)
+                        return;
+                    RemoveInheritanceContext(oldValue);
+                }
                 _dictionary[key] = value;
+                AddInheritanceContext(value);
             }
         }
 
@@ -47,6 +63,7 @@ namespace Wodsoft.UI
         public void Add(object key, object? value)
         {
             _dictionary.Add(key, value);
+            AddInheritanceContext(value);
         }
 
         public void Clear()
@@ -71,12 +88,53 @@ namespace Wodsoft.UI
 
         public void Remove(object key)
         {
-            _dictionary.Remove(key);
+            if (_dictionary.TryGetValue(key, out var value))
+            {
+                _dictionary.Remove(key);
+                RemoveInheritanceContext(value);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _dictionary.GetEnumerator();
+        }
+
+        internal void AddOwner(DependencyObject owner)
+        {
+            if (_owner != null)
+                return;
+            _owner = owner;
+            foreach (var obj in _dictionary.Values)
+                AddInheritanceContext(obj);
+        }
+
+        internal void RemoveOwner(DependencyObject owner)
+        {
+            if (_owner == owner)
+            {
+                foreach (var obj in _dictionary.Values)
+                    RemoveInheritanceContext(obj);
+                _owner = null;
+            }
+        }
+
+        private void AddInheritanceContext(object? item)
+        {
+            if (item is DependencyObject d)
+            {
+                if (_owner!.ProvideSelfAsInheritanceContext(d, _ContextProperty))
+                    d.IsInheritanceContextSealed = true;
+            }
+        }
+
+        private void RemoveInheritanceContext(object? item)
+        {
+            if (item is DependencyObject d && d.IsInheritanceContextSealed && d.InheritanceContext == _owner)
+            {
+                d.IsInheritanceContextSealed = false;
+                _owner!.RemoveSelfAsInheritanceContext(d, _ContextProperty);
+            }
         }
 
         #endregion

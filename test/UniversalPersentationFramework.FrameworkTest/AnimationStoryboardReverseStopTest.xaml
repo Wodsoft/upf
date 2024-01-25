@@ -1,0 +1,10 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<Grid.Resources>
+		<Storyboard x:Key="story1" AutoReverse="True" FillBehavior="Stop">
+			<SingleAnimation FillBehavior="Stop" Storyboard.TargetName="target" Storyboard.TargetProperty="Width" From="200" To="300" Duration="0:0:1"/>
+		</Storyboard>
+	</Grid.Resources>
+	<local:MyObject Name="target" Width="100"/>
+</Grid>

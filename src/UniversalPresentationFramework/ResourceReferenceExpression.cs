@@ -52,20 +52,7 @@ namespace Wodsoft.UI
 
         private void Bind()
         {
-            LogicalObject? logicalObject = AttachedObject as LogicalObject;
-            if (logicalObject == null)
-            {
-                var obj = AttachedObject;
-                while (obj != null)
-                {
-                    if (obj is LogicalObject)
-                    {
-                        logicalObject = (LogicalObject)obj;
-                        break;
-                    }
-                    obj = obj.InheritanceContext;
-                }
-            }
+            LogicalObject? logicalObject = LogicalTreeHelper.FindMentor(AttachedObject!);
 
             if (logicalObject == null)
                 return;

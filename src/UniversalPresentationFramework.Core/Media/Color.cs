@@ -205,6 +205,34 @@ namespace Wodsoft.UI.Media
             return _a.GetHashCode() ^ _r.GetHashCode() ^ _g.GetHashCode() ^ _b.GetHashCode();
         }
 
+        public static Color operator +(Color color1, Color color2)
+        {
+                Color c1 = FromScRgb(
+                      color1._af + color2._af,
+                      color1._rf + color2._rf,
+                      color1._gf + color2._gf,
+                      color1._bf + color2._bf);
+                return c1;
+        }
+
+        public static Color operator -(Color color1, Color color2)
+        {
+                Color c1 = FromScRgb(
+                    color1._af - color2._af,
+                    color1._rf - color2._rf,
+                    color1._gf - color2._gf,
+                    color1._bf - color2._bf
+                    );
+                return c1;
+        }
+
+        public static Color operator *(Color color, float coefficient)
+        {
+            Color c1 = FromScRgb(color._af * coefficient, color._rf * coefficient, color._gf * coefficient, color._bf * coefficient);
+            return c1;
+        }
+
         #endregion
+
     }
 }

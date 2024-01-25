@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media;
+using Wodsoft.UI.Media.Animation;
 
 namespace Wodsoft.UI
 {
-    public class UIElement : Visual
+    public class UIElement : Visual, IAnimatable
     {
         #region Layout
 
@@ -390,6 +391,87 @@ namespace Wodsoft.UI
 
             e.Source = e.OriginalSource;
             e.ClearUserInitiated();
+        }
+
+        #endregion
+
+        #region Animatable
+
+        public void BeginAnimation(DependencyProperty dp, AnimationTimeline animation)
+        {
+            if (FrameworkProvider.ClockProvider == null)
+                throw new InvalidOperationException("Framework not initialized.");
+            var clock = animation.CreateClock();
+            ApplyAnimationClock(dp, clock, HandoffBehavior.SnapshotAndReplace);
+        }
+
+        public void ApplyAnimationClock(DependencyProperty dp, AnimationClock clock, HandoffBehavior handoffBehavior)
+        {
+            AnimationStorage.ApplyClock(this, dp, clock, handoffBehavior);
+        }
+
+        protected override void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
+        {
+            FrameworkCoreModifiedValue? modifiedValue = effectiveValue.ModifiedValue as FrameworkCoreModifiedValue;
+            if (AnimationStorage.TryGetStorage(this, dp, out var storage))
+            {
+                object? value;
+                if (modifiedValue == null)
+                    value = effectiveValue.Value;
+                else
+                    value = modifiedValue.BaseValue;
+                var hasValue = storage.TryGetValue(ref value);
+                var isValidValue = dp.IsValidValue(value);
+                if (hasValue && isValidValue)
+                {
+                    if (modifiedValue == null)
+                    {
+                        modifiedValue = CreateModifiedValue();
+                        modifiedValue.BaseValue = effectiveValue.Value;
+                        if (effectiveValue.Source != DependencyEffectiveSource.Local)
+                        {
+                            var newEffectiveValue = new DependencyEffectiveValue(DependencyEffectiveSource.Local);
+                            if (effectiveValue.Expression != null)
+                                modifiedValue.Expression = effectiveValue.Expression;
+                            if (effectiveValue.HasValue)
+                                newEffectiveValue.UpdateValue(effectiveValue.Value);
+                            effectiveValue = newEffectiveValue;
+                        }
+                    }
+                    modifiedValue = modifiedValue.Clone();
+                    modifiedValue.SetAnimationValue(value);
+                    effectiveValue.ModifyValue(modifiedValue);
+                    return;
+                }
+            }
+
+            //Animation completed, may need to reset effective value
+            //If fill behavior is stop and there is no animation value, nothing to do
+            if (modifiedValue == null)
+                return;
+            modifiedValue = modifiedValue.Clone();
+            //Clean animation value
+            modifiedValue.CleanAnimationValue();
+            //Reset effective value if modified value is empty
+            if (modifiedValue.IsEmpty)
+            {
+                if (modifiedValue.Expression == null)
+                {
+                    effectiveValue = new DependencyEffectiveValue(modifiedValue.BaseValue, DependencyEffectiveSource.Local);
+                }
+                else
+                {
+                    //Rebuild expression effective value
+                    effectiveValue = new DependencyEffectiveValue(modifiedValue.Expression);
+                }
+            }
+            else
+                effectiveValue.ModifyValue(modifiedValue);
+        }
+
+        protected virtual FrameworkCoreModifiedValue CreateModifiedValue()
+        {
+            return new FrameworkCoreModifiedValue();
         }
 
         #endregion

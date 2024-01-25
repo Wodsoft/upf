@@ -14,18 +14,20 @@ namespace Wodsoft.UI
 
         private bool _isFrozen;
 
-        public virtual bool CanFreeze => !_isFrozen;
+        public virtual bool CanFreeze => !_isFrozen && FreezeCore(true);
 
         public bool IsFrozen => _isFrozen;
 
         public void Freeze()
         {
+            if (!CanFreeze)
+                throw new InvalidOperationException("Object can't freeze.");
             WritePreamble();
-            FreezeCore();
+            FreezeCore(false);
             _isFrozen = true;
         }
 
-        protected virtual void FreezeCore() { }
+        protected virtual bool FreezeCore(bool isChecking) => true;
 
         protected override void SetValueCore(DependencyProperty dp, object? value)
         {

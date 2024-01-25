@@ -294,6 +294,11 @@ namespace Wodsoft.UI
             return new Point(size._width, size._height);
         }
 
+        public static explicit operator Size(Vector2 vector)
+        {
+            return new Size(vector.X, vector.Y);
+        }
+
         #endregion Public Operators
 
         #region Private Methods

@@ -42,6 +42,30 @@ namespace Wodsoft.UI
         }
         public string? Name { get { return (string?)GetValue(NameProperty); } set { SetValue(NameProperty, value); } }
 
+        /// <summary>
+        /// Find the object with given name in the
+        /// NameScope that the current element belongs to.
+        /// </summary>
+        /// <param name="name">string name to index</param>
+        /// <returns>context if found, else null</returns>
+        public object? FindName(string name)
+        {
+            return FindScope()?.FindName(name);
+        }
+
+        private INameScope? FindScope()
+        {
+            LogicalObject? element = this;
+            while (element != null)
+            {
+                INameScope? nameScope = NameScope.NameScopeFromObject(element);
+                if (nameScope != null)
+                    return nameScope;
+                element = LogicalTreeHelper.GetParent(element);
+            }
+            return null;
+        }
+
 
         private ResourceDictionary? _resources;
         [Ambient]
