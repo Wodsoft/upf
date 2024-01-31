@@ -303,5 +303,10 @@ namespace Wodsoft.UI
 
             public PropertyMetadata PropertyMetadata;
         }
+
+        public override string ToString()
+        {
+            return $"{OwnerType.FullName}.{Name}";
+        }
     }
 }
