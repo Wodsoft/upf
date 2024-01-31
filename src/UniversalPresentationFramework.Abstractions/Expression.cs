@@ -17,6 +17,8 @@ namespace Wodsoft.UI
 
         public static readonly object NoValue = new object();
 
+        public event EventHandler? ValueChanged;
+
         /// <summary>
         /// Get a expression is attached or not.
         /// </summary>
@@ -87,7 +89,7 @@ namespace Wodsoft.UI
                     _property = dp;
                     OnAttach();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _object = null;
                     _property = null;
@@ -123,16 +125,22 @@ namespace Wodsoft.UI
         {
             if (!_isAttached)
                 throw new InvalidOperationException("Expression is not attaching.");
+            bool result;
+            var oldValue = Value;
             if (_object!.CoereceAndValidateValue(_property!, ref value, false, out var metadata))
             {
                 Value = value;
-                return true;
+                result = true;
             }
             else
             {
                 Value = metadata.DefaultValue;
-                return false;
+                result = false;
             }
+            var newValue = Value;
+            if (!Equals(oldValue, newValue))
+                ValueChanged?.Invoke(this, EventArgs.Empty);
+            return result;
         }
 
         internal void UpdateValue()
