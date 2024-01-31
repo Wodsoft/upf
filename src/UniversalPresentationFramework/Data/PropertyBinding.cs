@@ -12,6 +12,8 @@ namespace Wodsoft.UI.Data
 
         public abstract bool CanGet { get; }
 
+        public abstract Type ValueType { get; }
+
         public event EventHandler? ValueChanged;
 
         private bool _disposed;

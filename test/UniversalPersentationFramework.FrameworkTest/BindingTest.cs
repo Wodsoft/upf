@@ -72,5 +72,34 @@ namespace Wodsoft.UI.Test
             list.Add("d");
             Assert.Equal("d", obj.TextA);
         }
+
+        [Fact]
+        public void DataContextTest()
+        {
+            var list1 = new ObservableCollection<string>();
+            list1.Add("a");
+            list1.Add("b");
+            var source1 = new ClrDataSource();
+            source1.Content = list1;
+            var xaml = File.ReadAllText("BindingDataContextTest.xaml");
+            var grid = LoadUpfXaml<Grid>(xaml);
+            grid.DataContext = source1;
+            var target = (MyObject)grid.FindName("target")!;
+            grid.UpdateBinding();
+            Assert.Equal("b", target.TextB);
+            list1[1] = "c";
+            Assert.Equal("c", target.TextB);
+
+            var list2 = new ObservableCollection<string>();
+            list2.Add("e");
+            list2.Add("f");
+            var source2 = new ClrDataSource();
+            source2.Content = list2;
+            grid.DataContext = source2;
+            Assert.Equal("f", target.TextB);
+
+            grid.DataContext = null;
+            Assert.Null(target.TextB);
+        }
     }
 }

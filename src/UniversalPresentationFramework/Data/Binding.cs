@@ -63,6 +63,25 @@ namespace Wodsoft.UI.Data
             return new BindingExpression(this, targetObject, targetProperty);
         }
 
+        public override bool IsEqual(BindingBase bindingBase)
+        {
+            if (bindingBase is Binding binding)
+            {
+                return _path?.Path == binding.Path?.Path &&
+                    _mode == binding._mode &&
+                    _elementName == binding._elementName &&
+                    _source == binding._source &&
+                    _relativeSource == binding._relativeSource &&
+                    _converter == binding._converter &&
+                    _converterParameter == binding._converterParameter &&
+                    _converterCulture == binding._converterCulture &&
+                    FallbackValue == binding.FallbackValue &&
+                    StringFormat == binding.StringFormat &&
+                    TargetNullValue == binding.TargetNullValue;
+            }
+            return false;
+        }
+
         #endregion
     }
 }

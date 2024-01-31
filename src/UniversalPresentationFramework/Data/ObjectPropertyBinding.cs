@@ -13,11 +13,14 @@ namespace Wodsoft.UI.Data
         public ObjectPropertyBinding(object value)
         {
             _value = value;
+            ValueType = value.GetType();
         }
 
         public override bool CanSet => false;
 
         public override bool CanGet => true;
+
+        public override Type ValueType { get; }
 
         public override object? GetValue() => _value;
 

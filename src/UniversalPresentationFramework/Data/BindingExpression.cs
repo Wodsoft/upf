@@ -13,9 +13,9 @@ namespace Wodsoft.UI.Data
     public class BindingExpression : BindingExpressionBase
     {
         private readonly Binding _binding;
-        private bool _hasError;
+        private bool _hasError, _isDataContext;
         private object? _source;
-        private PropertyBinding? _propertyBinding;
+        private BindingContext? _propertyBinding;
         private BindingMode _mode;
         private System.Timers.Timer? _timer;
         private List<ValidationError>? _errors;
@@ -48,6 +48,7 @@ namespace Wodsoft.UI.Data
 
         protected override bool OnAttachCore()
         {
+            _isDataContext = false;
             object? source;
             _hasError = true;
             if (_binding.RelativeSource != null)
@@ -68,7 +69,8 @@ namespace Wodsoft.UI.Data
                     }
                     else
                     {
-                        source = null;
+                        source = AttachedObject!.GetValue(FrameworkElement.DataContextProperty);
+                        _isDataContext = true;
                     }
                 }
             }
@@ -84,24 +86,32 @@ namespace Wodsoft.UI.Data
             }
             if (_binding.Path != null)
             {
-                if (!_binding.Path.TryBind(source, out var propertyBinding))
-                    return false;
-                switch (mode)
-                {
-                    case BindingMode.OneWay:
-                    case BindingMode.OneTime:
-                        if (!propertyBinding.CanGet)
-                            return false;
-                        break;
-                    case BindingMode.OneWayToSource:
-                        if (!propertyBinding.CanSet)
-                            return false;
-                        break;
-                    case BindingMode.TwoWay:
-                        if (!propertyBinding.CanGet || !propertyBinding.CanSet)
-                            return false;
-                        break;
-                }
+                var propertyBinding = _binding.Path.Bind(source);
+                //switch (mode)
+                //{
+                //    case BindingMode.OneWay:
+                //    case BindingMode.OneTime:
+                //        if (!propertyBinding.CanGet)
+                //        {
+                //            propertyBinding.Dispose();
+                //            return false;
+                //        }
+                //        break;
+                //    case BindingMode.OneWayToSource:
+                //        if (!propertyBinding.CanSet)
+                //        {
+                //            propertyBinding.Dispose();
+                //            return false;
+                //        }
+                //        break;
+                //    case BindingMode.TwoWay:
+                //        if (!propertyBinding.CanGet || !propertyBinding.CanSet)
+                //        {
+                //            propertyBinding.Dispose();
+                //            return false;
+                //        }
+                //        break;
+                //}
                 _propertyBinding = propertyBinding;
                 if (propertyBinding.CanGet)
                     propertyBinding.ValueChanged += SourceChanged;
@@ -110,6 +120,10 @@ namespace Wodsoft.UI.Data
             {
                 if (mode == BindingMode.TwoWay || mode == BindingMode.OneWayToSource)
                     return false;
+            }
+            if (_isDataContext)
+            {
+                AttachedObject!.DependencyPropertyChanged += PropertyChanged;
             }
             _hasError = false;
             _mode = mode;
@@ -124,8 +138,20 @@ namespace Wodsoft.UI.Data
             return true;
         }
 
+        private void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.Property == FrameworkElement.DataContextProperty)
+            {
+                _propertyBinding!.SetSource(e.NewValue);
+            }
+        }
+
         protected override void OnDetach()
         {
+            if (_isDataContext)
+            {
+                AttachedObject!.DependencyPropertyChanged -= PropertyChanged;
+            }
             if (_timer != null)
             {
                 _timer.Elapsed -= TimerElapsed;
@@ -184,7 +210,8 @@ namespace Wodsoft.UI.Data
                     return;
                 }
             }
-            _propertyBinding!.SetValue(value);
+            if (_propertyBinding!.CanSet)
+                _propertyBinding!.SetValue(value);
         }
 
         protected override object? GetSourceValue()
@@ -196,13 +223,20 @@ namespace Wodsoft.UI.Data
                 value = _source;
             else
             {
-                try
+                if (_propertyBinding.CanGet)
                 {
-                    value = _propertyBinding.GetValue();
+                    try
+                    {
+                        value = _propertyBinding.GetValue();
+                    }
+                    catch
+                    {
+                        return Target!.GetMetadata(TargetProperty).DefaultValue;
+                    }
                 }
-                catch
+                else
                 {
-                    return Target!.GetMetadata(TargetProperty).DefaultValue;
+                    value = Target!.GetMetadata(TargetProperty).DefaultValue;
                 }
             }
             if (_binding.Converter != null)

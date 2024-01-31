@@ -28,6 +28,8 @@ namespace Wodsoft.UI.Data
 
         public override bool CanGet => true;
 
+        public override Type ValueType => _dp.PropertyType;
+
         public override object? GetValue()
         {
             return _d.GetValue(_dp);

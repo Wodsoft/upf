@@ -27,6 +27,7 @@ namespace Wodsoft.UI.Data
             _cache = GetCache(propertyInfo);
             if (parameters.Length == 1 && parameters[0] is int && source is IList && source is INotifyCollectionChanged notify)
                 notify.CollectionChanged += CollectionChanged;
+            ValueType = propertyInfo.PropertyType;
         }
 
         private void CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -40,6 +41,8 @@ namespace Wodsoft.UI.Data
         public override bool CanSet => _canSet;
 
         public override bool CanGet => _canGet;
+
+        public override Type ValueType { get; }
 
         public override object? GetValue()
         {

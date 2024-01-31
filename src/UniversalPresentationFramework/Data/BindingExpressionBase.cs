@@ -60,6 +60,7 @@ namespace Wodsoft.UI.Data
                     var list = (List<BindingExpressionBase>?)Target!.GetValue(BindingRetryProperty);
                     if (list != null)
                         list.Remove(this);
+                    _hasBindingRetry = false;
                 }
             }
             else
@@ -89,5 +90,8 @@ namespace Wodsoft.UI.Data
 
         private static readonly DependencyPropertyKey _BindingRetryPropertyKey = DependencyProperty.RegisterAttachedReadOnly("BindingRetry", typeof(List<BindingExpressionBase>), typeof(BindingExpressionBase), new PropertyMetadata());
         public static readonly DependencyProperty BindingRetryProperty = _BindingRetryPropertyKey.DependencyProperty;
+
+
+        internal static readonly DependencyProperty NoTargetProperty = DependencyProperty.RegisterAttached("NoTarget", typeof(object), typeof(BindingExpressionBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
     }
 }

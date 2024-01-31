@@ -1,0 +1,4 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<local:MyObject Name="target" TextB="{Binding Content[1]}"/>
+</Grid>

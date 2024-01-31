@@ -26,6 +26,7 @@ namespace Wodsoft.UI.Data
             _name = propertyInfo.Name;
             if (_canGet && source is INotifyPropertyChanged notify)
                 notify.PropertyChanged += PropertyChanged;
+            ValueType = propertyInfo.PropertyType;
         }
 
         private void PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -37,6 +38,8 @@ namespace Wodsoft.UI.Data
         public override bool CanSet => _canSet;
 
         public override bool CanGet => _canGet;
+
+        public override Type ValueType { get; }
 
         public override object? GetValue()
         {

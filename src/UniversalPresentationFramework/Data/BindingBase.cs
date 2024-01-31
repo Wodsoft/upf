@@ -76,7 +76,10 @@ namespace Wodsoft.UI.Data
 
         protected abstract BindingExpressionBase CreateBindingExpressionCore(FrameworkElement targetObject, DependencyProperty targetProperty);
 
+        public abstract bool IsEqual(BindingBase bindingBase);
+
         #endregion
 
+        
     }
 }
