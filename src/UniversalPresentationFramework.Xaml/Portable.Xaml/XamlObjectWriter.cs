@@ -389,19 +389,35 @@ namespace System.Xaml
 
             if (state.Type.IsMarkupExtension && (object_states.Count != 0 || !source.Settings.SkipProvideValueOnRoot))
             {
-                // validate that the provided value is a markup extension, throws InvalidCastException if not
                 var markupExtension = (MarkupExtension)obj;
-                try
+                bool isHandled = false;
+                if (object_states.Count != 0)
                 {
-                    obj = markupExtension.ProvideValue(service_provider);
+                    var parentState = object_states.Peek();
+                    if (parentState.Type.SetMarkupExtensionHandler != null)
+                    {
+                        var e = new XamlSetMarkupExtensionEventArgs(parentState.CurrentMember, markupExtension, service_provider, parentState.Value);
+                        parentState.Type.SetMarkupExtensionHandler(parentState.Value, e);
+                        isHandled = e.Handled;
+                        if (isHandled)
+                            parentState.IsMarkupExtensionHandled = true;
+                    }
                 }
-                catch (XamlObjectWriterException)
+                if (!isHandled)
                 {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    throw WithLineInfo(new XamlObjectWriterException("An error occured getting provided value", ex));
+                    // validate that the provided value is a markup extension, throws InvalidCastException if not
+                    try
+                    {
+                        obj = markupExtension.ProvideValue(service_provider);
+                    }
+                    catch (XamlObjectWriterException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw WithLineInfo(new XamlObjectWriterException("An error occured getting provided value", ex));
+                    }
                 }
             }
 
@@ -560,7 +576,7 @@ namespace System.Xaml
                 }
 
                 // validate that the provided value is a markup extension, throws InvalidCastException if not
-                if ((object_states.Count != 0 || !source.Settings.SkipProvideValueOnRoot) && CurrentMemberState.Value is MarkupExtension markupExtension)
+                if ((object_states.Count != 1 || !source.Settings.SkipProvideValueOnRoot) && !state.IsMarkupExtensionHandled && CurrentMemberState.Value is MarkupExtension markupExtension)
                 {
                     try
                     {

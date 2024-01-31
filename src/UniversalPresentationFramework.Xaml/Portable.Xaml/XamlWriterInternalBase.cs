@@ -77,6 +77,7 @@ namespace System.Xaml
                 public const int IsXamlWriterCreated = 1 << 2;
                 public const int IsValueProvidedByParent = 1 << 3;
                 public const int HasSeparator = 1 << 4;
+                public const int IsMarkupExtensionHandled = 1 << 5;
             }
 
             public bool IsGetObject
@@ -98,6 +99,12 @@ namespace System.Xaml
             {
                 get { return _flags.Get(ObjectStateFlags.HasSeparator) ?? false; }
                 set { _flags.Set(ObjectStateFlags.HasSeparator, value); }
+            }
+
+            public bool IsMarkupExtensionHandled
+            {
+                get { return _flags.Get(ObjectStateFlags.IsMarkupExtensionHandled) ?? false; }
+                set { _flags.Set(ObjectStateFlags.IsMarkupExtensionHandled, value); }
             }
 
             public int PositionalParameterIndex = -1;

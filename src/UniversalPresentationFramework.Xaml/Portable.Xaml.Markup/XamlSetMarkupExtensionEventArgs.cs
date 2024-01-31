@@ -31,7 +31,7 @@ namespace System.Xaml.Markup
 {
 	public class XamlSetMarkupExtensionEventArgs : XamlSetValueEventArgs
 	{
-		public XamlSetMarkupExtensionEventArgs (XamlMember member, MarkupExtension value, IServiceProvider serviceProvider)
+		public XamlSetMarkupExtensionEventArgs (XamlMember member, MarkupExtension value, IServiceProvider serviceProvider, object targetObject)
 			: base (member, null)
 		{
 			MarkupExtension = value;
@@ -40,10 +40,24 @@ namespace System.Xaml.Markup
 
 		public MarkupExtension MarkupExtension { get; private set; }
 		public IServiceProvider ServiceProvider { get; private set; }
+        internal XamlType CurrentType { get; set; }
+        internal object TargetObject { get; private set; }
 
-		public override void CallBase ()
+        public override void CallBase ()
 		{
-			throw new NotImplementedException ();
-		}
+            if (CurrentType != null)
+            {
+                XamlType baseType = CurrentType.BaseType;
+
+                if (baseType != null)
+                {
+                    CurrentType = baseType;
+                    if (baseType.SetMarkupExtensionHandler != null)
+                    {
+                        baseType.SetMarkupExtensionHandler(TargetObject, this);
+                    }
+                }
+            }
+        }
 	}
 }
