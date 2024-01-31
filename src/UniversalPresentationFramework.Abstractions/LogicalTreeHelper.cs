@@ -12,7 +12,7 @@ namespace Wodsoft.UI
 
         public static IEnumerable<LogicalObject>? GetChildren(LogicalObject current) => current.LogicalChildren;
 
-        public static LogicalObject GetRoot(LogicalObject current) => current.LogicalRoot ?? current;
+        public static LogicalObject GetRoot(LogicalObject current) => current.LogicalRoot;
 
         public static LogicalObject? FindMentor(DependencyObject d)
         {

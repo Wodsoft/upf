@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace Wodsoft.UI
 
         protected internal LogicalObject? LogicalParent => _parent;
 
-        protected internal LogicalObject? LogicalRoot => _root;
+        protected internal LogicalObject LogicalRoot => _root ?? this;
 
         protected internal IEnumerable<LogicalObject>? LogicalChildren => _readonlyChildren;
 
@@ -96,6 +97,30 @@ namespace Wodsoft.UI
         protected override bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty property)
         {
             return target is not LogicalObject;
+        }
+
+        #endregion
+
+        #region InheritedValue
+
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+
+            if (e.Metadata != null && e.Metadata.IsInherited)
+            {
+                if (_children != null)
+                {
+                    foreach (var child in _children)
+                    {
+                        var effectiveValue = child.GetEffectiveValue(e.Property);
+                        if (effectiveValue.Source == DependencyEffectiveSource.None || effectiveValue.Source == DependencyEffectiveSource.Inherited)
+                        {
+                            child.PropertyChanged(e);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
