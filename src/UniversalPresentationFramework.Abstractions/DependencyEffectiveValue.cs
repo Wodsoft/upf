@@ -75,6 +75,8 @@ namespace Wodsoft.UI
             _hasValue = true;
             _value = value;
         }
+
+        internal static DependencyEffectiveValue Default;
     }
 
     public enum DependencyEffectiveSource : byte

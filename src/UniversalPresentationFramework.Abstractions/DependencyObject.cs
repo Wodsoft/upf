@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Wodsoft.UI
 {
@@ -204,6 +205,16 @@ namespace Wodsoft.UI
             UpdateEffectiveValue(dp, GetMetadata(dp), ref oldValue, ref newValue);
         }
 
+        protected internal void UpdateEffectiveValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue newEffectiveValue)
+        {
+            ref var oldEffectiveValue = ref CollectionsMarshal.GetValueRefOrNullRef(_valueStores, dp.GlobalIndex);
+            if (Unsafe.IsNullRef(ref oldEffectiveValue))
+                UpdateEffectiveValue(dp, metadata, ref DependencyEffectiveValue.Default, ref newEffectiveValue);
+            else
+                UpdateEffectiveValue(dp, metadata, ref oldEffectiveValue, ref newEffectiveValue);
+
+        }
+
         private void UpdateEffectiveValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue oldEffectiveValue, ref DependencyEffectiveValue newEffectiveValue)
         {
             //Evaluate framework value
@@ -290,6 +301,14 @@ namespace Wodsoft.UI
         protected virtual void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
         {
 
+        }
+
+        protected internal ref readonly DependencyEffectiveValue GetEffectiveValue(DependencyProperty dp)
+        {
+            ref var value = ref CollectionsMarshal.GetValueRefOrNullRef(_valueStores, dp.GlobalIndex);
+            if (Unsafe.IsNullRef(ref value))
+                return ref DependencyEffectiveValue.Default;
+            return ref value;
         }
 
         protected Enumerable GetEffectiveValues()
