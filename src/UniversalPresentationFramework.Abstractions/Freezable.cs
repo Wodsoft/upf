@@ -197,7 +197,7 @@ namespace Wodsoft.UI
 
         #region InheritanceContext
 
-        private List<(DependencyObject, DependencyProperty)>? _inheritanceContext;
+        private List<(DependencyObject, DependencyProperty?)>? _inheritanceContext;
 
         public override DependencyObject? InheritanceContext
         {
@@ -211,17 +211,17 @@ namespace Wodsoft.UI
 
         public override event EventHandler? InheritanceContextChanged;
 
-        protected override void AddInheritanceContext(DependencyObject context, DependencyProperty property)
+        protected override void AddInheritanceContext(DependencyObject context, DependencyProperty? property)
         {
             if (IsInheritanceContextSealed)
                 return;
             if (_inheritanceContext == null)
-                _inheritanceContext = new List<(DependencyObject, DependencyProperty)>();
+                _inheritanceContext = new List<(DependencyObject, DependencyProperty?)>();
             _inheritanceContext.Add((context, property));
             InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        protected override void RemoveInheritanceContext(DependencyObject context, DependencyProperty property)
+        protected override void RemoveInheritanceContext(DependencyObject context, DependencyProperty? property)
         {
             if (IsInheritanceContextSealed)
                 return;

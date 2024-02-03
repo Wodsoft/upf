@@ -362,15 +362,15 @@ namespace Wodsoft.UI
 
         public bool IsInheritanceContextSealed { get; set; }
 
-        protected virtual void AddInheritanceContext(DependencyObject context, DependencyProperty property) { }
+        protected virtual void AddInheritanceContext(DependencyObject context, DependencyProperty? property) { }
 
-        protected virtual void RemoveInheritanceContext(DependencyObject context, DependencyProperty property) { }
+        protected virtual void RemoveInheritanceContext(DependencyObject context, DependencyProperty? property) { }
 
-        protected virtual bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty property) => false;
+        protected virtual bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty? property) => false;
 
         protected virtual bool CanBeInheritanceContext => false;
 
-        protected internal bool ProvideSelfAsInheritanceContext(DependencyObject d, DependencyProperty dp)
+        protected internal bool ProvideSelfAsInheritanceContext(DependencyObject d, DependencyProperty? dp)
         {
             if (CanBeInheritanceContext && d != null && !d.IsInheritanceContextSealed && ShouldProvideInheritanceContext(d, dp))
             {
@@ -385,7 +385,7 @@ namespace Wodsoft.UI
             }
         }
 
-        protected internal bool RemoveSelfAsInheritanceContext(DependencyObject d, DependencyProperty dp)
+        protected internal bool RemoveSelfAsInheritanceContext(DependencyObject d, DependencyProperty? dp)
         {
             if (CanBeInheritanceContext && d != null && !d.IsInheritanceContextSealed && ShouldProvideInheritanceContext(d, dp))
             {

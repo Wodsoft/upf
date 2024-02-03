@@ -94,7 +94,7 @@ namespace Wodsoft.UI
 
         protected override bool CanBeInheritanceContext => true;
 
-        protected override bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty property)
+        protected override bool ShouldProvideInheritanceContext(DependencyObject target, DependencyProperty? property)
         {
             return target is not LogicalObject;
         }
