@@ -65,7 +65,7 @@ namespace Wodsoft.UI
 
         public bool HasModifiedValue => _modifiedValue != null;
 
-        public void ModifyValue(IDependencyModifiedValue modifyedValue)
+        public void ModifyValue(IDependencyModifiedValue? modifyedValue)
         {
             _modifiedValue = modifyedValue;
         }
