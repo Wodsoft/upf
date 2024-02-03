@@ -516,8 +516,8 @@ namespace System.Xaml
             var t = Type.UnderlyingType;
             if (t == null)
                 return null;
-            if (t == typeof(object)) // it is different from XamlType.LookupTypeConverter().
-                return null;
+            //if (t == typeof(object)) // it is different from XamlType.LookupTypeConverter().
+            //    return null;
 
             var converterName = CustomAttributeProvider.GetTypeConverterName(false);
             if (converterName != null)
