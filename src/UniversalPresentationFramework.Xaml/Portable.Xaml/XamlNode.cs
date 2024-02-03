@@ -109,7 +109,16 @@ namespace System.Xaml
 
 		public override string ToString()
 		{
-			return $"[XamlNodeInfo: NodeType={NodeType}, Value={Value}]";
+            switch(NodeType)
+            {
+                case XamlNodeType.StartObject:
+                    return $"[XamlNodeInfo: NodeType={NodeType}, Type={Object.Type}]";
+                case XamlNodeType.StartMember:
+                    return $"[XamlNodeInfo: NodeType={NodeType}, Member={Member}]";
+                case XamlNodeType.Value:
+                    return $"[XamlNodeInfo: NodeType={NodeType}, Value={Value}]";
+            }
+			return $"[XamlNodeInfo: NodeType={NodeType}]";
 		}
 	}
 
