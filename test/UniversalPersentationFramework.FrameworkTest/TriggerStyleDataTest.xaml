@@ -1,0 +1,22 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<local:MyObject Name="target">
+		<FrameworkElement.Style>
+			<Style TargetType="{x:Type local:MyObject}">
+				<Style.Triggers>
+					<DataTrigger Binding="{Binding Text}" Value="text">
+						<Setter Property="TextC" Value="trigger text"/>
+					</DataTrigger>
+					<MultiDataTrigger>
+						<MultiDataTrigger.Conditions>
+							<Condition Binding="{Binding Text}" Value="text2"/>
+							<Condition Binding="{Binding Integer}" Value="100"/>
+						</MultiDataTrigger.Conditions>
+						<Setter Property="TextD" Value="D text"/>
+					</MultiDataTrigger>
+				</Style.Triggers>
+			</Style>
+		</FrameworkElement.Style>
+	</local:MyObject>
+</Grid>

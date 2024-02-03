@@ -1,7 +1,9 @@
 ﻿<ContentControl xmlns="http://schemas.wodsoft.com/upf/presentation">
     <ContentControl.Template>
         <ControlTemplate>
-            <Rectangle Name="test"/>
+            <Grid>
+                <Rectangle Name="test"/>
+            </Grid>
         </ControlTemplate>
     </ContentControl.Template>
 </ContentControl>

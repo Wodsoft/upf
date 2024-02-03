@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    public abstract class SetterBase : SealableDependencyObject
+    public abstract class TriggerAction : SealableDependencyObject
     {
-        internal abstract bool IsSameTarget(SetterBase setterBase);
+        public abstract void Invoke(DependencyObject container);
     }
 }

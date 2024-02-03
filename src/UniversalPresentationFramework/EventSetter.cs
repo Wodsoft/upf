@@ -41,7 +41,6 @@ namespace Wodsoft.UI
             _handler = handler;
         }
 
-
         public RoutedEvent? Event
         {
             get { return _event; }
@@ -85,6 +84,11 @@ namespace Wodsoft.UI
                 throw new ArgumentException("Handler can't be null.");
             if (_handler.GetType() != _event.HandlerType)
                 throw new ArgumentException("Event handler type invalid.");
+        }
+
+        internal override bool IsSameTarget(SetterBase setterBase)
+        {
+            return false;
         }
     }
 }

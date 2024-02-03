@@ -26,6 +26,8 @@ namespace Wodsoft.UI.Test
 
         }
 
+        internal DependencyObject? FindTemplateChild(string name) => GetTemplateChild(name);
+
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
             LastChangedProperty = e.Property;

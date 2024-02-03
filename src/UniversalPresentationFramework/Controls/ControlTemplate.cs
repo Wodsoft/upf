@@ -12,6 +12,7 @@ namespace Wodsoft.UI.Controls
     public class ControlTemplate : FrameworkTemplate
     {
         private Type? _targetType;
+        private TriggerCollection? _triggers;
 
         public ControlTemplate() { }
 
@@ -48,6 +49,26 @@ namespace Wodsoft.UI.Controls
 
         protected internal override Type TargetTypeInternal => TargetType;
 
+
+        [DependsOn("VisualTree")]
+        [DependsOn("Template")]
+        public TriggerCollection Triggers
+        {
+            get
+            {
+                if (_triggers == null)
+                {
+                    _triggers = new TriggerCollection();
+                    if (IsSealed)
+                        _triggers.Seal();
+                }
+                return _triggers;
+            }
+        }
+
+        protected internal override TriggerCollection? TriggersInternal => _triggers;
+
         #endregion
+
     }
 }

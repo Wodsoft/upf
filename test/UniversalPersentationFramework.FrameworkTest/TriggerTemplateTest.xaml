@@ -1,0 +1,27 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<local:MyObject Name="target">
+		<Control.Template>
+			<ControlTemplate TargetType="{x:Type local:MyObject}">
+				<Grid>
+					<Rectangle Name="rect" Width="100"/>
+				</Grid>
+				<ControlTemplate.Triggers>
+					<Trigger Property="TextA" Value="text">
+						<Setter Property="TextC" Value="trigger text"/>
+						<Setter TargetName="rect" Property="Width" Value="50"/>
+					</Trigger>
+					<MultiTrigger>
+						<MultiTrigger.Conditions>
+							<Condition Property="TextA" Value="text"/>
+							<Condition Property="TextB" Value="text2"/>
+						</MultiTrigger.Conditions>
+						<Setter Property="TextD" Value="D text"/>
+						<Setter TargetName="rect" Property="Width" Value="150"/>
+					</MultiTrigger>
+				</ControlTemplate.Triggers>
+			</ControlTemplate>
+		</Control.Template>
+	</local:MyObject>
+</Grid>

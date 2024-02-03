@@ -270,5 +270,18 @@ namespace Wodsoft.UI
         }
 
         #endregion
+
+        #region Equal
+
+        internal override bool IsSameTarget(SetterBase setterBase)
+        {
+            if (setterBase is Setter setter)
+            {
+
+            }
+            return false;
+        }
+
+        #endregion
     }
 }

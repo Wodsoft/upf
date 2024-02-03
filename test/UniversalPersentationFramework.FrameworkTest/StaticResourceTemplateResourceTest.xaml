@@ -6,9 +6,11 @@
 		<Control.Template>
 			<ControlTemplate>
 				<ControlTemplate.Resources>
-					<sys:String x:Key="value">test</sys:String>					
+					<sys:String x:Key="value">test</sys:String>
 				</ControlTemplate.Resources>
-				<local:TextObject Name="text" Text="{StaticResource value}"/>
+				<Grid>
+					<local:TextObject Name="text" Text="{StaticResource value}"/>
+				</Grid>
 			</ControlTemplate>
 		</Control.Template>
 	</local:MyObject>

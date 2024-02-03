@@ -44,7 +44,7 @@ namespace Wodsoft.UI
 
             XamlMember nameMember = _xamlReader.SchemaContext.GetXamlType(typeof(FrameworkElement)).GetMember("Name")!;
 
-            Stack<XamlType> objectStack = new Stack<XamlType>();
+            Stack<XamlType?> objectStack = new Stack<XamlType?>();
             bool isNameMember = false;
             while (_xamlReader.Read())
             {
@@ -60,6 +60,9 @@ namespace Wodsoft.UI
                         else
                             objectStack.Push(_xamlReader.Type);
                         break;
+                    case XamlNodeType.GetObject:
+                        objectStack.Push(null);
+                        break;
                     case XamlNodeType.EndObject:
                         objectStack.Pop();
                         break;
@@ -74,7 +77,7 @@ namespace Wodsoft.UI
                         if (isNameMember && _xamlReader.Value is string nameValue)
                         {
                             var type = objectStack.Peek();
-                            _nameTypes[nameValue] = type.UnderlyingType;
+                            _nameTypes[nameValue] = type!.UnderlyingType;
                         }
                         break;
                 }

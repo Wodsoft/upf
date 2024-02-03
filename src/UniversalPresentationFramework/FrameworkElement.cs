@@ -461,11 +461,15 @@ namespace Wodsoft.UI
         #region Template
 
         private bool _templateGenerated;
+        private FrameworkTemplate? _lastTemplate;
+        private TriggerCollection? _appliedTemplateTriggers;
         private FrameworkElement? _templatedContent, _templatedParent;
 
         public FrameworkElement? TemplatedParent => _templatedParent;
 
         public FrameworkElement? TemplatedChild => _templatedContent;
+
+        public event EventHandler? TemplatedParentChanged;
 
         public virtual bool ApplyTemplate()
         {
@@ -477,19 +481,39 @@ namespace Wodsoft.UI
             {
                 if (_templatedContent != null)
                 {
+                    if (_appliedTemplateTriggers != null)
+                    {
+                        foreach (var trigger in _appliedTemplateTriggers)
+                        {
+                            trigger.DisconnectTrigger(_lastTemplate!, this, _templatedContent.FindScope());
+                        }
+                    }
                     _templatedContent._templatedParent = null;
-                    RemoveLogicalChild(_templatedContent);
+                    _templatedContent.TemplatedParentChanged?.Invoke(_templatedContent, EventArgs.Empty);
+                    //RemoveLogicalChild(_templatedContent);
                     RemoveVisualChild(_templatedContent);
                 }
                 var template = GetTemplate();
                 if (template != null)
-                    _templatedContent = template.LoadContent();
-                if (_templatedContent != null)
                 {
-                    _templatedContent._templatedParent = this;
-                    AddLogicalChild(_templatedContent);
-                    AddVisualChild(_templatedContent);
+                    _templatedContent = template.LoadContent();
+                    if (_templatedContent != null)
+                    {
+                        if (template.TriggersInternal != null)
+                        {
+                            _appliedTemplateTriggers = template.TriggersInternal;
+                            foreach (var trigger in _appliedTemplateTriggers)
+                            {
+                                trigger.ConnectTrigger(template, this, _templatedContent.FindScope());
+                            }
+                        }
+                        _templatedContent._templatedParent = this;
+                        _templatedContent.TemplatedParentChanged?.Invoke(_templatedContent, EventArgs.Empty);
+                        //AddLogicalChild(_templatedContent);
+                        AddVisualChild(_templatedContent);
+                    }
                 }
+                _lastTemplate = template;
                 OnApplyTemplate();
             }
 
@@ -651,16 +675,32 @@ namespace Wodsoft.UI
             }
         }
 
-        //protected override void OnLogicalRootChanged(LogicObject oldRoot, LogicObject newRoot)
-        //{
-        //    base.OnLogicalRootChanged(oldRoot, newRoot);
-        //}
-
         protected sealed override void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
         {
+            TriggerModifiedValue? triggerModifiedValue = null;
+            if ((effectiveValue.Source == DependencyEffectiveSource.Local || effectiveValue.Source == DependencyEffectiveSource.Expression) && effectiveValue.ModifiedValue is TriggerModifiedValue modifiedValue)
+            {
+                triggerModifiedValue = modifiedValue;
+                effectiveValue.ModifyValue(null);
+            }
             base.EvaluateBaseValue(dp, metadata, ref effectiveValue);
-            if (effectiveValue.Source == DependencyEffectiveSource.Local || effectiveValue.Source == DependencyEffectiveSource.Expression)
+            TriggerStorage? triggerStorage = null;
+            if ((effectiveValue.Source == DependencyEffectiveSource.Local || effectiveValue.Source == DependencyEffectiveSource.Expression))
+            {
+                if (!_triggerStorages.TryGetValue(dp.GlobalIndex, out triggerStorage))
+                    return;
+                if (triggerStorage.TryGetValue(TriggerLayer.ParentTemplate, out var value))
+                {
+                    if (!dp.IsValidValue(value))
+                        value = metadata.DefaultValue;
+                    if (triggerModifiedValue == null)
+                        triggerModifiedValue = new TriggerModifiedValue(value);
+                    else
+                        triggerModifiedValue.Value = value;
+                    effectiveValue.ModifyValue(triggerModifiedValue);
+                }
                 return;
+            }
             if (dp == StyleProperty)
             {
                 InitializeStyle(ref effectiveValue);
@@ -670,6 +710,21 @@ namespace Wodsoft.UI
             {
                 if (_style != null && _style.TryApplyProperty(dp, ref effectiveValue))
                     return;
+                if (triggerStorage == null && _triggerStorages.TryGetValue(dp.GlobalIndex, out triggerStorage))
+                {
+                    object? value;
+                    if (triggerStorage.TryGetValue(TriggerLayer.Style, out value))
+                    { }
+                    else if (triggerStorage.TryGetValue(TriggerLayer.ControlTemplate, out value))
+                    { }
+                    else if (triggerStorage.TryGetValue(TriggerLayer.ThemeStyle, out value))
+                    { }
+                    else
+                        return;
+                    if (!dp.IsValidValue(value))
+                        value = metadata.DefaultValue;
+                    effectiveValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Internal);
+                }
             }
         }
 
@@ -768,6 +823,58 @@ namespace Wodsoft.UI
             var style = ResourceHelper.FindResource(this, GetType()) as Style;
             if (style != null)
                 effectiveValue = new DependencyEffectiveValue(style, DependencyEffectiveSource.Internal);
+        }
+
+        #endregion
+
+        #region Triggers
+
+        private readonly Dictionary<TriggerBase, TriggerBinding> _triggerBindings = new Dictionary<TriggerBase, TriggerBinding>();
+        private readonly Dictionary<int, TriggerStorage> _triggerStorages = new Dictionary<int, TriggerStorage>();
+
+        internal void AddTriggerBinding(TriggerBase trigger, TriggerBinding triggerBinding)
+        {
+            _triggerBindings.Add(trigger, triggerBinding);
+        }
+
+        internal void RemoveTriggerBinding(TriggerBase trigger)
+        {
+            if (_triggerBindings.TryGetValue(trigger, out var binding))
+            {
+                _triggerBindings.Remove(trigger);
+                binding.Dispose();
+            }
+        }
+
+        internal void AddTriggerValue(DependencyProperty dp, byte layer, TriggerValue triggerValue)
+        {
+            if (!_triggerStorages.TryGetValue(dp.GlobalIndex, out var storage))
+            {
+                storage = new TriggerStorage();
+                _triggerStorages.Add(dp.GlobalIndex, storage);
+            }
+            storage.AddValue(layer, triggerValue);
+        }
+
+        internal void RemoveTriggerValue(DependencyProperty dp, byte layer, TriggerValue triggerValue)
+        {
+            if (_triggerStorages.TryGetValue(dp.GlobalIndex, out var storage))
+            {
+                storage.RemoveValue(layer, triggerValue);
+            }
+        }
+
+        private TriggerCollection? _triggers;
+        public TriggerCollection Triggers
+        {
+            get
+            {
+                if (_triggers == null)
+                {
+                    _triggers = new TriggerCollection();
+                }
+                return _triggers;
+            }
         }
 
         #endregion

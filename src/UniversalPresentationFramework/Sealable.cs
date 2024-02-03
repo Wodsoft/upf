@@ -47,4 +47,52 @@ namespace Wodsoft.UI
 
         #endregion
     }
+
+    public class SealableDependencyObject : DependencyObject
+    {
+        protected override void SetValueCore(DependencyProperty dp, object? value)
+        {
+            if (_isSealed)
+                throw new InvalidOperationException("Object is sealed.");
+            base.SetValueCore(dp, value);
+        }
+
+        #region Seal
+
+        private bool _isSealed;
+        public bool IsSealed => _isSealed;
+
+        protected void CheckSealed()
+        {
+            if (_isSealed)
+                throw new InvalidOperationException("Can not change values after sealed.");
+        }
+
+        /// <summary>
+        /// This Style and all factories/triggers are now immutable
+        /// </summary>
+        public void Seal()
+        {
+            if (_isSealed)
+                if (ThrowIfSealTwice)
+                    throw new InvalidOperationException("Object is sealed.");
+                else
+                    return;
+
+            OnSeal();
+
+            _isSealed = true;
+        }
+
+        protected virtual void OnSeal()
+        {
+
+        }
+
+        protected virtual bool ThrowIfSealTwice => false;
+
+        protected virtual bool CanSeal => !_isSealed;
+
+        #endregion
+    }
 }

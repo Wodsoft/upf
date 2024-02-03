@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace Wodsoft.UI
             return LoadContent(out _);
         }
 
-        internal FrameworkElement? LoadContent(out INameScope? nameScope)
+        protected internal virtual FrameworkElement? LoadContent(out INameScope? nameScope)
         {
             if (_visualTree != null)
             {
@@ -132,6 +133,8 @@ namespace Wodsoft.UI
         }
 
         protected internal abstract Type TargetTypeInternal { get; }
+
+        protected internal virtual TriggerCollection? TriggersInternal => null;
 
         #endregion
 

@@ -10,6 +10,7 @@ namespace Wodsoft.UI
     {
         private readonly object _resourceKey;
         private LogicalObject? _logicalObject;
+        private LogicalObject? _logicalRoot;
 
         public ResourceReferenceExpression(object resourceKey)
         {
@@ -42,7 +43,16 @@ namespace Wodsoft.UI
             if (AttachedObject is not LogicalObject)
                 AttachedObject!.InheritanceContextChanged -= AttachedObject_InheritanceContextChanged;
             if (_logicalObject != null)
+            {
                 _logicalObject.LogicalRootChanged -= LogicalObject_LogicalRootChanged;
+                _logicalObject = null;
+            }
+            if (_logicalRoot != null)
+            {
+                if (_logicalRoot is FrameworkElement fe)
+                    fe.TemplatedParentChanged -= TemplatedParentChanged;
+                _logicalRoot = null;
+            }
         }
 
         protected override void SetSourceValue(object? value)
@@ -59,12 +69,30 @@ namespace Wodsoft.UI
 
             _logicalObject = logicalObject;
             logicalObject.LogicalRootChanged += LogicalObject_LogicalRootChanged;
+            _logicalRoot = _logicalObject.LogicalRoot;
+            if (_logicalRoot is FrameworkElement fe)
+                fe.TemplatedParentChanged += TemplatedParentChanged;
+        }
+
+        private void TemplatedParentChanged(object? sender, EventArgs e)
+        {
+            Rebind();
+            UpdateTarget();
         }
 
         private void Rebind()
         {
             if (_logicalObject != null)
+            {
                 _logicalObject.LogicalRootChanged -= LogicalObject_LogicalRootChanged;
+                _logicalObject = null;
+            }
+            if (_logicalRoot != null)
+            {
+                if (_logicalRoot is FrameworkElement fe)
+                    fe.TemplatedParentChanged -= TemplatedParentChanged;
+                _logicalRoot = null;
+            }
             Bind();
         }
 

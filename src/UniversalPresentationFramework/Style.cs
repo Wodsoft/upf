@@ -180,6 +180,21 @@ namespace Wodsoft.UI
             }
         }
 
+        private TriggerCollection? _triggers;
+        public TriggerCollection Triggers
+        {
+            get
+            {
+                if (_triggers == null)
+                {
+                    _triggers = new TriggerCollection();
+                    if (IsSealed)
+                        _triggers.Seal();
+                }
+                return _triggers;
+            }
+        }
+
         #endregion
 
         #region Seal
@@ -206,10 +221,8 @@ namespace Wodsoft.UI
             }
 
             //// Seal triggers
-            //if (_visualTriggers != null)
-            //{
-            //    _visualTriggers.Seal();
-            //}
+            if (_triggers != null)
+                _triggers.Seal();
 
             // Will throw InvalidOperationException if we find a loop of
             //  BasedOn references.  (A.BasedOn = B, B.BasedOn = C, C.BasedOn = A)
@@ -249,7 +262,7 @@ namespace Wodsoft.UI
 
             // Process all TriggerBase PropertyValues ("Self" triggers
             // and child triggers) in the Style chain last (highest priority)
-            //ProcessVisualTriggers(this);
+            ProcessVisualTriggers(this);
 
             // Sort the ResourceDependents, to help avoid duplicate invalidations
             //StyleHelper.SortResourceDependents(ref ResourceDependents);
@@ -363,6 +376,82 @@ namespace Wodsoft.UI
             ProcessSetters(style._basedOn);
         }
 
+        private void ProcessVisualTriggers(Style? style)
+        {
+            // Walk down to bottom of based-on chain
+            if (style == null)
+                return;
+
+            ProcessVisualTriggers(style._basedOn);
+
+            if (style._triggers != null)
+            {
+                // Merge in "self" and child TriggerBase PropertyValues while walking
+                // back up the tree. "Based-on" style rules are always added first
+                // (lower priority)
+                int triggerCount = style._triggers.Count;
+                for (int i = 0; i < triggerCount; i++)
+                {
+                    TriggerBase triggerBase = style._triggers[i];
+
+                    if (triggerBase is Trigger trigger && trigger.SourceName != null)
+                        throw new InvalidOperationException("Style trigger can not have source name.");
+                    else if (triggerBase is MultiTrigger multiTrigger)
+                    {
+                        if (multiTrigger.Conditions.Count == 0)
+                            throw new InvalidOperationException("Style multiple trigger must have a condition at least.");
+                        foreach (var condition in multiTrigger.Conditions)
+                            if (condition.SourceName != null)
+                                throw new InvalidOperationException("Style multiple trigger's condition can not have source name.");
+                    }                    
+
+                    bool isMerged = false;
+                    for (int ii = 0; ii < _mergedTriggers.Count; ii++)
+                    {
+                        TriggerBase mergedTrigger = _mergedTriggers[ii];
+                        if (mergedTrigger.CanMerge(triggerBase))
+                        {
+                            _mergedTriggers[ii] = mergedTrigger.Merge(triggerBase);
+                            isMerged = true;
+                            break;
+                        }
+                    }
+                    if (!isMerged)
+                        _mergedTriggers.Add(triggerBase);
+
+                    //// Set things up to handle Setter values
+                    //for (int j = 0; j < trigger.PropertyValues.Count; j++)
+                    //{
+                    //    PropertyValue propertyValue = trigger.PropertyValues[j];
+
+                    //    // Check for trigger rules that act on container
+                    //    if (propertyValue.ChildName != StyleHelper.SelfName)
+                    //    {
+                    //        throw new InvalidOperationException(SR.Get(SRID.StyleTriggersCannotTargetTheTemplate));
+                    //    }
+
+                    //    TriggerCondition[] conditions = propertyValue.Conditions;
+                    //    for (int k = 0; k < conditions.Length; k++)
+                    //    {
+                    //        if (conditions[k].SourceName != StyleHelper.SelfName)
+                    //        {
+                    //            throw new InvalidOperationException(SR.Get(SRID.TriggerOnStyleNotAllowedToHaveSource, conditions[k].SourceName));
+                    //        }
+                    //    }
+
+                    //    // Track properties on the container that are being driven by
+                    //    // the Style so that they can be invalidated during style changes
+                    //    StyleHelper.AddContainerDependent(propertyValue.Property, true /*fromVisualTrigger*/, ref this.ContainerDependents);
+
+                    //    StyleHelper.UpdateTables(ref propertyValue, ref ChildRecordFromChildIndex,
+                    //        ref TriggerSourceRecordFromChildIndex, ref ResourceDependents, ref _dataTriggerRecordFromBinding,
+                    //        null /*_childIndexFromChildID*/, ref _hasInstanceValues);
+                    //}
+
+                }
+            }
+        }
+
         #endregion
 
         public override int GetHashCode()
@@ -397,6 +486,7 @@ namespace Wodsoft.UI
 
         private Dictionary<DependencyProperty, object?> _propertySetters = new Dictionary<DependencyProperty, object?>();
         private List<EventSetter> _eventSetters = new List<EventSetter>();
+        private List<TriggerBase> _mergedTriggers = new List<TriggerBase>();
 
         internal bool TryApplyProperty(DependencyProperty dp, ref DependencyEffectiveValue effectiveValue)
         {
@@ -422,11 +512,19 @@ namespace Wodsoft.UI
             foreach (var property in properties)
                 element.InvalidateProperty(property);
             if (oldStyle != null)
+            {
                 foreach (var eventSetter in oldStyle._eventSetters)
                     element.RemoveHandler(eventSetter.Event!, eventSetter.Handler!);
+                foreach (var trigger in oldStyle._mergedTriggers)
+                    trigger.ConnectTrigger(oldStyle, element, null);
+            }
             if (newStyle != null)
+            {
                 foreach (var eventSetter in newStyle._eventSetters)
                     element.AddHandler(eventSetter.Event!, eventSetter.Handler!, eventSetter.HandledEventsToo);
+                foreach (var trigger in newStyle._mergedTriggers)
+                    trigger.ConnectTrigger(newStyle, element, null);
+            }
         }
 
         internal ResourceDictionary? FindResourceDictionary(object resourceKey)

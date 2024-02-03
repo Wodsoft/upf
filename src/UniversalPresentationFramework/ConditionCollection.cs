@@ -8,12 +8,8 @@ using Wodsoft.UI.Controls;
 
 namespace Wodsoft.UI
 {
-    public class SetterBaseCollection : Collection<SetterBase>
+    public sealed class ConditionCollection : Collection<Condition>
     {
-        public SetterBaseCollection() { }
-
-        internal SetterBaseCollection(IList<SetterBase> setters):base(setters) { }
-
         #region ProtectedMethods
 
         /// <summary>
@@ -28,10 +24,9 @@ namespace Wodsoft.UI
         /// <summary>
         ///     InsertItem override
         /// </summary>
-        protected override void InsertItem(int index, SetterBase item)
+        protected override void InsertItem(int index, Condition item)
         {
             CheckSealed();
-            SetterBaseValidation(item);
             base.InsertItem(index, item);
         }
 
@@ -47,10 +42,9 @@ namespace Wodsoft.UI
         /// <summary>
         ///     SetItem override
         /// </summary>
-        protected override void SetItem(int index, SetterBase item)
+        protected override void SetItem(int index, Condition item)
         {
             CheckSealed();
-            SetterBaseValidation(item);
             base.SetItem(index, item);
         }
 
@@ -62,13 +56,7 @@ namespace Wodsoft.UI
         ///     Returns the sealed state of this object.  If true, any attempt
         ///     at modifying the state of this object will trigger an exception.
         /// </summary>
-        public bool IsSealed
-        {
-            get
-            {
-                return _isSealed;
-            }
-        }
+        public bool IsSealed => _isSealed;
 
         #endregion PublicMethods
 
@@ -78,7 +66,7 @@ namespace Wodsoft.UI
         {
             _isSealed = true;
 
-            // Seal all the setters
+            // Seal all the conditions
             for (int i = 0; i < Count; i++)
             {
                 this[i].Seal();
@@ -92,15 +80,7 @@ namespace Wodsoft.UI
         private void CheckSealed()
         {
             if (_isSealed)
-                throw new InvalidOperationException("Can not change values after sealed.");
-        }
-
-        private void SetterBaseValidation(SetterBase setterBase)
-        {
-            if (setterBase == null)
-            {
-                throw new ArgumentNullException("setterBase");
-            }
+                throw new InvalidOperationException("Condition collection is sealed.");
         }
 
         #endregion PrivateMethods
