@@ -576,7 +576,7 @@ namespace System.Xaml
                 }
 
                 // validate that the provided value is a markup extension, throws InvalidCastException if not
-                if ((object_states.Count != 1 || !source.Settings.SkipProvideValueOnRoot) && !state.IsMarkupExtensionHandled && CurrentMemberState.Value is MarkupExtension markupExtension)
+                if ((object_states.Count != 0 || !source.Settings.SkipProvideValueOnRoot) && !state.IsMarkupExtensionHandled && CurrentMemberState.Value is MarkupExtension markupExtension)
                 {
                     try
                     {
@@ -592,8 +592,10 @@ namespace System.Xaml
                     }
                 }
 
-                if (!xm.IsReadOnly) // exclude read-only object such as collection item.
+                if (!xm.IsReadOnly && !state.IsMarkupExtensionHandled) // exclude read-only object such as collection item.
                     SetValue(xm, CurrentMemberState.Value);
+                if (state.IsMarkupExtensionHandled)
+                    state.IsMarkupExtensionHandled = false;
             }
         }
 
@@ -758,10 +760,10 @@ namespace System.Xaml
                 if (ReferenceEquals(xt, null))
                     return value;
 
-                // Not sure if this is really required though...
-                var vt = sctx.GetXamlType(value.GetType());
-                if (vt.CanAssignTo(xt))
-                    return value;
+                //// Not sure if this is really required though...
+                //var vt = sctx.GetXamlType(value.GetType());
+                //if (vt.CanAssignTo(xt))
+                //    return value;
 
                 // FIXME: this could be generalized by some means, but I cannot find any.
                 if (xt.UnderlyingType == typeof(XamlType) && value is string)
@@ -773,17 +775,7 @@ namespace System.Xaml
                 if (ReferenceEquals(xt, XamlLanguage.Type) && value is string)
                     value = new TypeExtension((string)value);
 
-                if (IsAllowedType(xt, value))
-                    return value;
-
                 var xtc = xm?.TypeConverter ?? xt.TypeConverter;
-                if (xtc != null && value != null)
-                {
-                    var tc = xtc.ConverterInstance;
-                    if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
-                        value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
-                    return value;
-                }
 
                 var typeConverterHandler = xm?.DeclaringType.SetTypeConverterHandler;
                 if (typeConverterHandler != null)
@@ -796,6 +788,18 @@ namespace System.Xaml
                         return null;
                     }
                 }
+
+                if (xtc != null && value != null)
+                {
+                    var tc = xtc.ConverterInstance;
+                    if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
+                        value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
+                    return value;
+                }
+
+
+                if (IsAllowedType(xt, value))
+                    return value;
             }
             catch (Exception ex)
             {
