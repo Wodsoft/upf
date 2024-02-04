@@ -4,30 +4,35 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
 
 namespace Wodsoft.UI
 {
     internal class TriggerBinding : IDisposable
     {
+        private readonly object _source;
         private readonly DependencyObject _container;
+        private readonly INameScope? _nameScope;
         private readonly TriggerActionCollection? _enterActions, _exitActions;
         private readonly List<(FrameworkElement, DependencyProperty, TriggerValue, byte)> _setters = new List<(FrameworkElement, DependencyProperty, TriggerValue, byte)>();
         private readonly List<ConditionBinding> _conditions = new List<ConditionBinding>();
         private bool _disposed, _isEquality;
 
-        public TriggerBinding(DependencyObject container, TriggerActionCollection? enterActions, TriggerActionCollection? exitActions)
+        public TriggerBinding(object source, DependencyObject container, INameScope? nameScope, TriggerActionCollection? enterActions, TriggerActionCollection? exitActions)
         {
+            _source = source;
             _container = container;
+            _nameScope = nameScope;
             _enterActions = enterActions;
             _exitActions = exitActions;
         }
 
-        public bool HasSetter => _setters.Count != 0;
-
         public bool HasCondition => _conditions.Count != 0;
 
+        public bool HasContent => _setters.Count != 0 || (_enterActions != null && _enterActions.Count != 0) || (_exitActions != null && _exitActions.Count != 0);
+
         public void AddSetter(FrameworkElement target, DependencyProperty property, TriggerValue value, byte layer)
-        {            
+        {
             target.AddTriggerValue(property, layer, value);
             _setters.Add((target, property, value, layer));
         }
@@ -58,7 +63,7 @@ namespace Wodsoft.UI
                 {
                     foreach (var action in _exitActions)
                     {
-                        action.Invoke(_container);
+                        action.Invoke(_source, _container, _nameScope);
                     }
                 }
             }
@@ -72,12 +77,12 @@ namespace Wodsoft.UI
                         value.IsEnabled = true;
                         target.InvalidateProperty(property);
                     }
-                }
-                if (_enterActions != null)
-                {
-                    foreach (var action in _enterActions)
+                    if (_enterActions != null)
                     {
-                        action.Invoke(_container);
+                        foreach (var action in _enterActions)
+                        {
+                            action.Invoke(_source, _container, _nameScope);
+                        }
                     }
                 }
             }

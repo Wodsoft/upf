@@ -57,12 +57,50 @@ namespace Wodsoft.UI.Test
             Assert.Null(obj.TextD);
             obj.TextA = "text";
             Assert.Equal("trigger text", obj.TextC);
-            Assert.Equal(50d, rect.Width);
+            Assert.Equal(50f, rect.Width);
             Assert.Null(obj.TextD);
             obj.TextB = "text2";
             Assert.Equal("trigger text", obj.TextC);
             Assert.Equal("D text", obj.TextD);
+            Assert.Equal(150f, rect.Width);
+        }
+
+        [Fact]
+        public void ActionTest()
+        {
+            var xaml = File.ReadAllText("TriggerActionTemplateTest.xaml");
+            var grid = LoadUpfXaml<Grid>(xaml);
+            grid.Arrange(new Rect(0, 0, 100, 100));
+            var obj = (MyObject)grid.FindName("target")!;
+            var rect = (Rectangle)obj.FindTemplateChild("rect")!;
+            Assert.Null(obj.TextC);
+            Assert.Null(obj.TextD);
+            obj.TextA = "run";
+            Assert.Equal("trigger text", obj.TextC);
+            Assert.Equal(100f, rect.Width);
+            Assert.Null(obj.TextD);
+            ApplyTick(TimeSpan.FromMilliseconds(250));
+            Assert.Equal(125f, rect.Width);
+            obj.TextB = "pause";
+            Assert.Equal("D text", obj.TextD);
+            ApplyTick(TimeSpan.FromMilliseconds(500));
+            Assert.Equal(125f, rect.Width);
+            obj.TextB = null;
+            Assert.Null(obj.TextD);
+            Assert.Equal(125f, rect.Width);
+            obj.TextB = "half";
+            ApplyTick(TimeSpan.FromMilliseconds(1000));
+            Assert.Equal(175f, rect.Width);
+            obj.TextB = null;
+            ApplyTick(TimeSpan.FromMilliseconds(500));
+            Assert.Equal(200d, rect.Width);
+            obj.TextB = "seek";
             Assert.Equal(150d, rect.Width);
+            obj.TextB = "fill";
+            Assert.Equal(200d, rect.Width);
+            obj.TextA = "stop";
+            Assert.Null(obj.TextC);
+            Assert.Equal(100f, rect.Width);
         }
     }
 }

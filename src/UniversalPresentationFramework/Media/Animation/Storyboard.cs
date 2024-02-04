@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace Wodsoft.UI.Media.Animation
     {
         #region Properties
 
+        private static readonly DependencyProperty _ClockProperty = DependencyProperty.RegisterAttached("Clock", typeof(Dictionary<Storyboard, WeakReference<Clock>>), typeof(Storyboard));
         public static readonly DependencyProperty TargetProperty = DependencyProperty.RegisterAttached("Target", typeof(DependencyObject), typeof(Storyboard));
         public static DependencyObject? GetTarget(DependencyObject element)
         {
@@ -72,13 +74,37 @@ namespace Wodsoft.UI.Media.Animation
 
         public void Begin(DependencyObject container, HandoffBehavior handoffBehavior, bool isControllable)
         {
+            Begin(container, null, handoffBehavior, isControllable);
+        }
+
+        public void Begin(FrameworkElement container, HandoffBehavior handoffBehavior, bool isControllable)
+        {
+            Begin(container, (INameScope?)null, handoffBehavior, isControllable);
+        }
+
+        public void Begin(FrameworkElement container, FrameworkTemplate template, HandoffBehavior handoffBehavior, bool isControllable)
+        {
+            if (container.GetTemplateInternal() != template)
+                throw new InvalidOperationException("Template not equal to container's template.");
+            INameScope? nameScope;
+            if (container.TemplatedChild == null)
+                nameScope = null;
+            else
+                nameScope = NameScope.GetNameScope(container.TemplatedChild);
+            Begin(container, nameScope, handoffBehavior, isControllable);
+        }
+
+        public void Begin(DependencyObject container, INameScope? nameScope, HandoffBehavior handoffBehavior, bool isControllable)
+        {
             if (FrameworkProvider.ClockProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             if (BeginTime == null)
                 return;
 
             var clock = CreateClock(isControllable);
-            HandleClock(container, clock, null, null, null, handoffBehavior);
+            HandleClock(container, clock, nameScope, null, null, handoffBehavior);
+            if (isControllable)
+                SetStoryboardClock(container, clock);
         }
 
         private void HandleClock(DependencyObject container, Clock clock, INameScope? nameScope, DependencyObject? parentObject, PropertyPath? parentPropertyPath,
@@ -161,6 +187,116 @@ namespace Wodsoft.UI.Media.Animation
             {
                 return nameScope.FindName(name) as DependencyObject;
             }
+        }
+
+        private void SetStoryboardClock(DependencyObject container, Clock clock)
+        {
+            var clocks = (Dictionary<Storyboard, WeakReference<Clock>>?)container.GetValue(_ClockProperty);
+            if (clocks == null)
+            {
+                clocks = new Dictionary<Storyboard, WeakReference<Clock>>();
+                container.SetValue(_ClockProperty, clocks);
+            }
+            clocks[this] = new WeakReference<Clock>(clock);
+        }
+
+        private Clock? GetStoryboardClock(DependencyObject container, bool remove = false)
+        {
+            var clocks = (Dictionary<Storyboard, WeakReference<Clock>>?)container.GetValue(_ClockProperty);
+            if (clocks == null)
+                return null;
+            if (clocks.TryGetValue(this, out var reference))
+            {
+                if (reference.TryGetTarget(out var clock))
+                {
+                    if (remove)
+                        clocks.Remove(this);
+                    return clock;
+                }
+                clocks.Remove(this);
+            }
+            return null;
+        }
+
+        public void Pause()
+        {
+            Pause(this);
+        }
+
+        public void Pause(DependencyObject container)
+        {
+            GetStoryboardClock(container)?.Pause();
+        }
+
+        public void Resume()
+        {
+            Resume(this);
+        }
+
+        public void Resume(DependencyObject container)
+        {
+            GetStoryboardClock(container)?.Resume();
+        }
+
+        public void Stop()
+        {
+            Stop(this);
+        }
+
+        public void Stop(DependencyObject container)
+        {
+            GetStoryboardClock(container)?.Stop();
+        }
+
+        public void Remove()
+        {
+            Remove(this);
+        }
+
+        public void Remove(DependencyObject container)
+        {
+            GetStoryboardClock(container, true)?.Remove();
+        }
+
+        public void SetSpeedRatio(double speedRatio)
+        {
+            SetSpeedRatio(this, speedRatio);
+        }
+
+        public void SetSpeedRatio(DependencyObject containingObject, double speedRatio)
+        {
+            var clock = GetStoryboardClock(containingObject);
+            if (clock != null)
+                clock.Controller!.SpeedRatio = speedRatio;
+        }
+
+        public void Seek(TimeSpan offset)
+        {
+            Seek(this, offset, TimeSeekOrigin.BeginTime);
+        }
+
+        public void Seek(TimeSpan offset, TimeSeekOrigin origin)
+        {
+            Seek(this, offset, origin);
+        }
+
+        public void Seek(DependencyObject container, TimeSpan offset, TimeSeekOrigin origin)
+        {
+            Clock? clock = GetStoryboardClock(container);
+            if (clock != null)
+            {
+                clock.Controller!.Seek(offset, origin);
+            }
+        }
+
+        public void SkipToFill()
+        {
+            SkipToFill(this);
+        }
+
+        public void SkipToFill(DependencyObject container)
+        {
+            GetStoryboardClock(container)?.SkipToFill();
         }
 
         #endregion

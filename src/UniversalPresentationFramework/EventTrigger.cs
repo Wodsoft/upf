@@ -123,13 +123,16 @@ namespace Wodsoft.UI
 
         #region Connect
 
-        protected internal override void ConnectTrigger(object? source, FrameworkElement container, INameScope? nameScope)
+        private readonly Dictionary<FrameworkElement, (object, INameScope?)> _scopes = new Dictionary<FrameworkElement, (object, INameScope?)>();
+
+        protected internal override void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
         {
             if (_routedEvent == null)
                 return;
             if (_actions == null || _actions.Count == 0)
                 return;
             container.AddHandler(_routedEvent, Handle, false);
+            _scopes[container] = (source, nameScope);
         }
 
         protected internal override void DisconnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
@@ -139,6 +142,7 @@ namespace Wodsoft.UI
             if (_actions == null || _actions.Count == 0)
                 return;
             container.RemoveHandler(_routedEvent, Handle);
+            _scopes.Remove(container);
         }
 
         #endregion
@@ -147,9 +151,10 @@ namespace Wodsoft.UI
 
         private void Handle(object sender, RoutedEventArgs e)
         {
-            foreach(var action in _actions!)
+            _scopes.TryGetValue((FrameworkElement)sender, out var value);
+            foreach (var action in _actions!)
             {
-                action.Invoke((DependencyObject)sender);
+                action.Invoke(value.Item1, (DependencyObject)sender, value.Item2);
             }
         }
 

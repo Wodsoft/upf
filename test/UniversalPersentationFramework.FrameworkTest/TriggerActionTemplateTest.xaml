@@ -1,0 +1,71 @@
+﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	<local:MyObject Name="target">
+		<Control.Template>
+			<ControlTemplate TargetType="{x:Type local:MyObject}">
+				<Grid>
+					<Rectangle Name="rect" Width="100"/>
+				</Grid>
+				<ControlTemplate.Triggers>
+					<Trigger Property="TextA" Value="run">
+						<Setter Property="TextC" Value="trigger text"/>
+						<Trigger.EnterActions>
+							<BeginStoryboard Name="storyboard">
+								<Storyboard>
+									<SingleAnimation Storyboard.TargetName="rect" Storyboard.TargetProperty="Width" To="200" Duration="0:0:1"/>
+								</Storyboard>
+							</BeginStoryboard>
+						</Trigger.EnterActions>
+						<Trigger.ExitActions>
+							<RemoveStoryboard BeginStoryboardName="storyboard"/>
+						</Trigger.ExitActions>
+					</Trigger>
+					<MultiTrigger>
+						<MultiTrigger.Conditions>
+							<Condition Property="TextA" Value="run"/>
+							<Condition Property="TextB" Value="pause"/>
+						</MultiTrigger.Conditions>
+						<Setter Property="TextD" Value="D text"/>
+						<MultiTrigger.EnterActions>
+							<PauseStoryboard BeginStoryboardName="storyboard"/>
+						</MultiTrigger.EnterActions>
+						<MultiTrigger.ExitActions>
+							<ResumeStoryboard BeginStoryboardName="storyboard"/>
+						</MultiTrigger.ExitActions>
+					</MultiTrigger>
+					<MultiTrigger>
+						<MultiTrigger.Conditions>
+							<Condition Property="TextA" Value="run"/>
+							<Condition Property="TextB" Value="seek"/>
+						</MultiTrigger.Conditions>
+						<MultiTrigger.EnterActions>
+							<SeekStoryboard Offset="0:0:0.5" BeginStoryboardName="storyboard"/>
+						</MultiTrigger.EnterActions>
+					</MultiTrigger>
+					<MultiTrigger>
+						<MultiTrigger.Conditions>
+							<Condition Property="TextA" Value="run"/>
+							<Condition Property="TextB" Value="fill"/>
+						</MultiTrigger.Conditions>
+						<MultiTrigger.EnterActions>
+							<SkipStoryboardToFill BeginStoryboardName="storyboard"/>
+						</MultiTrigger.EnterActions>
+					</MultiTrigger>
+					<MultiTrigger>
+						<MultiTrigger.Conditions>
+							<Condition Property="TextA" Value="run"/>
+							<Condition Property="TextB" Value="half"/>
+						</MultiTrigger.Conditions>
+						<MultiTrigger.EnterActions>
+							<SetStoryboardSpeedRatio SpeedRatio="0.5" BeginStoryboardName="storyboard"/>
+						</MultiTrigger.EnterActions>
+						<MultiTrigger.ExitActions>
+							<SetStoryboardSpeedRatio SpeedRatio="1" BeginStoryboardName="storyboard"/>
+						</MultiTrigger.ExitActions>
+					</MultiTrigger>
+				</ControlTemplate.Triggers>
+			</ControlTemplate>
+		</Control.Template>
+	</local:MyObject>
+</Grid>

@@ -26,7 +26,7 @@ namespace Wodsoft.UI
             get => _binding;
             set
             {
-                CheckSealed();                
+                CheckSealed();
                 _binding = value;
             }
         }
@@ -194,11 +194,9 @@ namespace Wodsoft.UI
 
         #region Connect
 
-        protected internal override void ConnectTrigger(object? source, FrameworkElement container, INameScope? nameScope)
+        protected internal override void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
         {
             if (_binding == null)
-                return;
-            if (_setters == null || _setters.Count == 0)
                 return;
             var bindingExpression = _binding!.CreateBindingExpression(container, BindingExpressionBase.NoTargetProperty);
             if (!bindingExpression.CanUpdateTarget)
@@ -210,27 +208,30 @@ namespace Wodsoft.UI
                 layer = TriggerLayer.Style;
             else
                 layer = TriggerLayer.ThemeStyle;
-            TriggerBinding binding = new TriggerBinding(container, _enterActions, _exitActions);
-            foreach (var setterBase in _setters)
+            TriggerBinding binding = new TriggerBinding(source, container, nameScope, _enterActions, _exitActions);
+            if (_setters != null)
             {
-                if (setterBase is Setter setter)
+                foreach (var setterBase in _setters)
                 {
-                    FrameworkElement? target;
-                    if (setter.TargetName == null)
-                        target = container;
-                    else
+                    if (setterBase is Setter setter)
                     {
-                        target = nameScope!.FindName(setter.TargetName) as FrameworkElement;
-                        if (target == null)
+                        FrameworkElement? target;
+                        if (setter.TargetName == null)
+                            target = container;
+                        else
+                        {
+                            target = nameScope!.FindName(setter.TargetName) as FrameworkElement;
+                            if (target == null)
+                                continue;
+                        }
+                        if (setter.Property == null)
                             continue;
+                        TriggerValue triggerValue = new TriggerValue(setter.Value);
+                        binding.AddSetter(target, setter.Property, triggerValue, layer == TriggerLayer.ControlTemplate && setter.TargetName != null ? TriggerLayer.ParentTemplate : layer);
                     }
-                    if (setter.Property == null)
-                        continue;
-                    TriggerValue triggerValue = new TriggerValue(setter.Value);
-                    binding.AddSetter(target, setter.Property, triggerValue, layer == TriggerLayer.ControlTemplate && setter.TargetName != null ? TriggerLayer.ParentTemplate : layer);
                 }
             }
-            if (!binding.HasSetter)
+            if (!binding.HasContent)
                 return;
             bindingExpression.Attach(container, BindingExpressionBase.NoTargetProperty);
             binding.AddCondition(new ExpressionConditionBinding(bindingExpression, _value));

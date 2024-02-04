@@ -168,7 +168,10 @@ namespace Wodsoft.UI.Media.Animation
                 throw new InvalidOperationException("Offset can't be negative.");
             }
 
-            _clock.ApplyTick(offset);
+            if (origin == TimeSeekOrigin.Duration)
+                _clock.ApplyTick(offset);
+            else
+                _clock.ApplyTimeSpan(_clock.BeginTime + offset, false);
         }
 
         /// <summary>
@@ -205,7 +208,10 @@ namespace Wodsoft.UI.Media.Animation
                 throw new InvalidOperationException("Offset can't be negative.");
             }
 
-            _clock.ApplyTick(offset);
+            if (origin == TimeSeekOrigin.Duration)
+                _clock.ApplyTick(offset);
+            else
+                _clock.ApplyTimeSpan(_clock.BeginTime + offset, false);
         }
 
         /// <summary>

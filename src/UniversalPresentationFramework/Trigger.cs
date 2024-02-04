@@ -266,11 +266,9 @@ namespace Wodsoft.UI
 
         #region Connect
 
-        protected internal override void ConnectTrigger(object? source, FrameworkElement container, INameScope? nameScope)
+        protected internal override void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
         {
-            if (_setters == null || _setters.Count == 0)
-                return;
-            TriggerBinding binding = new TriggerBinding(container, _enterActions, _exitActions);
+            TriggerBinding binding = new TriggerBinding(source, container, nameScope, _enterActions, _exitActions);
             if (_sourceName == null)
             {
                 binding.AddCondition(new DependencyConditionBinding(container, _property!, _value));
@@ -296,26 +294,29 @@ namespace Wodsoft.UI
                 layer = TriggerLayer.Style;
             else
                 layer = TriggerLayer.ThemeStyle;
-            foreach (var setterBase in _setters)
+            if (_setters != null)
             {
-                if (setterBase is Setter setter)
+                foreach (var setterBase in _setters)
                 {
-                    FrameworkElement? target;
-                    if (setter.TargetName == null)
-                        target = container;
-                    else
+                    if (setterBase is Setter setter)
                     {
-                        target = nameScope!.FindName(setter.TargetName) as FrameworkElement;
-                        if (target == null)
+                        FrameworkElement? target;
+                        if (setter.TargetName == null)
+                            target = container;
+                        else
+                        {
+                            target = nameScope!.FindName(setter.TargetName) as FrameworkElement;
+                            if (target == null)
+                                continue;
+                        }
+                        if (setter.Property == null)
                             continue;
+                        TriggerValue triggerValue = new TriggerValue(setter.Value);
+                        binding.AddSetter(target, setter.Property, triggerValue, layer == TriggerLayer.ControlTemplate && setter.TargetName != null ? TriggerLayer.ParentTemplate : layer);
                     }
-                    if (setter.Property == null)
-                        continue;
-                    TriggerValue triggerValue = new TriggerValue(setter.Value);
-                    binding.AddSetter(target, setter.Property, triggerValue, layer == TriggerLayer.ControlTemplate && setter.TargetName != null ? TriggerLayer.ParentTemplate : layer);
                 }
             }
-            if (!binding.HasSetter)
+            if (!binding.HasContent)
             {
                 binding.Dispose();
                 return;
