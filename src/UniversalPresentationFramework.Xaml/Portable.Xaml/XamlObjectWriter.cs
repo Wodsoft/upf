@@ -34,6 +34,7 @@ using System.Xaml.Schema;
 using System.Xml;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Net.NetworkInformation;
 
 // To use this under .NET, compile sources as:
 //
@@ -320,6 +321,7 @@ namespace System.Xaml
 
         XamlObjectWriter source;
         INameScope name_scope;
+        Stack<INameScope> _nameScopes = new Stack<INameScope>();
         List<NameFixupRequired> pending_name_references = new List<NameFixupRequired>();
 
         public INameScope NameScope
@@ -365,6 +367,11 @@ namespace System.Xaml
             InitializeObjectIfRequired(false, true);
             var xm = CurrentMember;
             var instance = xm.Invoker.GetValue(object_states.Peek().Value);
+            if (instance is INameScope nameScope)
+            {
+                _nameScopes.Push(name_scope);
+                name_scope = nameScope;
+            }
             if (state.Type.IsImmutable)
                 instance = state.Type.Invoker.ToMutable(instance);
             if (instance == null)
@@ -384,6 +391,10 @@ namespace System.Xaml
 
             var state = object_states.Pop();
             var obj = state.Value;
+            if (obj is INameScope)
+            {
+                name_scope = _nameScopes.Pop();
+            }
             if (state.Type.IsImmutable)
                 obj = state.Type.Invoker.ToImmutable(obj);
 
@@ -882,7 +893,7 @@ namespace System.Xaml
                             if (!prop.Member.IsReadOnly)
                                 SetValue(prop.Member, prop.Value);
                         }
-                        return;
+                        goto final;
                     }
                     else
                         obj = state.Type.Invoker.CreateInstance(null);
@@ -896,6 +907,12 @@ namespace System.Xaml
             state.IsInstantiated = true;
             HandleBeginInit(obj);
             source.OnBeforeProperties(state.Value);
+        final:
+            if (obj is INameScope nameScope)
+            {
+                _nameScopes.Push(name_scope);
+                name_scope = nameScope;
+            }
         }
 
         internal IXamlNameResolver name_resolver
