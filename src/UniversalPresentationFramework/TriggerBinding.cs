@@ -40,13 +40,13 @@ namespace Wodsoft.UI
         public void AddCondition(ConditionBinding conditionBinding)
         {
             _conditions.Add(conditionBinding);
-            conditionBinding.IsEqualityChanged += ConditionBinding_IsEqualityChanged;
+            conditionBinding.IsMatchedChanged += ConditionBinding_IsEqualityChanged;
         }
 
         public void EnsureState()
         {
             foreach (var condition in _conditions)
-                condition.EnsureEquailty();
+                condition.EnsureMatched();
         }
 
         private void ConditionBinding_IsEqualityChanged(ConditionBinding conditionBinding, bool isEquality)
@@ -69,7 +69,7 @@ namespace Wodsoft.UI
             }
             else if (!_isEquality && isEquality)
             {
-                _isEquality = _conditions.All(t => t.IsEquality);
+                _isEquality = _conditions.All(t => t.IsMatched);
                 if (_isEquality)
                 {
                     foreach (var (target, property, value, _) in _setters)
@@ -95,7 +95,7 @@ namespace Wodsoft.UI
             _disposed = true;
             foreach (var condition in _conditions)
             {
-                condition.IsEqualityChanged -= ConditionBinding_IsEqualityChanged;
+                condition.IsMatchedChanged -= ConditionBinding_IsEqualityChanged;
                 condition.Dispose();
             }
             _conditions.Clear();

@@ -153,7 +153,7 @@ namespace Wodsoft.UI
                 if (!bindingExpression.CanUpdateTarget)
                     continue;
                 bindingExpression.Attach(container, BindingExpressionBase.NoTargetProperty);
-                binding.AddCondition(new ExpressionConditionBinding(bindingExpression, condition.Value));
+                binding.AddCondition(new ExpressionConditionBinding(bindingExpression, condition.Value, condition.Logic));
             }
             if (!binding.HasCondition)
             {

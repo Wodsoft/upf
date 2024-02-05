@@ -20,6 +20,7 @@ namespace Wodsoft.UI
         private DependencyProperty? _property;
         private object? _value;
         private string? _sourceName;
+        private ConditionLogic _logic;
         private SetterBaseCollection? _setters;
         private TriggerActionCollection? _enterActions, _exitActions;
 
@@ -70,6 +71,16 @@ namespace Wodsoft.UI
             {
                 CheckSealed();
                 _sourceName = value;
+            }
+        }
+
+        public ConditionLogic Logic
+        {
+            get { return _logic; }
+            set
+            {
+                CheckSealed();
+                _logic = value;
             }
         }
 
@@ -271,7 +282,7 @@ namespace Wodsoft.UI
             TriggerBinding binding = new TriggerBinding(source, container, nameScope, _enterActions, _exitActions);
             if (_sourceName == null)
             {
-                binding.AddCondition(new DependencyConditionBinding(container, _property!, _value));
+                binding.AddCondition(new DependencyConditionBinding(container, _property!, _value, _logic));
             }
             else
             {
@@ -280,7 +291,7 @@ namespace Wodsoft.UI
                 var target = nameScope!.FindName(_sourceName);
                 if (target is DependencyObject d)
                 {
-                    binding.AddCondition(new DependencyConditionBinding(d, _property!, _value));
+                    binding.AddCondition(new DependencyConditionBinding(d, _property!, _value, _logic));
                 }
                 else
                 {

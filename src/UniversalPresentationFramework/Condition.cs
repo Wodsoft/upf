@@ -19,6 +19,7 @@ namespace Wodsoft.UI
         private BindingBase? _binding;
         private object? _value = DependencyProperty.UnsetValue;
         private string? _sourceName = null;
+        private ConditionLogic _logic;
 
         /// <summary>
         ///     Constructor with no property reference nor value
@@ -126,6 +127,16 @@ namespace Wodsoft.UI
                 if (value is Expression)
                     throw new ArgumentException("Condition value doesn't support expression.");
                 _value = value;
+            }
+        }
+
+        public ConditionLogic Logic
+        {
+            get { return _logic; }
+            set
+            {
+                CheckSealed();
+                _logic = value;
             }
         }
 

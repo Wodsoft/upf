@@ -151,7 +151,7 @@ namespace Wodsoft.UI
             {
                 if (condition.SourceName == null)
                 {
-                    binding.AddCondition(new DependencyConditionBinding(container, condition.Property!, condition.Value));
+                    binding.AddCondition(new DependencyConditionBinding(container, condition.Property!, condition.Value, condition.Logic));
                 }
                 else
                 {
@@ -160,7 +160,7 @@ namespace Wodsoft.UI
                     var target = nameScope!.FindName(condition.SourceName);
                     if (target is DependencyObject d)
                     {
-                        binding.AddCondition(new DependencyConditionBinding(d, condition.Property!, condition.Value));
+                        binding.AddCondition(new DependencyConditionBinding(d, condition.Property!, condition.Value, condition.Logic));
                     }
                     else
                     {

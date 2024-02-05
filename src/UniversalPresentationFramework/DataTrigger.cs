@@ -18,6 +18,7 @@ namespace Wodsoft.UI
 
         private BindingBase? _binding;
         private object? _value;
+        private ConditionLogic _logic;
         private SetterBaseCollection? _setters;
         private TriggerActionCollection? _enterActions, _exitActions;
 
@@ -48,6 +49,16 @@ namespace Wodsoft.UI
                 if (value is Expression)
                     throw new ArgumentException("Trigger condition value doesn't support expression.");
                 _value = value;
+            }
+        }
+
+        public ConditionLogic Logic
+        {
+            get { return _logic; }
+            set
+            {
+                CheckSealed();
+                _logic = value;
             }
         }
 
@@ -234,7 +245,7 @@ namespace Wodsoft.UI
             if (!binding.HasContent)
                 return;
             bindingExpression.Attach(container, BindingExpressionBase.NoTargetProperty);
-            binding.AddCondition(new ExpressionConditionBinding(bindingExpression, _value));
+            binding.AddCondition(new ExpressionConditionBinding(bindingExpression, _value, _logic));
             binding.EnsureState();
             container.AddTriggerBinding(this, binding);
         }

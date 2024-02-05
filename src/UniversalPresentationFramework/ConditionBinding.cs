@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Data;
@@ -11,31 +12,58 @@ namespace Wodsoft.UI
 {
     internal abstract class ConditionBinding : IDisposable
     {
-        public event ConditionBindingEqualityChangedEventHandler? IsEqualityChanged;
+        public abstract event ConditionBindingEqualityChangedEventHandler? IsMatchedChanged;
 
-        protected void EqualityChanged(bool isEquality)
-        {
-            IsEqualityChanged?.Invoke(this, isEquality);
-        }
+        //protected void IsMatchedChanged(bool isMatched)
+        //{
+        //    IsEqualityChanged?.Invoke(this, isMatched);
+        //}
 
         public abstract void Dispose();
 
-        public abstract bool IsEquality { get; }
+        public abstract bool IsMatched { get; }
 
-        public abstract void EnsureEquailty();
+        public abstract void EnsureMatched();
+
+        protected bool Match(object? left, object? right, ConditionLogic logic)
+        {
+            switch (logic)
+            {
+                case ConditionLogic.Equal:
+                    return Equals(left, right);
+                case ConditionLogic.NotEqual:
+                    return !Equals(left, right);
+            }
+            if (left is IComparable comparable)
+            {
+                switch (logic)
+                {
+                    case ConditionLogic.Less:
+                        return comparable.CompareTo(right) < 0;
+                    case ConditionLogic.LessThan:
+                        return comparable.CompareTo(right) <= 0;
+                    case ConditionLogic.Greater:
+                        return comparable.CompareTo(right) > 0;
+                    case ConditionLogic.GreaterThan:
+                        return comparable.CompareTo(right) >= 0;
+                }
+            }
+            return false;
+        }
     }
 
-    internal delegate void ConditionBindingEqualityChangedEventHandler(ConditionBinding conditionBinding, bool isEquality);
+    internal delegate void ConditionBindingEqualityChangedEventHandler(ConditionBinding conditionBinding, bool isMatched);
 
     internal class DependencyConditionBinding : ConditionBinding, IDisposable
     {
         private readonly DependencyObject _target;
         private readonly DependencyProperty _property;
         private readonly object? _value;
-        private bool _isEquality;
+        private readonly ConditionLogic _logic;
+        private bool _isMatched;
         private bool _disposed;
 
-        public DependencyConditionBinding(DependencyObject target, DependencyProperty property, object? value)
+        public DependencyConditionBinding(DependencyObject target, DependencyProperty property, object? value, ConditionLogic logic)
         {
             _target = target;
             _property = property;
@@ -50,27 +78,30 @@ namespace Wodsoft.UI
                 }
             }
             _value = value;
+            _logic = logic;
             target.DependencyPropertyChanged += Target_DependencyPropertyChanged;
         }
+
+        public override event ConditionBindingEqualityChangedEventHandler? IsMatchedChanged;
 
         private void Target_DependencyPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.Property == _property)
             {
-                if (!_isEquality && Equals(e.NewValue, _value))
+                if (!_isMatched && Match(e.NewValue, _value, _logic))
                 {
-                    _isEquality = true;
-                    EqualityChanged(true);
+                    _isMatched = true;
+                    IsMatchedChanged?.Invoke(this, true);
                 }
-                else if (_isEquality && !Equals(e.NewValue, _value))
+                else if (_isMatched && !Match(e.NewValue, _value, _logic))
                 {
-                    _isEquality = false;
-                    EqualityChanged(false);
+                    _isMatched = false;
+                    IsMatchedChanged?.Invoke(this, false);
                 }
             }
         }
 
-        public override bool IsEquality => _isEquality;
+        public override bool IsMatched => _isMatched;
 
         public override void Dispose()
         {
@@ -80,18 +111,18 @@ namespace Wodsoft.UI
             _target.DependencyPropertyChanged -= Target_DependencyPropertyChanged;
         }
 
-        public override void EnsureEquailty()
+        public override void EnsureMatched()
         {
             var value = _target.GetValue(_property);
-            if (!_isEquality && Equals(value, _value))
+            if (!_isMatched && Match(value, _value, _logic))
             {
-                _isEquality = true;
-                EqualityChanged(true);
+                _isMatched = true;
+                IsMatchedChanged?.Invoke(this, true);
             }
-            else if (_isEquality && !Equals(value, _value))
+            else if (_isMatched && !Match(value, _value, _logic))
             {
-                _isEquality = false;
-                EqualityChanged(false);
+                _isMatched = false;
+                IsMatchedChanged?.Invoke(this, false);
             }
         }
     }
@@ -100,24 +131,28 @@ namespace Wodsoft.UI
     {
         private readonly BindingExpressionBase _expression;
         private readonly object? _value;
+        private readonly ConditionLogic _logic;
         private TypeConverter? _converter;
         private object? _convertedValue;
-        private bool _isEquality;
+        private bool _isMatched;
         private bool _disposed;
 
-        public ExpressionConditionBinding(BindingExpressionBase expression, object? value)
+        public ExpressionConditionBinding(BindingExpressionBase expression, object? value, ConditionLogic logic)
         {
             _expression = expression;
             _value = value;
+            _logic = logic;
             _expression.ValueChanged += ValueChanged;
         }
 
+        public override event ConditionBindingEqualityChangedEventHandler? IsMatchedChanged;
+
         private void ValueChanged(object? sender, EventArgs e)
         {
-            EnsureEquailty();
+            EnsureMatched();
         }
 
-        public override bool IsEquality => _isEquality;
+        public override bool IsMatched => _isMatched;
 
         public override void Dispose()
         {
@@ -128,17 +163,17 @@ namespace Wodsoft.UI
             _expression.Detach();
         }
 
-        public override void EnsureEquailty()
+        public override void EnsureMatched()
         {
             var expressionValue = _expression.Value;
-            bool isEquality;
+            bool isMatched;
             if (expressionValue != null && _value != null)
             {
                 var valueType = _value.GetType();
                 var expressionType = expressionValue.GetType();
                 if (expressionType.IsAssignableFrom(valueType))
                 {
-                    isEquality = Equals(expressionValue, _value);
+                    isMatched = Match(expressionValue, _value, _logic);
                 }
                 else
                 {
@@ -152,21 +187,20 @@ namespace Wodsoft.UI
                             _convertedValue = _value;
                         _converter = converter;
                     }
-                    isEquality = Equals(expressionValue, _convertedValue);
+                    isMatched = Match(expressionValue, _convertedValue, _logic);
                 }
-
             }
             else
-                isEquality = Equals(expressionValue, _value);
-            if (!_isEquality && isEquality)
+                isMatched = Match(expressionValue, _value, _logic);
+            if (!_isMatched && isMatched)
             {
-                _isEquality = true;
-                EqualityChanged(true);
+                _isMatched = true;
+                IsMatchedChanged?.Invoke(this, true);
             }
-            else if (_isEquality && !isEquality)
+            else if (_isMatched && !isMatched)
             {
-                _isEquality = false;
-                EqualityChanged(false);
+                _isMatched = false;
+                IsMatchedChanged?.Invoke(this, false);
             }
         }
     }

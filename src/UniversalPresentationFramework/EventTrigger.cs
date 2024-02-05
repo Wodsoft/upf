@@ -123,7 +123,7 @@ namespace Wodsoft.UI
 
         #region Connect
 
-        private readonly Dictionary<FrameworkElement, (object, INameScope?)> _scopes = new Dictionary<FrameworkElement, (object, INameScope?)>();
+        private readonly Dictionary<FrameworkElement, (object Source, INameScope? NameScope)> _scopes = new Dictionary<FrameworkElement, (object, INameScope?)>();
 
         protected internal override void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
         {
@@ -154,7 +154,7 @@ namespace Wodsoft.UI
             _scopes.TryGetValue((FrameworkElement)sender, out var value);
             foreach (var action in _actions!)
             {
-                action.Invoke(value.Item1, (DependencyObject)sender, value.Item2);
+                action.Invoke(value.Source, (DependencyObject)sender, value.NameScope);
             }
         }
 
