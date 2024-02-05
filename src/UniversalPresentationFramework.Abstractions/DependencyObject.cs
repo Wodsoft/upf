@@ -8,7 +8,14 @@ namespace Wodsoft.UI
         #region Values
 
         private Type? _type;
-        private Dictionary<int, DependencyEffectiveValue> _valueStores = new Dictionary<int, DependencyEffectiveValue>();
+        private Dictionary<int, DependencyEffectiveValue> _valueStores;
+
+        public DependencyObject()
+        {
+            _valueStores = new Dictionary<int, DependencyEffectiveValue>(EffectiveValuesInitialSize);
+        }
+
+        protected virtual int EffectiveValuesInitialSize => 2;
 
         public void ClearValue(DependencyProperty dp)
         {
