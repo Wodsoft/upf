@@ -30,6 +30,20 @@ namespace Wodsoft.UI.Controls
 
         #endregion
 
+        #region Child
+
+        protected override void AddChild(object value)
+        {
+            if (value is RowDefinition row)
+                RowDefinitions.Add(row);
+            else if (value is ColumnDefinition column)
+                ColumnDefinitions.Add(column);
+            else
+                base.AddChild(value);
+        }
+
+        #endregion
+
         #region Properties
 
         public ColumnDefinitionCollection ColumnDefinitions => _columns;

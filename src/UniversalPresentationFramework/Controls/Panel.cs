@@ -42,6 +42,11 @@ namespace Wodsoft.UI.Controls
 
         void IAddChild.AddChild(object value)
         {
+            AddChild(value);
+        }
+
+        protected virtual void AddChild(object value)
+        {
             if (value is UIElement element)
                 Children.Add(element);
             else
