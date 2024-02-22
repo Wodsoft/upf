@@ -197,6 +197,8 @@ namespace System.Xaml
 
         public override void WriteGetObject()
         {
+            if (intl.IsComponentInitialized)
+                return;
             if (deferredWriter != null)
             {
                 deferredWriter.Writer.WriteGetObject();
@@ -220,6 +222,8 @@ namespace System.Xaml
 
         public override void WriteStartObject(XamlType xamlType)
         {
+            if (intl.IsComponentInitialized)
+                return;
             if (xamlType.IsUnknown)
             {
                 throw WithLineInfo(new XamlObjectWriterException($"Cannot create unknown type '{xamlType}'."));
@@ -237,6 +241,8 @@ namespace System.Xaml
 
         public override void WriteValue(object value)
         {
+            if (intl.IsComponentInitialized)
+                return;
             if (deferredWriter != null)
             {
                 deferredWriter.Writer.WriteValue(value);
@@ -248,6 +254,8 @@ namespace System.Xaml
 
         public override void WriteStartMember(XamlMember property)
         {
+            if (intl.IsComponentInitialized)
+                return;
             if (deferredWriter != null)
             {
                 deferredWriter.Writer.WriteStartMember(property);
@@ -271,6 +279,8 @@ namespace System.Xaml
 
         public override void WriteEndObject()
         {
+            if (intl.IsComponentInitialized)
+                return;
             if (deferredWriter != null)
             {
                 deferredWriter.Writer.WriteEndObject();
@@ -285,6 +295,8 @@ namespace System.Xaml
 
         public override void WriteEndMember()
         {
+            if (intl.IsComponentInitialized)
+                return;
             if (deferredWriter != null)
             {
                 if (--deferredWriter.DeferCount > 0)
@@ -331,6 +343,8 @@ namespace System.Xaml
 
         public object Result { get; set; }
 
+        public bool IsComponentInitialized { get; private set; }
+
         protected override void OnWriteStartObject()
         {
             var state = object_states.Pop();
@@ -359,6 +373,8 @@ namespace System.Xaml
             if (!state.Type.IsContentValue(service_provider))
                 InitializeObjectIfRequired(true);
             state.IsXamlWriterCreated = true;
+            if (source.Settings.RootObjectInstance == null && state == root_state && state.Value is IComponentConnector connector && connector.IsComponentInitialized)
+                IsComponentInitialized = true;
         }
 
         protected override void OnWriteGetObject()

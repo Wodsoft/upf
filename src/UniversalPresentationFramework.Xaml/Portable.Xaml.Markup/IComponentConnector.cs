@@ -32,6 +32,9 @@ namespace System.Xaml.Markup
 	public interface IComponentConnector
 	{
 		void Connect (int connectionId, object target);
+
 		void InitializeComponent ();
+
+        bool IsComponentInitialized { get; }
 	}
 }
