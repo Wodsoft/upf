@@ -540,6 +540,21 @@ namespace Wodsoft.UI
             return null;
         }
 
+        internal void CheckTargetType(object element)
+        {
+            //// In the most common case TargetType is Default
+            //// and we can avoid a call to IsAssignableFrom() who's performance is unknown.
+            //if (DefaultTargetType == TargetType)
+            //    return;
+            if (_targetType == null)
+                throw new InvalidOperationException("Target type can't be null.");
+            Type elementType = element.GetType();
+            if (!_targetType.IsAssignableFrom(elementType))
+            {
+                throw new InvalidOperationException($"Style target type \"{_targetType.Name}\" mismatch with element \"{elementType.Name}\".");
+            }
+        }
+
         #endregion
     }
 }

@@ -471,6 +471,8 @@ namespace Wodsoft.UI
 
         public event EventHandler? TemplatedParentChanged;
 
+        internal FrameworkTemplate? LastTemplate => _lastTemplate;
+
         public virtual bool ApplyTemplate()
         {
             OnPreApplyTemplate();
@@ -823,6 +825,114 @@ namespace Wodsoft.UI
             var style = ResourceHelper.FindResource(this, GetType()) as Style;
             if (style != null)
                 effectiveValue = new DependencyEffectiveValue(style, DependencyEffectiveSource.Internal);
+        }
+
+        protected internal static readonly DependencyProperty DefaultStyleKeyProperty
+            = DependencyProperty.Register("DefaultStyleKey", typeof(object), typeof(FrameworkElement),
+                                            new FrameworkPropertyMetadata(
+                                                        null,
+                                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                        new PropertyChangedCallback(OnThemeStyleKeyChanged)));
+        private static void OnThemeStyleKeyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // Re-evaluate ThemeStyle because it is
+            // a factor of the ThemeStyleKey property
+            ((FrameworkElement)d).UpdateThemeStyleProperty();
+        }
+        protected internal object? DefaultStyleKey
+        {
+            get { return GetValue(DefaultStyleKeyProperty); }
+            set { SetValue(DefaultStyleKeyProperty, value); }
+        }
+
+        internal Style? ThemeStyle => _themeStyle;
+
+        private Style? _themeStyle;
+        private bool _isThemeStyleUpdateInProgress;
+        internal void UpdateThemeStyleProperty()
+        {
+            if (_isThemeStyleUpdateInProgress == false)
+            {
+                _isThemeStyleUpdateInProgress = true;
+                try
+                {
+                    Style? oldTheme = _themeStyle, newTheme;
+                    var key = DefaultStyleKey;
+                    if (key == null || OverridesDefaultStyle)
+                        newTheme = null;
+                    else
+                    {
+                        if (FrameworkProvider.ResourceProvider != null)
+                            newTheme = FrameworkProvider.ResourceProvider.FindSystemResource(key) as Style;
+                        else
+                            newTheme = null;
+                    }
+
+                    if (oldTheme != newTheme)
+                    {
+                        if (newTheme != null)
+                        {
+                            newTheme.CheckTargetType(this);
+                            newTheme.Seal();
+                        }
+                        _themeStyle = newTheme;
+
+                        if (_style == null)
+                            Style.ApplyStyle(this, oldTheme, newTheme);
+                    }
+
+                    // Update the ContextMenu and ToolTips separately because they aren't in the tree
+                    //ContextMenu contextMenu =
+                    //        GetValueEntry(
+                    //                LookupEntry(ContextMenuProperty.GlobalIndex),
+                    //                ContextMenuProperty,
+                    //                null,
+                    //                RequestFlags.DeferredReferences).Value as ContextMenu;
+                    //if (contextMenu != null)
+                    //{
+                    //    TreeWalkHelper.InvalidateOnResourcesChange(contextMenu, null, ResourcesChangeInfo.ThemeChangeInfo);
+                    //}
+
+                    //DependencyObject toolTip =
+                    //        GetValueEntry(
+                    //                LookupEntry(ToolTipProperty.GlobalIndex),
+                    //                ToolTipProperty,
+                    //                null,
+                    //                RequestFlags.DeferredReferences).Value as DependencyObject;
+
+                    //if (toolTip != null)
+                    //{
+                    //    FrameworkObject toolTipFO = new FrameworkObject(toolTip);
+                    //    if (toolTipFO.IsValid)
+                    //    {
+                    //        TreeWalkHelper.InvalidateOnResourcesChange(toolTipFO.FE, toolTipFO.FCE, ResourcesChangeInfo.ThemeChangeInfo);
+                    //    }
+                    //}
+
+                    //OnThemeChanged();
+                }
+                finally
+                {
+                    _isThemeStyleUpdateInProgress = false;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Cyclic theme style reference detected.");
+            }
+        }
+
+
+        public static readonly DependencyProperty OverridesDefaultStyleProperty
+            = DependencyProperty.Register("OverridesDefaultStyle", typeof(bool), typeof(FrameworkElement),
+                                            new FrameworkPropertyMetadata(
+                                                        false,
+                                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                        new PropertyChangedCallback(OnThemeStyleKeyChanged)));
+        public bool OverridesDefaultStyle
+        {
+            get { return (bool)GetValue(OverridesDefaultStyleProperty)!; }
+            set { SetValue(OverridesDefaultStyleProperty, value); }
         }
 
         #endregion
