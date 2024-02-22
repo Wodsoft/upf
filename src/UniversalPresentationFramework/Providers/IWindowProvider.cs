@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wodsoft.UI
+namespace Wodsoft.UI.Providers
 {
     /// <summary>
     /// OS Window Provider.

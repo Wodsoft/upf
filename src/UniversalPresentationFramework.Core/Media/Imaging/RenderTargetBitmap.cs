@@ -21,9 +21,9 @@ namespace Wodsoft.UI.Media.Imaging
 
         public RenderTargetBitmap(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
         {
-            if (FrameworkProvider.RendererProvider == null)
+            if (FrameworkCoreProvider.RendererProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
-            _context = FrameworkProvider.RendererProvider.CreateRenderBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat);
+            _context = FrameworkCoreProvider.RendererProvider.CreateRenderBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat);
             _dpiX = dpiX;
             _dpiY = dpiY;
         }

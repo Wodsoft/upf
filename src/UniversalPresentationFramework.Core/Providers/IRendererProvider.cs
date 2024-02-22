@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Wodsoft.UI.Media;
 using Wodsoft.UI.Media.Imaging;
 
-namespace Wodsoft.UI
+namespace Wodsoft.UI.Providers
 {
     /// <summary>
     /// Framework Renderer Provider.

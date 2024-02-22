@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media.Animation;
+using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI.Test
 {

@@ -96,7 +96,7 @@ namespace Wodsoft.UI.Media.Animation
 
         public void Begin(DependencyObject container, INameScope? nameScope, HandoffBehavior handoffBehavior, bool isControllable)
         {
-            if (FrameworkProvider.ClockProvider == null)
+            if (FrameworkCoreProvider.ClockProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             if (BeginTime == null)
                 return;

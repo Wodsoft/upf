@@ -100,9 +100,9 @@ namespace Wodsoft.UI
 
                 if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize) || !_isRenderValid))
                 {
-                    if (FrameworkProvider.RendererProvider != null)
+                    if (FrameworkCoreProvider.RendererProvider != null)
                     {
-                        var drawingContext = FrameworkProvider.RendererProvider.CreateDrawingContext(this);
+                        var drawingContext = FrameworkCoreProvider.RendererProvider.CreateDrawingContext(this);
                         try
                         {
                             OnRender(drawingContext);
@@ -399,7 +399,7 @@ namespace Wodsoft.UI
 
         public void BeginAnimation(DependencyProperty dp, AnimationTimeline animation)
         {
-            if (FrameworkProvider.ClockProvider == null)
+            if (FrameworkCoreProvider.ClockProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             var clock = animation.CreateClock();
             ApplyAnimationClock(dp, clock, HandoffBehavior.SnapshotAndReplace);

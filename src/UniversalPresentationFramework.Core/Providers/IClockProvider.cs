@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media.Animation;
 
-namespace Wodsoft.UI
+namespace Wodsoft.UI.Providers
 {
     public interface IClockProvider
     {

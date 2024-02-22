@@ -73,7 +73,7 @@ namespace Wodsoft.UI.Media.Imaging
 
         private void FinalizeCreation()
         {
-            if (FrameworkProvider.RendererProvider == null)
+            if (FrameworkCoreProvider.RendererProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             if (_uriSource != null)
             {
@@ -119,7 +119,7 @@ namespace Wodsoft.UI.Media.Imaging
                 }
                 try
                 {
-                    _context = FrameworkProvider.RendererProvider.CreateImageContext(stream, DecodePixelWidth, DecodePixelHeight, Rotation);
+                    _context = FrameworkCoreProvider.RendererProvider.CreateImageContext(stream, DecodePixelWidth, DecodePixelHeight, Rotation);
                 }
                 catch (Exception ex)
                 {
@@ -138,7 +138,7 @@ namespace Wodsoft.UI.Media.Imaging
             {
                 try
                 {
-                    _context = FrameworkProvider.RendererProvider!.CreateImageContext(_downloader.GetStream(), DecodePixelWidth, DecodePixelHeight, Rotation);
+                    _context = FrameworkCoreProvider.RendererProvider!.CreateImageContext(_downloader.GetStream(), DecodePixelWidth, DecodePixelHeight, Rotation);
                     OnDownloadCompleted();
                 }
                 catch (Exception ex)

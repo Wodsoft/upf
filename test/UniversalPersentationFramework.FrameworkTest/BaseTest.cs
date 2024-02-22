@@ -13,7 +13,7 @@ namespace Wodsoft.UI.Test
         public BaseTest()
         {
             _clockProvider = new TestClockProvider();
-            FrameworkProvider.ClockProvider = _clockProvider;
+            FrameworkCoreProvider.ClockProvider = _clockProvider;
         }
 
         protected void ApplyTick(TimeSpan tick)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Providers;
 using Wodsoft.UI.Renderers;
 
 namespace Wodsoft.UI.Platforms.Win32
@@ -17,6 +18,8 @@ namespace Wodsoft.UI.Platforms.Win32
             application.WindowProvider = windowProvider;
             application.LifecycleProvider = new LifecycleProvider(windowProvider);
             application.RendererProvider = new SkiaRendererProvider();
+            application.ThemeProvider = new ThemeProvider();
+            application.ResourceProvider = new EmbeddedResourceProvider();
         }
     }
 }

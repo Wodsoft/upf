@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media;
 using Wodsoft.UI.Media.Imaging;
+using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI.Renderers
 {
