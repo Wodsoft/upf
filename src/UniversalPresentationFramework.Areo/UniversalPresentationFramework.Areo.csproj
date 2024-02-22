@@ -3,13 +3,12 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<RootNamespace>Wodsoft.UI.Test</RootNamespace>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\UniversalPresentationFramework.SourceGenerators\UniversalPresentationFramework.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-		<ProjectReference Include="..\..\src\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+		<ProjectReference Include="..\UniversalPresentationFramework.SourceGenerators\UniversalPresentationFramework.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+		<ProjectReference Include="..\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -21,5 +20,5 @@
 		<AdditionalFiles Include="@(Page)" SourceItemGroup="XAML" />
 		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="SourceItemGroup" />
 	</ItemGroup>
-	
+
 </Project>

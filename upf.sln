@@ -33,7 +33,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Abstractions", "src\UniversalPresentationFramework.Abstractions\UniversalPresentationFramework.Abstractions.csproj", "{2975A43F-367C-460D-A7E1-D0077DC894DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalPersentationFramework.FrameworkTest", "test\UniversalPersentationFramework.FrameworkTest\UniversalPersentationFramework.FrameworkTest.csproj", "{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPersentationFramework.FrameworkTest", "test\UniversalPersentationFramework.FrameworkTest\UniversalPersentationFramework.FrameworkTest.csproj", "{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "themes", "themes", "{B4E0370E-6DF6-44BB-BB93-DF58082A4610}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Areo", "src\UniversalPresentationFramework.Areo\UniversalPresentationFramework.Areo.csproj", "{4D67BC07-1FC4-41E1-B0E4-9E524E5C64DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPersentationFramework.BuildTest", "test\UniversalPersentationFramework.BuildTest\UniversalPersentationFramework.BuildTest.csproj", "{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.SourceGenerators", "src\UniversalPresentationFramework.SourceGenerators\UniversalPresentationFramework.SourceGenerators.csproj", "{166C3EE4-1DE3-4FCF-B2BF-256864980620}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +97,18 @@ Global
 		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D67BC07-1FC4-41E1-B0E4-9E524E5C64DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D67BC07-1FC4-41E1-B0E4-9E524E5C64DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D67BC07-1FC4-41E1-B0E4-9E524E5C64DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D67BC07-1FC4-41E1-B0E4-9E524E5C64DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{166C3EE4-1DE3-4FCF-B2BF-256864980620}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{166C3EE4-1DE3-4FCF-B2BF-256864980620}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{166C3EE4-1DE3-4FCF-B2BF-256864980620}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{166C3EE4-1DE3-4FCF-B2BF-256864980620}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +128,10 @@ Global
 		{FDD2940C-8F38-4BB4-91D6-465144BF7745} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{2975A43F-367C-460D-A7E1-D0077DC894DB} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
 		{B30C25E1-5A4C-4CC8-980B-413D6ED171BF} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
+		{B4E0370E-6DF6-44BB-BB93-DF58082A4610} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
+		{4D67BC07-1FC4-41E1-B0E4-9E524E5C64DD} = {B4E0370E-6DF6-44BB-BB93-DF58082A4610}
+		{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
+		{166C3EE4-1DE3-4FCF-B2BF-256864980620} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F56DE84-DAC8-4DF0-92EF-B337FDBDCE69}

@@ -1,4 +1,7 @@
-﻿<Window x:Class="Wodsoft.UI.Test.App"
-             xmlns="http://schemas.wodsoft.com/upf/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<Window x:Class="Wodsoft.UI.Test.MainWindow"
+        xmlns="http://schemas.wodsoft.com/upf/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	    xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.Test"
+		Width="640" Height="480" Title="Hello Window">
+	<local:TestControl x:Name="testControl" TestEvent="TestControl_TestEvent"/>
 </Window>

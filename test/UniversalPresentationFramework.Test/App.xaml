@@ -1,4 +1,5 @@
 ﻿<Application x:Class="Wodsoft.UI.Test.App"
              xmlns="http://schemas.wodsoft.com/upf/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 StartupUri="MainWindow.xaml">
 </Application>

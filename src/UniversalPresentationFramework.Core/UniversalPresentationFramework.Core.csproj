@@ -8,6 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="System.IO.Packaging" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\UniversalPresentationFramework.Abstractions\UniversalPresentationFramework.Abstractions.csproj" />
 	</ItemGroup>
 
