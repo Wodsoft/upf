@@ -524,7 +524,8 @@ namespace System.Xaml
                 return context.GetValueConverter<TypeConverter>(System.Type.GetType(converterName), Type);
             if (IsEvent)
                 return context.GetValueConverter<TypeConverter>(typeof(EventConverter), Type);
-
+            if (t == typeof(object))
+                return null;
             return Type.TypeConverter;
         }
 
