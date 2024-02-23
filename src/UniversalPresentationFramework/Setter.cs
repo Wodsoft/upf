@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Xaml.Markup;
 using Wodsoft.UI.Controls;
 using Wodsoft.UI.Data;
+using Wodsoft.UI.Markup;
 
 namespace Wodsoft.UI
 {
@@ -113,6 +114,7 @@ namespace Wodsoft.UI
         #region Properties
 
         [Ambient]
+        [TypeConverter(typeof(DependencyPropertyConverter))]
         public DependencyProperty? Property
         {
             get { return _property; }

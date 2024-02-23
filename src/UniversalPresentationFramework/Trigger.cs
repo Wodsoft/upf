@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
 using Wodsoft.UI.Controls;
+using Wodsoft.UI.Markup;
 
 namespace Wodsoft.UI
 {
@@ -25,6 +26,7 @@ namespace Wodsoft.UI
         private TriggerActionCollection? _enterActions, _exitActions;
 
         [Ambient]
+        [TypeConverter(typeof(DependencyPropertyConverter))]
         public DependencyProperty? Property
         {
             get
