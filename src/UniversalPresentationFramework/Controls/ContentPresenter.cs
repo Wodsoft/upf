@@ -206,22 +206,6 @@ namespace Wodsoft.UI.Controls
 
         #endregion
 
-
-        #region Visual
-
-        protected internal override int VisualChildrenCount => TemplatedChild == null ? 0 : 1;
-
-        protected internal override Visual GetVisualChild(int index)
-        {
-            if (TemplatedChild == null)
-                throw new ArgumentOutOfRangeException("index");
-            if (index != 0)
-                throw new ArgumentOutOfRangeException("index");
-            return TemplatedChild;
-        }
-
-        #endregion
-
         #region Selector
 
         internal static Type? DataTypeForItem(object? item, DependencyObject target)

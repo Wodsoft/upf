@@ -36,8 +36,8 @@ namespace Wodsoft.UI.Controls
         protected virtual void OnContentChanged(object? oldContent, object? newContent)
         {
             // Remove the old content child
-            //if (oldContent is LogicalObject oldLogicalObject)
-            //    RemoveLogicalChild(oldLogicalObject);
+            if (oldContent is LogicalObject oldLogicalObject)
+                RemoveLogicalChild(oldLogicalObject);
 
             //// if Content should not be treated as a logical child, there's
             //// nothing to do
@@ -45,8 +45,8 @@ namespace Wodsoft.UI.Controls
             //    return;
 
             // Add the new content child
-            //if (newContent is LogicalObject newLogicalObject)
-            //    AddLogicalChild(newLogicalObject);
+            if (newContent is LogicalObject newLogicalObject)
+                AddLogicalChild(newLogicalObject);
         }
         public object? Content
         {
@@ -132,21 +132,6 @@ namespace Wodsoft.UI.Controls
         void IAddChild.AddText(string text)
         {
             Content = text;
-        }
-
-        #endregion
-
-        #region Visual
-
-        protected internal override int VisualChildrenCount => TemplatedChild == null ? 0 : 1;
-
-        protected internal override Visual GetVisualChild(int index)
-        {
-            if (TemplatedChild == null)
-                throw new ArgumentOutOfRangeException("index");
-            if (index != 0)
-                throw new ArgumentOutOfRangeException("index");
-            return TemplatedChild;
         }
 
         #endregion
