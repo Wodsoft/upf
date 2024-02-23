@@ -121,6 +121,20 @@ namespace UniversalPresentationFramework.SourceGenerators
             return null;
         }
 
+        protected override bool LookupIsMarkupExtension()
+        {
+            if (_baseType == null)
+                return false;
+            if (SymbolEqualityComparer.Default.Equals(_baseType.Type, _schemaContext.MarkupExtensionType))
+                return true;
+            return _baseType.IsMarkupExtension;
+        }
+
+        protected override bool LookupIsUnknown()
+        {
+            return false;
+        }
+
         public new AnalyzerXamlSchemaContext SchemaContext => _schemaContext;
 
         public override string ToString()

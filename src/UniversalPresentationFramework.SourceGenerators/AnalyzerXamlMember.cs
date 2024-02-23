@@ -67,6 +67,11 @@ namespace UniversalPresentationFramework.SourceGenerators
             return _memberType?.DeferringLoader;
         }
 
+        protected override bool LookupIsUnknown()
+        {
+            return false;
+        }
+
         public override string ToString()
         {
             return DeclaringType.ToString() + "." + Name;

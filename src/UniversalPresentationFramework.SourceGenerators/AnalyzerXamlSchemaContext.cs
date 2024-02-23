@@ -15,7 +15,7 @@ namespace UniversalPresentationFramework.SourceGenerators
         private readonly Dictionary<string, List<(IAssemblySymbol Assembly, string Namespace)>> _namespaceMaps = new Dictionary<string, List<(IAssemblySymbol Assembly, string Namespace)>>();
         private readonly Dictionary<(string Namespace, string Name), XamlType> _namespaceCaches = new Dictionary<(string Namespace, string Name), XamlType>();
         private readonly Dictionary<ITypeSymbol, AnalyzerXamlType> _typeCaches = new Dictionary<ITypeSymbol, AnalyzerXamlType>();
-        private INamedTypeSymbol _contentPropertyAttribute, _objectType, _dictionaryInterface, _listInterface, _enumerableInterface, _xamlDeferLoadAttribute;
+        private INamedTypeSymbol _contentPropertyAttribute, _objectType, _dictionaryInterface, _listInterface, _enumerableInterface, _xamlDeferLoadAttribute, _markupExtensionType;
         private IAssemblySymbol _immutableAssembly;
 
         public void SetCompilation(Compilation compilation)
@@ -53,6 +53,7 @@ namespace UniversalPresentationFramework.SourceGenerators
                 _listInterface = compilation.GetTypeByMetadataName("System.Collections.IList");
                 _enumerableInterface = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
                 _xamlDeferLoadAttribute = compilation.GetTypeByMetadataName("System.Xaml.Markup.XamlDeferLoadAttribute");
+                _markupExtensionType = compilation.GetTypeByMetadataName("System.Xaml.Markup.MarkupExtension");
                 _assemblies.TryGetValue("System.Collections.Immutable", out _immutableAssembly);
             }
         }
@@ -70,6 +71,8 @@ namespace UniversalPresentationFramework.SourceGenerators
         public INamedTypeSymbol EnumerableInterface => _enumerableInterface;
 
         public INamedTypeSymbol XamlDeferLoadAttribute => _xamlDeferLoadAttribute;
+
+        public INamedTypeSymbol MarkupExtensionType => _markupExtensionType;
 
         public IAssemblySymbol ImmutableAssembly => _immutableAssembly;
 

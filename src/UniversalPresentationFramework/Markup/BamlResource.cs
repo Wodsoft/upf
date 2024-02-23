@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -80,34 +81,43 @@ namespace Wodsoft.UI.Markup
             _nodes.Add(new BamlResourceNode(XamlNodeType.Value, value, null, null, null, lineNumber, linePosition));
         }
 
-        public void WriteNamespace(NamespaceDeclaration ns, int lineNumber, int linePosition)
+        public void WriteNamespace(string ns, string prefix, int lineNumber, int linePosition)
         {
             CheckSealed();
-            _nodes.Add(new BamlResourceNode(XamlNodeType.NamespaceDeclaration, null, null, null, ns, lineNumber, linePosition));
+            _nodes.Add(new BamlResourceNode(XamlNodeType.NamespaceDeclaration, null, null, null, new NamespaceDeclaration(ns, prefix), lineNumber, linePosition));
         }
 
         public System.Xaml.XamlReader GetReader() => new BamlResourceReader(this);
 
-        internal static Func<string, object>? GetLoadResourcesFunction(Assembly assembly)
+        private static ConcurrentDictionary<Assembly, Func<string, object?>?> _LoadResourcesCaches = new ConcurrentDictionary<Assembly, Func<string, object?>?>();
+        private static ConcurrentDictionary<Assembly, Action<string, object>?> _LoadComponentCaches = new ConcurrentDictionary<Assembly, Action<string, object>?>();
+
+        internal static Func<string, object?>? GetLoadResourcesFunction(Assembly assembly)
         {
-            var resourcesType = assembly.GetType(assembly.GetName().Name + ".BamlResources");
-            if (resourcesType == null)
-                return null;
-            var method = resourcesType.GetMethod("LoadResources", BindingFlags.Public | BindingFlags.Static, [typeof(string)]);
-            if (method == null)
-                return null;
-            return (Func<string, object>)Delegate.CreateDelegate(typeof(Func<string, object>), method);
+            return _LoadResourcesCaches.GetOrAdd(assembly, key =>
+            {
+                var resourcesType = key.GetType(key.GetName().Name + ".BamlResources");
+                if (resourcesType == null)
+                    return null;
+                var method = resourcesType.GetMethod("LoadResources", BindingFlags.Public | BindingFlags.Static, [typeof(string)]);
+                if (method == null)
+                    return null;
+                return (Func<string, object?>)Delegate.CreateDelegate(typeof(Func<string, object?>), method);
+            });
         }
 
         internal static Action<string, object>? GetLoadComponentFunction(Assembly assembly)
         {
-            var resourcesType = assembly.GetType(assembly.GetName().Name + ".BamlResources");
-            if (resourcesType == null)
-                return null;
-            var method = resourcesType.GetMethod("LoadResources", BindingFlags.Public | BindingFlags.Static, [typeof(string), typeof(object)]);
-            if (method == null)
-                return null;
-            return (Action<string, object>)Delegate.CreateDelegate(typeof(Action<string, object>), method);
+            return _LoadComponentCaches.GetOrAdd(assembly, key =>
+            {
+                var resourcesType = key.GetType(key.GetName().Name + ".BamlResources");
+                if (resourcesType == null)
+                    return null;
+                var method = resourcesType.GetMethod("LoadResources", BindingFlags.Public | BindingFlags.Static, [typeof(string), typeof(object)]);
+                if (method == null)
+                    return null;
+                return (Action<string, object>)Delegate.CreateDelegate(typeof(Action<string, object>), method);
+            });
         }
     }
 }

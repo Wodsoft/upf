@@ -24,13 +24,15 @@ namespace UniversalPresentationFramework.SourceGenerators
 
         public abstract void ResourceValue(object value, int lineNumber, int linePosition);
 
+        public abstract void ResourceNamespace(NamespaceDeclaration ns, int lineNumber, int linePosition);
+
         public abstract void ResourceClassType(AnalyzerXamlType type);
 
         protected string GetRelativePathName(string relativePath)
         {
             if (relativePath.EndsWith(".xaml"))
                 relativePath = relativePath.Substring(0, relativePath.Length - 5);
-            return relativePath.Replace("_", "__").Replace('.', '_').Replace('\\', '_').Replace('-', '_');
+            return relativePath.Replace("_", "__").Replace('.', '_').Replace('/', '_').Replace('-', '_');
         }
 
         public abstract string ResourceName { get; }

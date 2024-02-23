@@ -260,6 +260,11 @@ namespace UniversalPresentationFramework.SourceGenerators
             _resourceBuilder.AppendLine($", {lineNumber}, {linePosition});");
         }
 
+        public override void ResourceNamespace(NamespaceDeclaration ns, int lineNumber, int linePosition)
+        {
+            _resourceBuilder.AppendLine($"                _{_resourceName}.WriteNamespace(\"{ns.Namespace}\", \"{ns.Prefix}\", {lineNumber}, {linePosition});");
+        }
+
         public override void ResourceClassType(AnalyzerXamlType type)
         {
             _rootType = type;

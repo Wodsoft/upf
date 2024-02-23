@@ -71,7 +71,7 @@ namespace Wodsoft.UI.Providers
             private readonly ResourceDictionaryLocation _themedLocation;
             private readonly ResourceDictionaryLocation _genericLocation;
             private readonly Assembly _assembly;
-            private string? _themeName;
+            private string? _themeName, _colorName;
             private ResourceDictionary? _themeResource, _genericResource;
             private bool _genericLoaded, _themeLoaded;
 
@@ -103,15 +103,17 @@ namespace Wodsoft.UI.Providers
             {
                 if (FrameworkProvider.ThemeProvider == null)
                     return null;
-                if (FrameworkProvider.ThemeProvider.Name != _themeName)
+                if (FrameworkProvider.ThemeProvider.Name != _themeName || FrameworkProvider.ThemeProvider.Color != _colorName)
+                {
                     _themeLoaded = false;
-                else
                     _themeName = FrameworkProvider.ThemeProvider.Name;
+                    _colorName = FrameworkProvider.ThemeProvider.Color;
+                }
                 if (_themeLoaded || _themedLocation == ResourceDictionaryLocation.None)
-                    return null;
+                    return _themeResource;
                 _themeLoaded = true;
                 Assembly assembly;
-                if (_genericLocation == ResourceDictionaryLocation.ExternalAssembly)
+                if (_themedLocation == ResourceDictionaryLocation.ExternalAssembly)
                 {
                     try
                     {
@@ -127,7 +129,7 @@ namespace Wodsoft.UI.Providers
                 var loadResourceFunc = BamlResource.GetLoadResourcesFunction(assembly);
                 if (loadResourceFunc == null)
                     return null;
-                _themeResource = loadResourceFunc($"themes/{_themeName}.baml") as ResourceDictionary;
+                _themeResource = loadResourceFunc($"themes/{_themeName}.{_colorName}.xaml") as ResourceDictionary;
                 return _themeResource;                
             }
 
@@ -156,7 +158,7 @@ namespace Wodsoft.UI.Providers
                 var loadResourceFunc = BamlResource.GetLoadResourcesFunction(assembly);
                 if (loadResourceFunc == null)
                     return null;
-                _genericResource = loadResourceFunc("themes/generic.baml") as ResourceDictionary;
+                _genericResource = loadResourceFunc("themes/generic.xaml") as ResourceDictionary;
                 return _genericResource;
             }
         }

@@ -590,6 +590,15 @@ namespace System.Xaml
             {
                 // ... and no need to do anything. The object value to pop *is* the return value.
             }
+            else if (ReferenceEquals(xm, XamlLanguage.ConnectionId) || xm.IsEvent)
+            {
+                if (root_state.Value is IComponentConnector connector)
+                {
+                    connector.Connect((int)CurrentMemberState.Value, state.Value);
+                }
+                else
+                    throw WithLineInfo(new XamlObjectWriterException("Root object must implement IComponentConnector to use ConnectionId attribute."));
+            }
             else
             {
                 XamlMember aliasedName = state.Type.GetAliasedProperty(XamlLanguage.Name);
@@ -721,6 +730,20 @@ namespace System.Xaml
                 if (ixser != null)
                     ixser.ReadXml((XmlReader)xdata.XmlReader);
             }
+            else if (xm.IsEvent)
+            {
+                if (obj is int)
+                    ms.Value = obj;
+                else
+                    throw WithLineInfo(new XamlObjectWriterException("Event member must have a int connection id value."));
+            }
+            else if (ReferenceEquals(xm, XamlLanguage.ConnectionId))
+            {
+                if (obj is int)
+                    ms.Value = obj;
+                else
+                    throw WithLineInfo(new XamlObjectWriterException("Event member must have a int connection id value."));
+            }
             else if (ReferenceEquals(xm, XamlLanguage.Base))
             {
                 ms.Value = GetCorrectlyTypedValue(null, xm.Type, obj, out var isAlreadySet);
@@ -788,9 +811,9 @@ namespace System.Xaml
                     return value;
 
                 //// Not sure if this is really required though...
-                //var vt = sctx.GetXamlType(value.GetType());
-                //if (vt.CanAssignTo(xt))
-                //    return value;
+                var vt = sctx.GetXamlType(value.GetType());
+                if (vt == xt)
+                    return value;
 
                 // FIXME: this could be generalized by some means, but I cannot find any.
                 if (xt.UnderlyingType == typeof(XamlType) && value is string)
@@ -836,11 +859,12 @@ namespace System.Xaml
                     ex));
             }
 
-            return fallbackToString ?
-                value :
-                throw WithLineInfo(new XamlObjectWriterException(
-                    String.Format("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object)value.GetType() : "(null)", xt, xm),
-                    null));
+            return value;
+            //return fallbackToString ?
+            //    value :
+            //    throw WithLineInfo(new XamlObjectWriterException(
+            //        String.Format("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object)value.GetType() : "(null)", xt, xm),
+            //        null));
         }
 
         XamlType ResolveTypeFromName(string name)
@@ -989,7 +1013,7 @@ namespace System.Xaml
         public void WriteDeferred(XamlDeferringLoader loader, XamlNodeList nodeList, bool setValue)
         {
             nodeList.Writer.Close();
-            var obj = loader.Load(nodeList.GetReader(), service_provider);
+            var obj = loader.Load(nodeList.GetReader(), new XamlDeferServiceProvider(sctx, source.Settings, service_provider));
             var cms = CurrentMemberState;
             if (cms != null)
                 cms.Value = obj;
@@ -1011,6 +1035,39 @@ namespace System.Xaml
         public XamlObjectWriter GetXamlObjectWriter(XamlObjectWriterSettings settings)
         {
             return new XamlObjectWriter(sctx, settings);
+        }
+
+        private class XamlDeferServiceProvider : IServiceProvider, IXamlObjectWriterFactory
+        {
+            private readonly XamlSchemaContext _schemaContext;
+            private readonly XamlObjectWriterSettings _settings;
+            private readonly IServiceProvider _serviceProvider;
+            private readonly IAmbientProvider _ambientProvider;
+
+            public XamlDeferServiceProvider(XamlSchemaContext schemaContext, XamlObjectWriterSettings settings, IServiceProvider serviceProvider)
+            {
+                _schemaContext = schemaContext;
+                _settings = settings;
+                _serviceProvider = serviceProvider;
+                _ambientProvider = (IAmbientProvider)serviceProvider.GetService(typeof(IAmbientProvider));
+            }
+
+            public XamlObjectWriterSettings GetParentSettings()
+            {
+                return _settings;
+            }
+
+            public object GetService(Type serviceType)
+            {
+                if (serviceType == typeof(IXamlObjectWriterFactory))
+                    return this;
+                return _serviceProvider.GetService(serviceType);
+            }
+
+            public XamlObjectWriter GetXamlObjectWriter(XamlObjectWriterSettings settings)
+            {
+                return new XamlObjectWriter(_schemaContext, settings, _ambientProvider);
+            }
         }
     }
 }

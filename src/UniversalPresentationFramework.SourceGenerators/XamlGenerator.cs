@@ -55,7 +55,7 @@ namespace UniversalPresentationFramework.SourceGenerators
             writer.Flush();
             stream.Position = 0;
 
-            relativePath = additionalText.Path.Substring(projectDir.Length);
+            relativePath = additionalText.Path.Substring(projectDir.Length).Replace('\\', '/');
 
             schemaContext.SetCompilation(compilation);
 
@@ -104,18 +104,24 @@ namespace UniversalPresentationFramework.SourceGenerators
                         }
                         else if (xamlXmlReader.Member == XamlLanguage.Name)
                         {
+                            fileGenerator.ResourceStartMember(xamlXmlReader.Member, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                             xamlXmlReader.Read();
                             if (xamlXmlReader.NodeType != XamlNodeType.Value)
                             {
                                 return;
                             }
                             var name = xamlXmlReader.Value as string;
-                            xamlXmlReader.Read();
                             connectItems.Add(new ConnectItem
                             {
                                 Name = name,
                                 Type = typeStacks.Peek()
                             });
+                            fileGenerator.ResourceValue(name, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
+                            xamlXmlReader.Read();
+                            fileGenerator.ResourceEndMember(xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
+                            fileGenerator.ResourceStartMember(XamlLanguage.ConnectionId, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
+                            fileGenerator.ResourceValue(connectItems.Count, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
+                            fileGenerator.ResourceEndMember(xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                             continue;
                         }
                         else if (xamlXmlReader.Member == XamlLanguage.Base)
@@ -131,18 +137,21 @@ namespace UniversalPresentationFramework.SourceGenerators
                         else if (xamlXmlReader.Member.IsEvent)
                         {
                             var member = xamlXmlReader.Member;
+                            fileGenerator.ResourceStartMember(member, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                             xamlXmlReader.Read();
                             if (xamlXmlReader.NodeType != XamlNodeType.Value)
                             {
                                 return;
                             }
                             var delegateName = xamlXmlReader.Value as string;
-                            xamlXmlReader.Read();
                             connectItems.Add(new ConnectItem
                             {
                                 Name = delegateName,
                                 Member = member
                             });
+                            fileGenerator.ResourceValue(connectItems.Count, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
+                            xamlXmlReader.Read();
+                            fileGenerator.ResourceEndMember(xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                             continue;
                         }
                         else
@@ -158,7 +167,7 @@ namespace UniversalPresentationFramework.SourceGenerators
                             continue;
                         }
                     case XamlNodeType.StartObject:
-                        if (XamlLanguage.AllTypes.Contains(xamlXmlReader.Type))
+                        if (XamlLanguage.Type == xamlXmlReader.Type)
                         {
                             var lineNumber = xamlXmlReader.LineNumber;
                             var linePosition = xamlXmlReader.LinePosition;
@@ -200,6 +209,7 @@ namespace UniversalPresentationFramework.SourceGenerators
                         continue;
                     case XamlNodeType.NamespaceDeclaration:
                         namespaces.Add(xamlXmlReader.Namespace.Prefix, xamlXmlReader.Namespace.Namespace);
+                        fileGenerator.ResourceNamespace(xamlXmlReader.Namespace, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                         continue;
                 }
             }
