@@ -8,7 +8,7 @@ namespace Wodsoft.UI
 {
     internal class TreeMap<T>
     {
-        public ItemStructList<TreeMapNode<T>> Children { get; } = new ItemStructList<TreeMapNode<T>>();
+        public List<TreeMapNode<T>> Children { get; } = new List<TreeMapNode<T>>();
     }
 
     internal class TreeMapNode<T> : TreeMap<T>

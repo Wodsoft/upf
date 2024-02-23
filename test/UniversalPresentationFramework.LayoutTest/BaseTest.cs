@@ -9,6 +9,12 @@ namespace Wodsoft.UI.Test
 {
     public class BaseTest
     {
+        public BaseTest()
+        {
+            FrameworkProvider.ResourceProvider = new Providers.EmbeddedResourceProvider();
+            FrameworkProvider.ThemeProvider = new TestThemeProvider();
+        }
+
         protected T LoadWpfXaml<T>(string xaml)
         {
             return (T)System.Windows.Markup.XamlReader.Parse(xaml);

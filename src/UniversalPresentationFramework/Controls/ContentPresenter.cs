@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
 using Wodsoft.UI.Data;
+using Wodsoft.UI.Media;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Wodsoft.UI.Controls
@@ -18,7 +21,7 @@ namespace Wodsoft.UI.Controls
         //private static readonly DataTemplate _AccessTextTemplate;
         private static readonly DataTemplate _StringTemplate;
         //private static readonly DataTemplate _XmlNodeTemplate;
-        //private static readonly DataTemplate _UIElementTemplate;
+        private static readonly DataTemplate _UIElementTemplate;
         private static readonly DataTemplate _DefaultTemplate;
         private static readonly DefaultSelector _DefaultTemplateSelector;
 
@@ -42,6 +45,11 @@ namespace Wodsoft.UI.Controls
                 template.VisualTree = text;
                 template.Seal();
                 _DefaultTemplate = template;
+            }
+            {
+                var template = new UseContentTemplate();
+                template.Seal();
+                _UIElementTemplate = template;
             }
         }
 
@@ -198,6 +206,24 @@ namespace Wodsoft.UI.Controls
 
         #endregion
 
+
+        #region Visual
+
+        protected internal override int VisualChildrenCount => TemplatedChild == null ? 0 : 1;
+
+        protected internal override Visual GetVisualChild(int index)
+        {
+            if (TemplatedChild == null)
+                throw new ArgumentOutOfRangeException("index");
+            if (index != 0)
+                throw new ArgumentOutOfRangeException("index");
+            return TemplatedChild;
+        }
+
+        #endregion
+
+        #region Selector
+
         internal static Type? DataTypeForItem(object? item, DependencyObject target)
         {
             if (item == null)
@@ -248,8 +274,8 @@ namespace Wodsoft.UI.Controls
                             template.Seal();
                         }
                     }
-                    //else if (item is UIElement)
-                    //    template = _UIElementTemplate;
+                    else if (item is FrameworkElement)
+                        template = _UIElementTemplate;
                     //else if (SystemXmlHelper.IsXmlNode(item))
                     //    template = ((ContentPresenter)container).SelectTemplateForXML();
                     //else if (item is Inline)
@@ -290,5 +316,25 @@ namespace Wodsoft.UI.Controls
                 throw new NotSupportedException();
             }
         }
+
+
+        private class UseContentTemplate : DataTemplate
+        {
+            public UseContentTemplate()
+            {
+
+            }
+
+            protected internal override FrameworkElement? LoadContent(FrameworkElement container, out INameScope? nameScope)
+            {
+                nameScope = null;
+                object? content = ((ContentPresenter)container).Content;
+                if (content is FrameworkElement fe)
+                    return fe;
+                return null;
+            }
+        }
+
+        #endregion
     }
 }

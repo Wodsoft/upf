@@ -9,7 +9,7 @@ namespace Wodsoft.UI
     public class TemplateBindingExpression : Expression
     {
         private readonly TemplateBindingExtension _extension;
-        private FrameworkElement? _templatedParent;
+        private FrameworkElement? _rootElement;
 
         public TemplateBindingExpression(TemplateBindingExtension extension)
         {
@@ -22,9 +22,11 @@ namespace Wodsoft.UI
 
         protected override object? GetSourceValue()
         {
-            if (_templatedParent == null)
+            if (_rootElement == null)
                 return Expression.NoValue;
-            var value = _templatedParent.GetValue(_extension.Property!);
+            if (_rootElement.TemplatedParent == null)
+                return null;
+            var value = _rootElement.TemplatedParent.GetValue(_extension.Property!);
             if (_extension.Converter != null)
                 value = _extension.Converter.Convert(value, AttachedProperty!.PropertyType, _extension.ConverterParameter, null);
             return value;
@@ -35,13 +37,22 @@ namespace Wodsoft.UI
             var logicalObject = LogicalTreeHelper.FindMentor(AttachedObject!);
             if (logicalObject != null && logicalObject.LogicalRoot is FrameworkElement fe)
             {
-                _templatedParent = fe.TemplatedParent;
+                _rootElement = fe;
+                _rootElement.TemplatedParentChanged += TemplatedParentChanged;
             }
+        }
+
+        private void TemplatedParentChanged(object? sender, EventArgs e)
+        {
+            UpdateTarget();
         }
 
         protected override void OnDetach()
         {
-
+            if (_rootElement != null)
+            {
+                _rootElement.TemplatedParentChanged -= TemplatedParentChanged;
+            }
         }
 
         protected override void SetSourceValue(object? value)

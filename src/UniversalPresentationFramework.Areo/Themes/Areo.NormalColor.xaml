@@ -6,7 +6,7 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type ContentControl}">
-					<ContentPresenter/>
+					<ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" ContentStringFormat="{TemplateBinding ContentStringFormat}"/>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>

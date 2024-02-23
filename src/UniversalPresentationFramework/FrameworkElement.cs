@@ -49,6 +49,8 @@ namespace Wodsoft.UI
 
         private void Initialize()
         {
+            if (!_isThemeStyleLoaded)
+                UpdateThemeStyleProperty();
             if (_style == null)
                 InvalidateProperty(StyleProperty);
         }
@@ -498,7 +500,7 @@ namespace Wodsoft.UI
                 var template = GetTemplate();
                 if (template != null)
                 {
-                    _templatedContent = template.LoadContent();
+                    _templatedContent = template.LoadContent(this);
                     if (_templatedContent != null)
                     {
                         if (template.TriggersInternal != null)
@@ -825,6 +827,8 @@ namespace Wodsoft.UI
             var style = ResourceHelper.FindResource(this, GetType()) as Style;
             if (style != null)
                 effectiveValue = new DependencyEffectiveValue(style, DependencyEffectiveSource.Internal);
+            else if (_themeStyle != null)
+                effectiveValue = new DependencyEffectiveValue(_themeStyle, DependencyEffectiveSource.Internal);
         }
 
         protected internal static readonly DependencyProperty DefaultStyleKeyProperty
@@ -848,11 +852,12 @@ namespace Wodsoft.UI
         internal Style? ThemeStyle => _themeStyle;
 
         private Style? _themeStyle;
-        private bool _isThemeStyleUpdateInProgress;
+        private bool _isThemeStyleUpdateInProgress, _isThemeStyleLoaded;
         internal void UpdateThemeStyleProperty()
         {
             if (_isThemeStyleUpdateInProgress == false)
             {
+                _isThemeStyleLoaded = true;
                 _isThemeStyleUpdateInProgress = true;
                 try
                 {

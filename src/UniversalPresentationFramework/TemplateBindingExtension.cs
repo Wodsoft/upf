@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xaml.Markup;
 using Wodsoft.UI.Controls;
 using Wodsoft.UI.Data;
+using Wodsoft.UI.Markup;
 
 namespace Wodsoft.UI
 {
@@ -28,6 +29,7 @@ namespace Wodsoft.UI
         private object? _parameter;
 
         [ConstructorArgument("property")]
+        [TypeConverter(typeof(DependencyPropertyConverter))]
         public DependencyProperty? Property
         {
             get { return _property; }

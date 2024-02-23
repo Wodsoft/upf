@@ -43,12 +43,12 @@ namespace Wodsoft.UI
         /// Load the content of a template as an instance of an object.  Calling this multiple times
         /// will return separate instances.
         /// </summary>
-        public FrameworkElement? LoadContent()
+        public FrameworkElement? LoadContent(FrameworkElement container)
         {
-            return LoadContent(out _);
+            return LoadContent(container, out _);
         }
 
-        protected internal virtual FrameworkElement? LoadContent(out INameScope? nameScope)
+        protected internal virtual FrameworkElement? LoadContent(FrameworkElement container, out INameScope? nameScope)
         {
             if (_visualTree != null)
             {

@@ -85,7 +85,9 @@ namespace Wodsoft.UI
                     keys.Add(key);
 
                 type = type.BaseType;
-                if (type == typeof(object))     // don't search for Object - perf
+                if (type == typeof(FrameworkElement))
+                    type = null; //don't search FrameworkElement and their parent
+                else if (type == typeof(object))     // don't search for Object - perf
                     type = null;
             }
 
@@ -238,7 +240,7 @@ namespace Wodsoft.UI
                 for (var k = 0; k < keys.Length; k++)
                 {
                     object? candidate = resources[keys[k]];
-                    if (candidate != null)
+                    if (candidate != DependencyProperty.UnsetValue)
                     {
                         resource = candidate;
                         matchIndex = k;

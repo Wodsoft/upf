@@ -211,8 +211,8 @@ namespace Wodsoft.UI
         {
             for (int i = 0; i < node.Children.Count; i++)
             {
-                var childNode = node.Children.List[i];
-                var childValue = node.Children.List[i].Value;
+                var childNode = node.Children[i];
+                var childValue = node.Children[i].Value;
                 if (childValue.Type == type)
                     return childValue.PropertyMetadata;
                 if (type.IsSubclassOf(childValue.Type))
@@ -230,8 +230,8 @@ namespace Wodsoft.UI
             {
                 for (int i = 0; i < node.Children.Count; i++)
                 {
-                    var childNode = node.Children.List[i];
-                    var childValue = node.Children.List[i].Value;
+                    var childNode = node.Children[i];
+                    var childValue = node.Children[i].Value;
                     if (childValue.Type == type)
                         return false;
                     if (type.IsSubclassOf(childValue.Type))
