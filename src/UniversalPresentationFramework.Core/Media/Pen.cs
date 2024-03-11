@@ -4,10 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media.Animation;
 
 namespace Wodsoft.UI.Media
 {
-    public class Pen : DependencyObject
+    public class Pen : Animatable
     {
         #region Constructors
 
@@ -132,6 +133,15 @@ namespace Wodsoft.UI.Media
                         new PropertyMetadata(1.0f));
 
         public float Thickness { get { return (float)GetValue(ThicknessProperty)!; } set { SetValue(ThicknessProperty, value); } }
+
+        #endregion
+
+        #region Clone
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new Pen();
+        }
 
         #endregion
     }

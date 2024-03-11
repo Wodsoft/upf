@@ -53,8 +53,8 @@ namespace Wodsoft.UI.Media
         /// </param>
         /// <param name="rectangle"> The Rect to fill and/or stroke. </param>
         public abstract void DrawRectangle(
-            Brush brush,
-            Pen pen,
+            Brush? brush,
+            Pen? pen,
             Rect rectangle);
 
         ///// <summary>
@@ -101,8 +101,8 @@ namespace Wodsoft.UI.Media
         ///     rounded Rect.  This value will be clamped to the range [0..rectangle.Height/2].
         /// </param>
         public abstract void DrawRoundedRectangle(
-            Brush brush,
-            Pen pen,
+            Brush? brush,
+            Pen? pen,
             Rect rectangle,
             float radiusX,
             float radiusY);
@@ -167,8 +167,8 @@ namespace Wodsoft.UI.Media
         ///     The absolute value of the radius provided will be used.
         /// </param>
         public abstract void DrawEllipse(
-            Brush brush,
-            Pen pen,
+            Brush? brush,
+            Pen? pen,
             Point center,
             float radiusX,
             float radiusY);
@@ -210,24 +210,24 @@ namespace Wodsoft.UI.Media
         //    float radiusY,
         //    AnimationClock radiusYAnimations);
 
-        ///// <summary>
-        /////     DrawGeometry - 
-        /////     Draw a Geometry with the provided Brush and/or Pen.
-        /////     If both the Brush and Pen are null this call is a no-op.
-        ///// </summary>
-        ///// <param name="brush">
-        /////     The Brush with which to fill the Geometry.
-        /////     This is optional, and can be null, in which case no fill is performed.
-        ///// </param>
-        ///// <param name="pen">
-        /////     The Pen with which to stroke the Geometry.
-        /////     This is optional, and can be null, in which case no stroke is performed.
-        ///// </param>
-        ///// <param name="geometry"> The Geometry to fill and/or stroke. </param>
-        //public abstract void DrawGeometry(
-        //    Brush brush,
-        //    Pen pen,
-        //    Geometry geometry);
+        /// <summary>
+        ///     DrawGeometry - 
+        ///     Draw a Geometry with the provided Brush and/or Pen.
+        ///     If both the Brush and Pen are null this call is a no-op.
+        /// </summary>
+        /// <param name="brush">
+        ///     The Brush with which to fill the Geometry.
+        ///     This is optional, and can be null, in which case no fill is performed.
+        /// </param>
+        /// <param name="pen">
+        ///     The Pen with which to stroke the Geometry.
+        ///     This is optional, and can be null, in which case no stroke is performed.
+        /// </param>
+        /// <param name="geometry"> The Geometry to fill and/or stroke. </param>
+        public abstract void DrawGeometry(
+            Brush? brush,
+            Pen? pen,
+            Geometry geometry);
 
         /// <summary>
         ///     DrawImage - 

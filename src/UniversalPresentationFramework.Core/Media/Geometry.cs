@@ -3,13 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media.Animation;
 
 namespace Wodsoft.UI.Media
 {
-    public abstract class Geometry : DependencyObject
+    public abstract class Geometry : Animatable
     {
         public virtual Rect Bounds { get; set; }
 
-        protected abstract IEnumerable<PathFigure> GetPathGeometryData();
+        public abstract PathGeometryData GetPathGeometryData();
+
+        public abstract bool IsEmpty();
+
+        protected StreamGeometryContext CreateStreamGeometryContext()
+        {
+            if (FrameworkCoreProvider.RendererProvider == null)
+                throw new InvalidOperationException("Framework not initialized.");
+            return FrameworkCoreProvider.RendererProvider.CreateGeometryContext();
+        }
     }
 }

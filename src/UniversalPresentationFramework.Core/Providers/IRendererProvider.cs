@@ -22,5 +22,7 @@ namespace Wodsoft.UI.Providers
         IBitmapContext CreateBitmapContext(IImageContext context);
 
         IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat);
+
+        StreamGeometryContext CreateGeometryContext();
     }
 }

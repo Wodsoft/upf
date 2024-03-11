@@ -54,28 +54,28 @@ namespace Wodsoft.UI.Renderers
             GC.SuppressFinalize(this);
         }
 
-        public override void DrawRoundedRectangle(Brush brush, Pen pen, Rect rectangle, float radiusX, float radiusY)
+        public override void DrawRoundedRectangle(Brush? brush, Pen? pen, Rect rectangle, float radiusX, float radiusY)
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
             _canvas.DrawRoundRect(new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), radiusX, radiusY, paint);
         }
 
-        public override void DrawRectangle(Brush brush, Pen pen, Rect rectangle)
+        public override void DrawRectangle(Brush? brush, Pen? pen, Rect rectangle)
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
             _canvas.DrawRect(new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), paint);
         }
 
-        public override void DrawLine(Pen pen, Point point0, Point point1)
+        public override void DrawLine(Pen? pen, Point point0, Point point1)
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(null, pen);
             _canvas.DrawLine(point0.X, point0.Y, point1.X, point1.Y, paint);
         }
 
-        public override void DrawEllipse(Brush brush, Pen pen, Point center, float radiusX, float radiusY)
+        public override void DrawEllipse(Brush? brush, Pen? pen, Point center, float radiusX, float radiusY)
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
@@ -139,6 +139,34 @@ namespace Wodsoft.UI.Renderers
         public override void Pop()
         {
             _canvas.Restore();
+        }
+
+        public override void DrawGeometry(Brush? brush, Pen? pen, Geometry geometry)
+        {
+            if (geometry is RectangleGeometry rectangle)
+            {
+                float rx = rectangle.RadiusX, ry = rectangle.RadiusY;
+                if (rx == 0 && ry == 0)
+                    DrawRectangle(brush, pen, rectangle.Rect);
+                else
+                    DrawRoundedRectangle(brush, pen, rectangle.Rect, rx, ry);
+            }
+            else
+            {
+                var data = geometry.GetPathGeometryData();
+                if (data == null)
+                    return;
+                SKPaint paint = SkiaHelper.GetPaint(brush, pen);
+                if (data is SkiaGeometryData skData)
+                {
+                    _canvas.DrawPath(skData.Path, paint);
+                }
+                else
+                {
+                    var path = SKPath.ParseSvgPathData(data.ToPathString());
+                    _canvas.DrawPath(path, paint);
+                }
+            }
         }
     }
 }

@@ -187,6 +187,30 @@ namespace Wodsoft.UI
 
         public bool IsArrangeValid { get; private set; }
 
+        public static float RoundLayoutValue(float value, float dpiScale)
+        {
+            float newValue;
+
+            // If DPI == 1, don't use DPI-aware rounding.
+            if (!FloatUtil.AreClose(dpiScale, 1.0f))
+            {
+                newValue = MathF.Round(value * dpiScale) / dpiScale;
+                // If rounding produces a value unacceptable to layout (NaN, Infinity or MaxValue), use the original value.
+                if (float.IsNaN(newValue) ||
+                    float.IsInfinity(newValue) ||
+                    FloatUtil.AreClose(newValue, float.MaxValue))
+                {
+                    newValue = value;
+                }
+            }
+            else
+            {
+                newValue = MathF.Round(value);
+            }
+
+            return newValue;
+        }
+
         #endregion
 
         #region Render
