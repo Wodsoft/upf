@@ -299,6 +299,8 @@ namespace Wodsoft.UI
 
         protected sealed override Size MeasureCore(Size availableSize)
         {
+            UpdateBindingSelf();
+
             ApplyTemplate();
 
             Thickness margin = Margin;
@@ -336,10 +338,28 @@ namespace Wodsoft.UI
             //Really measure size
             Size unclippedDesiredSize = new Size(Math.Max(0, desiredSize.Width - marginWidth),
                                                     Math.Max(0, desiredSize.Height - marginHeight));
-            if (unclippedDesiredSize.Width < arrangeSize.Width)
+
+            bool needClip = false;
+
+            if (FloatUtil.LessThan(arrangeSize.Width, unclippedDesiredSize.Width))
+            {
+                needClip = true;
                 arrangeSize.Width = unclippedDesiredSize.Width;
-            if (unclippedDesiredSize.Height < arrangeSize.Height)
+            }
+            if (FloatUtil.LessThan(arrangeSize.Height, unclippedDesiredSize.Height))
+            {
+                needClip = true;
                 arrangeSize.Height = unclippedDesiredSize.Height;
+            }
+
+            if (HorizontalAlignment != HorizontalAlignment.Stretch)
+            {
+                arrangeSize.Width = unclippedDesiredSize.Width;
+            }
+            if (VerticalAlignment != VerticalAlignment.Stretch)
+            {
+                arrangeSize.Height = unclippedDesiredSize.Height;
+            }
 
             //if (HorizontalAlignment == HorizontalAlignment.Stretch)
             //    arrangeSize.Width = MathF.Max(arrangeSize.Width, unclippedDesiredSize.Width);
@@ -350,7 +370,19 @@ namespace Wodsoft.UI
             //else
             //    arrangeSize.Height = unclippedDesiredSize.Height;
 
-            //MinMax mm = new MinMax(this);
+            MinMax mm = new MinMax(this);
+            float effectiveMaxWidth = Math.Max(unclippedDesiredSize.Width, mm.maxWidth);
+            if (FloatUtil.LessThan(effectiveMaxWidth, arrangeSize.Width))
+            {
+                needClip = true;
+                arrangeSize.Width = effectiveMaxWidth;
+            }
+            float effectiveMaxHeight = Math.Max(unclippedDesiredSize.Height, mm.maxHeight);
+            if (FloatUtil.LessThan(effectiveMaxHeight, arrangeSize.Height))
+            {
+                needClip = true;
+                arrangeSize.Height = effectiveMaxHeight;
+            }
             //if (mm.minWidth > unclippedDesiredSize.Width)
             //    unclippedDesiredSize.Width = mm.minWidth;
             //if (mm.maxWidth < unclippedDesiredSize.Width)
@@ -420,6 +452,22 @@ namespace Wodsoft.UI
             internal float maxWidth;
             internal float minHeight;
             internal float maxHeight;
+        }
+
+
+
+        public static readonly DependencyProperty UseLayoutRoundingProperty =
+                DependencyProperty.Register(
+                        "UseLayoutRounding",
+                        typeof(bool),
+                        typeof(FrameworkElement),
+                        new FrameworkPropertyMetadata(
+                            false,
+                            FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public bool UseLayoutRounding
+        {
+            get { return (bool)GetValue(UseLayoutRoundingProperty)!; }
+            set { SetValue(UseLayoutRoundingProperty, value); }
         }
 
         #endregion
@@ -676,6 +724,18 @@ namespace Wodsoft.UI
             {
                 foreach (var child in children)
                     UpdateBinding(child);
+            }
+        }
+
+        private void UpdateBindingSelf()
+        {
+            var list = (List<BindingExpressionBase>?)GetValue(BindingExpressionBase.BindingRetryProperty);
+            if (list != null)
+            {
+                foreach (var binding in list.ToArray())
+                {
+                    binding.RetryAttach();
+                }
             }
         }
 

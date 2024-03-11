@@ -73,24 +73,27 @@ namespace Wodsoft.UI.Controls
                 UIElement? child = children[i];
                 if (child == null)
                     continue;
-                child.Arrange(childRect);
+                float size;
                 if (isHorizontal)
                 {
-                    var value = child.DesiredSize.Width;
-                    childRect.X += value;
-                    if (childRect.Width > value)
-                        childRect.Width -= value;
-                    else
-                        childRect.Width = 0;
+                    size = child.DesiredSize.Width;
+                    childRect.Width = size;
+                    childRect.Height = Math.Max(finalSize.Height, child.DesiredSize.Height);
                 }
                 else
                 {
-                    var value = child.DesiredSize.Width;
-                    childRect.Y += value;
-                    if (childRect.Height > value)
-                        childRect.Height -= value;
-                    else
-                        childRect.Height = 0;
+                    size = child.DesiredSize.Height;
+                    childRect.Height = size;
+                    childRect.Width = Math.Max(finalSize.Width, child.DesiredSize.Width);
+                }
+                child.Arrange(childRect);
+                if (isHorizontal)
+                {
+                    childRect.X += size;
+                }
+                else
+                {
+                    childRect.Y += size;
                 }
             }
             return finalSize;

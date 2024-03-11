@@ -132,5 +132,64 @@ namespace Wodsoft.UI.Shapes
 
         #endregion
 
+        #region Layout
+
+        protected override Size MeasureOverride(Size constraint)
+        {
+            //CacheDefiningGeometry();
+
+            Size newSize = GetDefiningGeometryBounds().Size;
+
+            if (SizeIsInvalidOrEmpty(newSize))
+            {
+                // We've encountered a numerical error. Don't draw anything.
+                newSize = new Size(0, 0);
+            }
+            return newSize;
+        }
+
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            Size newSize = GetDefiningGeometryBounds().Size;
+
+            if (SizeIsInvalidOrEmpty(newSize))
+            {
+                // We've encountered a numerical error. Don't draw anything.
+                newSize = new Size(0, 0);
+            }
+
+            return newSize;
+        }
+
+        #endregion
+
+        #region Methods
+
+        private bool SizeIsInvalidOrEmpty(Size size)
+        {
+            return (double.IsNaN(size.Width) ||
+                    double.IsNaN(size.Height) ||
+                    size.IsEmpty);
+        }
+
+        protected abstract Rect GetDefiningGeometryBounds();
+
+        protected abstract Size GetNaturalSize();
+
+        protected float GetStrokeThickness()
+        {
+            var strokeThickness = StrokeThickness;
+            if (Stroke == null || float.IsNaN(strokeThickness) || FloatUtil.IsZero(strokeThickness))
+            {
+                return 0;
+            }
+            else
+            {
+                return MathF.Abs(strokeThickness);
+            }
+        }
+
+        #endregion
     }
 }
