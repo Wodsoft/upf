@@ -63,6 +63,7 @@ namespace Wodsoft.UI
 
         protected override void OnLogicalRootChanged(LogicalObject oldRoot, LogicalObject newRoot)
         {
+            _hasRetryBind = false;
             Initialize();
         }
 
@@ -299,7 +300,11 @@ namespace Wodsoft.UI
 
         protected sealed override Size MeasureCore(Size availableSize)
         {
-            UpdateBindingSelf();
+            if (_needRetryBind && !_hasRetryBind)
+            {
+                UpdateBindingSelf();
+                _hasRetryBind = true;
+            }
 
             ApplyTemplate();
 
@@ -477,7 +482,10 @@ namespace Wodsoft.UI
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
-
+            if (e.Property == BindingExpression.BindingRetryProperty)
+            {
+                _needRetryBind = e.NewValue != null;
+            }
             if (e.Metadata is FrameworkPropertyMetadata metadata)
             {
                 if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsMeasure))
@@ -560,6 +568,7 @@ namespace Wodsoft.UI
                             }
                         }
                         _templatedContent._templatedParent = this;
+                        _templatedContent._hasRetryBind = false;
                         _templatedContent.TemplatedParentChanged?.Invoke(_templatedContent, EventArgs.Empty);
                         //AddLogicalChild(_templatedContent);
                         AddVisualChild(_templatedContent);
@@ -688,6 +697,8 @@ namespace Wodsoft.UI
 
         #region DependencyValue
 
+        private bool _needRetryBind, _hasRetryBind;
+
         public BindingExpressionBase? GetBindingExpression(DependencyProperty dp)
         {
             return GetExpression(dp) as BindingExpressionBase;
@@ -711,12 +722,15 @@ namespace Wodsoft.UI
 
         private void UpdateBinding(LogicalObject obj)
         {
-            var list = (List<BindingExpressionBase>?)obj.GetValue(BindingExpressionBase.BindingRetryProperty);
-            if (list != null)
+            if (obj is not FrameworkElement fe || fe._needRetryBind)
             {
-                foreach (var binding in list.ToArray())
+                var list = (List<BindingExpressionBase>?)obj.GetValue(BindingExpressionBase.BindingRetryProperty);
+                if (list != null)
                 {
-                    binding.RetryAttach();
+                    foreach (var binding in list.ToArray())
+                    {
+                        binding.RetryAttach();
+                    }
                 }
             }
             var children = LogicalTreeHelper.GetChildren(obj);
