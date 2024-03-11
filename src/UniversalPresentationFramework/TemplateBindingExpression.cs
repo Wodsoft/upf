@@ -25,7 +25,7 @@ namespace Wodsoft.UI
             if (_rootElement == null)
                 return Expression.NoValue;
             if (_rootElement.TemplatedParent == null)
-                return null;
+                return Expression.NoValue;
             var value = _rootElement.TemplatedParent.GetValue(_extension.Property!);
             if (_extension.Converter != null)
                 value = _extension.Converter.Convert(value, AttachedProperty!.PropertyType, _extension.ConverterParameter, null);

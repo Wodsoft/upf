@@ -127,15 +127,23 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Expression is not attaching.");
             bool result;
             var oldValue = Value;
-            if (_object!.CoereceAndValidateValue(_property!, ref value, false, out var metadata))
+            if (value == NoValue)
             {
-                Value = value;
-                result = true;
+                Value = _object!.GetMetadata(_property!).DefaultValue;
+                result = false;
             }
             else
             {
-                Value = metadata.DefaultValue;
-                result = false;
+                if (_object!.CoereceAndValidateValue(_property!, ref value, false, out var metadata))
+                {
+                    Value = value;
+                    result = true;
+                }
+                else
+                {
+                    Value = metadata.DefaultValue;
+                    result = false;
+                }
             }
             var newValue = Value;
             if (!Equals(oldValue, newValue))
