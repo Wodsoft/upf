@@ -51,6 +51,8 @@ namespace Wodsoft.UI
                 switch (_xamlReader.NodeType)
                 {
                     case XamlNodeType.StartObject:
+                        if (RootType == null)
+                            RootType = _xamlReader.Type.UnderlyingType;
                         if (_xamlReader.Type.UnderlyingType == typeof(StaticResourceExtension))
                         {
                             var obj = LoadTimeBindUnshareableStaticResource(_xamlReader);
@@ -87,6 +89,7 @@ namespace Wodsoft.UI
             _xamlReader = null;
         }
 
+        public Type? RootType { get; private set; }
 
         private StaticResourceExtension LoadTimeBindUnshareableStaticResource(XamlReader xamlReader)
         {
