@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UniversalPresentationFramework.SourceGenerators;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace UniversalPersentationFramework.BuildTest
 {
     public class SourceGeneratorTest
