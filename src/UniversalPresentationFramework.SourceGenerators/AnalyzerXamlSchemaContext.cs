@@ -14,7 +14,9 @@ namespace UniversalPresentationFramework.SourceGenerators
         private readonly Dictionary<string, IAssemblySymbol> _assemblies = new Dictionary<string, IAssemblySymbol>();
         private readonly Dictionary<string, List<(IAssemblySymbol Assembly, string Namespace)>> _namespaceMaps = new Dictionary<string, List<(IAssemblySymbol Assembly, string Namespace)>>();
         private readonly Dictionary<(string Namespace, string Name), XamlType> _namespaceCaches = new Dictionary<(string Namespace, string Name), XamlType>();
+#pragma warning disable RS1024
         private readonly Dictionary<ITypeSymbol, AnalyzerXamlType> _typeCaches = new Dictionary<ITypeSymbol, AnalyzerXamlType>();
+#pragma warning restore RS1024
         private INamedTypeSymbol _contentPropertyAttribute, _objectType, _dictionaryInterface, _listInterface, _enumerableInterface, _xamlDeferLoadAttribute, _markupExtensionType;
         private IAssemblySymbol _immutableAssembly;
 

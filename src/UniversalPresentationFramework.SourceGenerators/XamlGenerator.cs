@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -84,6 +85,9 @@ namespace UniversalPresentationFramework.SourceGenerators
                             xamlXmlReader.Read();
                             if (xamlXmlReader.NodeType != XamlNodeType.Value)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML001", "XAML", "XAML directive must have a value text", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             var className = xamlXmlReader.Value as string;
@@ -91,10 +95,16 @@ namespace UniversalPresentationFramework.SourceGenerators
                             //fileGenerator.ResourceValue(classType, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                             if (classType == null)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML002", "XAML", $"Class not found \"{className}\"", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             if (classType.IsGenericType)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML003", "XAML", $"Not support generic type class \"{className}\"", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             xamlXmlReader.Read();
@@ -108,6 +118,9 @@ namespace UniversalPresentationFramework.SourceGenerators
                             xamlXmlReader.Read();
                             if (xamlXmlReader.NodeType != XamlNodeType.Value)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML001", "XAML", "XAML directive must have a value text", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             var name = xamlXmlReader.Value as string;
@@ -129,6 +142,9 @@ namespace UniversalPresentationFramework.SourceGenerators
                             xamlXmlReader.Read();
                             if (xamlXmlReader.NodeType != XamlNodeType.Value)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML001", "XAML", "XAML directive must have a value text", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             xamlXmlReader.Read();
@@ -141,6 +157,9 @@ namespace UniversalPresentationFramework.SourceGenerators
                             xamlXmlReader.Read();
                             if (xamlXmlReader.NodeType != XamlNodeType.Value)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML004", "XAML", "Event member must have a value text", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             var delegateName = xamlXmlReader.Value as string;
@@ -156,6 +175,13 @@ namespace UniversalPresentationFramework.SourceGenerators
                         }
                         else
                         {
+                            if (xamlXmlReader.Member is not AnalyzerXamlMember && xamlXmlReader.Member is not XamlDirective)
+                            {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML008", "XAML", $"Unknown member \"{xamlXmlReader.Member.Name}\"", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, xamlXmlReader.Member.Name.Length)));
+                                return;
+                            }
                             memberStacks.Push(xamlXmlReader.Member);
                             fileGenerator.ResourceStartMember(xamlXmlReader.Member, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
                         }
@@ -176,6 +202,9 @@ namespace UniversalPresentationFramework.SourceGenerators
                             var typeName = xamlXmlReader.Value as string;
                             if (string.IsNullOrEmpty(typeName))
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML006", "XAML", "Type extension must have a value text", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, 1)));
                                 return;
                             }
                             var types = typeName.Split(':');
@@ -186,12 +215,22 @@ namespace UniversalPresentationFramework.SourceGenerators
                                 xamlType = schemaContext.GetXamlType(new XamlTypeName(namespaces[types[0]], types[1])) as AnalyzerXamlType;
                             if (xamlType == null)
                             {
+                                sourceContext.ReportDiagnostic(Diagnostic.Create("XAML006", "XAML", $"Type not found \"{typeName}\"", DiagnosticSeverity.Error,
+                                    DiagnosticSeverity.Error, true, 0, false,
+                                    location: GetLocation(xamlXmlReader, additionalText, typeName.Length)));
                                 return;
                             }
                             xamlXmlReader.Read();
                             xamlXmlReader.Read();
                             fileGenerator.ResourceValue(xamlType.Type, lineNumber, linePosition);
                             continue;
+                        }
+                        if (xamlXmlReader.Type is not AnalyzerXamlType)
+                        {
+                            sourceContext.ReportDiagnostic(Diagnostic.Create("XAML007", "XAML", $"Unknown type \"{{{xamlXmlReader.Type.PreferredXamlNamespace}}}{xamlXmlReader.Type.Name}\"", DiagnosticSeverity.Error,
+                                DiagnosticSeverity.Error, true, 0, false,
+                                location: GetLocation(xamlXmlReader, additionalText, xamlXmlReader.Type.Name.Length)));
+                            return;
                         }
                         typeStacks.Push(xamlXmlReader.Type);
                         fileGenerator.ResourceStartObject(xamlXmlReader.Type, xamlXmlReader.LineNumber, xamlXmlReader.LinePosition);
@@ -223,5 +262,21 @@ namespace UniversalPresentationFramework.SourceGenerators
         protected abstract FileGenerator CreateFileGenerator(Compilation compilation, string relativePath);
 
         protected abstract string GenerateBamlResources(Compilation compilation, List<(string Path, string Name)> resources);
+
+        private Location GetLocation(XamlXmlReader reader, AdditionalText additionalText, int length)
+        {
+            return Location.Create(additionalText.Path, GetTextSpan(reader, additionalText, length), GetLinePosition(reader, length));
+        }
+
+        private LinePositionSpan GetLinePosition(XamlXmlReader reader, int length)
+        {
+            return new LinePositionSpan(new LinePosition(reader.LineNumber - 1, reader.LinePosition - 1), new LinePosition(reader.LineNumber - 1, reader.LinePosition + length - 1));
+        }
+
+        private TextSpan GetTextSpan(XamlXmlReader reader, AdditionalText additionalText, int length)
+        {
+            var line = additionalText.GetText().Lines[reader.LineNumber - 1];
+            return new TextSpan(line.Span.Start + reader.LinePosition - 1, length);
+        }
     }
 }
