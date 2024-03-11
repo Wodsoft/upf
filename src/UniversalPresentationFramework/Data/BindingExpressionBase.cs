@@ -59,7 +59,11 @@ namespace Wodsoft.UI.Data
                 {
                     var list = (List<BindingExpressionBase>?)Target!.GetValue(BindingRetryProperty);
                     if (list != null)
+                    {
                         list.Remove(this);
+                        if (list.Count == 0)
+                            Target.ClearValue(_BindingRetryPropertyKey);
+                    }
                     _hasBindingRetry = false;
                 }
             }
