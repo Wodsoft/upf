@@ -31,7 +31,7 @@ namespace Wodsoft.UI.Controls
             {
                 var template = new DataTemplate();
                 FrameworkElementFactory text = new FrameworkElementFactory(typeof(TextBlock));
-                text.SetValue(TextBlock.TextProperty, new TemplateBindingExtension(ContentProperty));
+                text.SetValue(TextBlock.TextProperty, new TemplateBindingExpression(new TemplateBindingExtension(ContentProperty)));
                 template.VisualTree = text;
                 template.Seal();
                 _StringTemplate = template;
@@ -178,6 +178,12 @@ namespace Wodsoft.UI.Controls
             }
 
             return template;
+        }
+
+        protected override void OnApplyTemplate()
+        {
+            if (TemplatedChild != null)
+                TemplatedChild.DataContext = Content;
         }
 
         #endregion
