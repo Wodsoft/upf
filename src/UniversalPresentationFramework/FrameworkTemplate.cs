@@ -45,6 +45,7 @@ namespace Wodsoft.UI
         /// </summary>
         public FrameworkElement? LoadContent(FrameworkElement container)
         {
+            ValidateTemplatedParent(container);
             return LoadContent(container, out _);
         }
 
@@ -64,6 +65,8 @@ namespace Wodsoft.UI
                 return null;
             }
         }
+
+        protected virtual void ValidateTemplatedParent(FrameworkElement templatedParent) { }
 
         #endregion
 

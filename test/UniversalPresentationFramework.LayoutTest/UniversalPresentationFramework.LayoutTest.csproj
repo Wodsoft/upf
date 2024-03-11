@@ -11,9 +11,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="**\*.xaml">
+		<None Include="**\*.xaml" Exclude="bin\**\*.xaml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Remove="ItemsControlTest.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -33,6 +37,13 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\UniversalPresentationFramework.Areo\UniversalPresentationFramework.Areo.csproj" />
 		<ProjectReference Include="..\..\src\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="ItemsControlTest.xaml">
+	    <SubType>Designer</SubType>
+	    <Generator>MSBuild:Compile</Generator>
+	  </None>
 	</ItemGroup>
 
 </Project>
