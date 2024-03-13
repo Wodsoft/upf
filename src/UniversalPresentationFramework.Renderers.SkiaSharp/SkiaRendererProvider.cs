@@ -46,6 +46,11 @@ namespace Wodsoft.UI.Renderers
             return new SkiaDrawingContext(0, 0);
         }
 
+        public StreamGeometryContext CreateGeometryContext()
+        {
+            return new SkiaGeometryContext();
+        }
+
         public IImageContext CreateImageContext(Stream stream, int newWidth, int newHeight, Rotation rotation)
         {
             var image = SKImage.FromEncodedData(stream);
