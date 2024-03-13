@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI
 {
@@ -11,7 +12,7 @@ namespace Wodsoft.UI
         private readonly object _resourceKey;
         private LogicalObject? _logicalObject;
         private LogicalObject? _logicalRoot;
-
+        private IThemeProvider? _themeProvider;
         public ResourceReferenceExpression(object resourceKey)
         {
             _resourceKey = resourceKey;
@@ -53,6 +54,11 @@ namespace Wodsoft.UI
                     fe.TemplatedParentChanged -= TemplatedParentChanged;
                 _logicalRoot = null;
             }
+            if (_themeProvider != null)
+            {
+                _themeProvider.ThemeChanged -= ThemeChanged;
+                _themeProvider = null;
+            }
         }
 
         protected override void SetSourceValue(object? value)
@@ -72,6 +78,14 @@ namespace Wodsoft.UI
             _logicalRoot = _logicalObject.LogicalRoot;
             if (_logicalRoot is FrameworkElement fe)
                 fe.TemplatedParentChanged += TemplatedParentChanged;
+            _themeProvider = FrameworkProvider.ThemeProvider;
+            if (_themeProvider != null)
+                _themeProvider.ThemeChanged += ThemeChanged;
+        }
+
+        private void ThemeChanged(object? sender, EventArgs e)
+        {
+            UpdateTarget();
         }
 
         private void TemplatedParentChanged(object? sender, EventArgs e)
