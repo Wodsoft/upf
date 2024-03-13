@@ -12,5 +12,19 @@ namespace Wodsoft.UI
         internal static IRendererProvider? RendererProvider;
 
         internal static IClockProvider? ClockProvider;
+
+        internal static IRendererProvider GetRendererProvider()
+        {
+            if (RendererProvider == null)
+                throw new InvalidOperationException("Framework not initialized.");
+            return RendererProvider;
+        }
+
+        internal static IClockProvider GetClockProvider()
+        {
+            if (ClockProvider == null)
+                throw new InvalidOperationException("Framework not initialized.");
+            return ClockProvider;
+        }
     }
 }

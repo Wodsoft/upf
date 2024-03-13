@@ -423,8 +423,6 @@ namespace Wodsoft.UI
 
         public void BeginAnimation(DependencyProperty dp, AnimationTimeline animation)
         {
-            if (FrameworkCoreProvider.ClockProvider == null)
-                throw new InvalidOperationException("Framework not initialized.");
             var clock = animation.CreateClock();
             ApplyAnimationClock(dp, clock, HandoffBehavior.SnapshotAndReplace);
         }

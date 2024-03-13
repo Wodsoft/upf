@@ -17,9 +17,7 @@ namespace Wodsoft.UI.Media
 
         protected StreamGeometryContext CreateStreamGeometryContext()
         {
-            if (FrameworkCoreProvider.RendererProvider == null)
-                throw new InvalidOperationException("Framework not initialized.");
-            return FrameworkCoreProvider.RendererProvider.CreateGeometryContext();
+            return FrameworkCoreProvider.GetRendererProvider().CreateGeometryContext();
         }
     }
 }

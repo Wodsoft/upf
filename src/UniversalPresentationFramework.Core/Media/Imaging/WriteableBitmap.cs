@@ -19,18 +19,14 @@ namespace Wodsoft.UI.Media.Imaging
 
         public WriteableBitmap(BitmapSource source)
         {
-            if (FrameworkCoreProvider.RendererProvider == null)
-                throw new InvalidOperationException("Framework not initialized.");
             if (source.Context == null)
                 throw new ArgumentException("Bitmap source not initialized.");
-            _context = FrameworkCoreProvider.RendererProvider.CreateBitmapContext(source.Context);
+            _context = FrameworkCoreProvider.GetRendererProvider().CreateBitmapContext(source.Context);
         }
 
         public WriteableBitmap(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette palette)
         {
-            if (FrameworkCoreProvider.RendererProvider == null)
-                throw new InvalidOperationException("Framework not initialized.");
-            _context = FrameworkCoreProvider.RendererProvider.CreateBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat, palette);
+            _context = FrameworkCoreProvider.GetRendererProvider().CreateBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat, palette);
         }
 
         public override int PixelWidth => _context.Width;
@@ -130,7 +126,7 @@ namespace Wodsoft.UI.Media.Imaging
             if (IsFrozen)
                 return new WriteableBitmap(_context);
             else
-                return new WriteableBitmap(FrameworkCoreProvider.RendererProvider!.CreateBitmapContext(_context));
+                return new WriteableBitmap(FrameworkCoreProvider.GetRendererProvider().CreateBitmapContext(_context));
         }
 
         #endregion

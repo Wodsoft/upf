@@ -15,9 +15,7 @@ namespace Wodsoft.UI.Media
             WritePreamble();
             if (_context == null)
             {
-                if (FrameworkCoreProvider.RendererProvider == null)
-                    throw new InvalidOperationException("Framework not initialized.");
-                _context = FrameworkCoreProvider.RendererProvider.CreateGeometryContext();
+                _context = FrameworkCoreProvider.GetRendererProvider().CreateGeometryContext();
             }
             return _context;
         }
@@ -26,9 +24,7 @@ namespace Wodsoft.UI.Media
         {
             if (_context == null)
             {
-                if (FrameworkCoreProvider.RendererProvider == null)
-                    throw new InvalidOperationException("Framework not initialized.");
-                _context = FrameworkCoreProvider.RendererProvider.CreateGeometryContext();
+                _context = FrameworkCoreProvider.GetRendererProvider().CreateGeometryContext();
             }
             return _context.GetGeometryData();
         }

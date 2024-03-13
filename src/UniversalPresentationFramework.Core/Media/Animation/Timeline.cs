@@ -158,13 +158,11 @@ namespace Wodsoft.UI.Media.Animation
 
         public Clock CreateClock(bool hasControllableRoot)
         {
-            if (FrameworkCoreProvider.ClockProvider == null)
-                throw new InvalidOperationException("Framework not initialized.");
             var clock = AllocateClock();
             clock.IsRoot = true;
             clock.HasControllableRoot = hasControllableRoot;
             clock.Measure();
-            FrameworkCoreProvider.ClockProvider.RegisterClock(this, clock);
+            FrameworkCoreProvider.GetClockProvider().RegisterClock(this, clock);
             return clock;
         }
 
