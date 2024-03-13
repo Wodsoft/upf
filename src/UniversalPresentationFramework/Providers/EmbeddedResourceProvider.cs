@@ -26,7 +26,8 @@ namespace Wodsoft.UI.Providers
 
             if (typeKey == null && resourceKey == null)
                 return null;
-
+            if (resourceKey != null && resourceKey.HasResource)
+                return resourceKey.Resource;
 
             //if (!FindCachedResource(key, ref resource))
             //{
@@ -130,7 +131,7 @@ namespace Wodsoft.UI.Providers
                 if (loadResourceFunc == null)
                     return null;
                 _themeResource = loadResourceFunc($"themes/{_themeName}.{_colorName}.xaml") as ResourceDictionary;
-                return _themeResource;                
+                return _themeResource;
             }
 
             public ResourceDictionary? LoadGenericResource()

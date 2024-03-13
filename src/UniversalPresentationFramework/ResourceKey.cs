@@ -26,5 +26,9 @@ namespace Wodsoft.UI
         {
             return this;
         }
+
+        public virtual bool HasResource { get; } = false;
+
+        public virtual object? Resource { get; } = null;
     }
 }

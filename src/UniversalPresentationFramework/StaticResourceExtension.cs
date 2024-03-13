@@ -52,6 +52,8 @@ namespace Wodsoft.UI
         {
             if (_resourceKey == null)
                 throw new Exception($"StaticResource must have a resource key.");
+            if (_resourceKey is ResourceKey key && key.HasResource)
+                return key.Resource;
             var value = TryFindValue(serviceProvider);
             if (value == DependencyProperty.UnsetValue)
                 throw new Exception($"No resource of key \"{_resourceKey}\" found.");
