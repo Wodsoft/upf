@@ -9,12 +9,18 @@ namespace Wodsoft.UI.Platforms.Win32
 {
     public class WindowProvider : IWindowProvider
     {
-        private List<IWindowContext> _contexts = new List<IWindowContext>();
-        private object _lock = new object();
+        private readonly Win32Platform _platform;
+        private readonly List<IWindowContext> _contexts = new List<IWindowContext>();
+        private readonly object _lock = new object();
+
+        public WindowProvider(Win32Platform platform)
+        {
+            _platform = platform;
+        }
 
         public IWindowContext CreateContext(Window window)
         {
-            var context = new WindowContext(window);
+            var context = new WindowContext(window, _platform.ThemeProvider.OnThemeChanged);
             context.Disposed += Context_Disposed;
             context.Opened += Context_CreateOpened;
             context.Closed += Context_Closed;

@@ -12,6 +12,8 @@ namespace Wodsoft.UI.Providers
 
         string Color { get; }
 
+        object? GetResourceValue(SystemResourceKeyID key);
+
         event EventHandler? ThemeChanged;
     }
 }

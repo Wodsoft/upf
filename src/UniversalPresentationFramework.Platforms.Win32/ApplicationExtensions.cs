@@ -14,11 +14,11 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             if (application.IsRunning)
                 throw new InvalidOperationException("Could not initialize services while application is running.");
-            var windowProvider = new WindowProvider();
-            application.WindowProvider = windowProvider;
-            application.LifecycleProvider = new LifecycleProvider(windowProvider);
-            application.RendererProvider = new SkiaRendererProvider();
-            application.ThemeProvider = new ThemeProvider();
+            var platform = new Win32Platform();
+            application.WindowProvider = platform.WindowProvider;
+            application.LifecycleProvider = platform.LifecycleProvider;
+            application.RendererProvider = platform.RendererProvider;
+            application.ThemeProvider = platform.ThemeProvider;
             application.ResourceProvider = new EmbeddedResourceProvider();
         }
     }

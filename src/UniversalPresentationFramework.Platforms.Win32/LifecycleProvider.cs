@@ -12,10 +12,12 @@ namespace Wodsoft.UI.Platforms.Win32
         private bool _isRunning;
         private object _lock = new object();
         private ManualResetEvent? _eventEvent;
+        private readonly WindowProvider _windowProvider;
 
         public LifecycleProvider(WindowProvider windowProvider)
         {
             windowProvider.WindowEmpty += WindowEmpty;
+            _windowProvider = windowProvider;
         }
 
         private void WindowEmpty(object? sender, EventArgs e)
@@ -36,7 +38,12 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public void Stop()
         {
-
+            lock (_lock)
+            {
+                if (!_isRunning)
+                    throw new InvalidOperationException("Application is not running.");
+                _windowProvider.CloseAll();
+            }
         }
 
         public void WaitForEnd()

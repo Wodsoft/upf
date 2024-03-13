@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.UI.Controls;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wodsoft.UI.Renderers;
 
@@ -32,8 +33,9 @@ namespace Wodsoft.UI.Platforms.Win32
         private WindowState _state;
         private WindowStyle _style;
         private readonly Window _window;
+        private readonly Action _themeChanged;
 
-        public WindowContext(Window window)
+        public WindowContext(Window window, Action themeChanged)
         {
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
@@ -52,6 +54,7 @@ namespace Wodsoft.UI.Platforms.Win32
             _uiThread = new Thread(ProcessUI);
             _inputThread = new Thread(ProcessInput);
             _window = window;
+            _themeChanged = themeChanged;
             //_thread.SetApartmentState(ApartmentState.STA);
         }
 
@@ -430,6 +433,11 @@ namespace Wodsoft.UI.Platforms.Win32
                         _isActivateChanged = true;
                         break;
                     }
+                case PInvoke.WM_THEMECHANGED:
+                    {
+                        _themeChanged();
+                        break;
+                    }
             }
             return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
         }
@@ -462,6 +470,11 @@ namespace Wodsoft.UI.Platforms.Win32
             if (Style != WindowStyle.None)
                 style |= WINDOW_STYLE.WS_BORDER | WINDOW_STYLE.WS_CAPTION;
             return style;
+        }
+
+        private void UpdateTheme()
+        {
+
         }
 
         #endregion
