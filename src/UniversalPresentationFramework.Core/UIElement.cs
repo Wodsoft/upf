@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -415,6 +416,70 @@ namespace Wodsoft.UI
 
             e.Source = e.OriginalSource;
             e.ClearUserInitiated();
+        }
+
+        internal static void AddHandler(DependencyObject d, RoutedEvent routedEvent, Delegate handler)
+        {
+            if (d == null)
+                throw new ArgumentNullException("d");
+
+            if (d is UIElement uiElement)
+            {
+                uiElement.AddHandler(routedEvent, handler);
+            }
+            else
+            {
+                //ContentElement contentElement = d as ContentElement;
+                //if (contentElement != null)
+                //{
+                //    contentElement.AddHandler(routedEvent, handler);
+                //}
+                //else
+                //{
+                //    UIElement3D uiElement3D = d as UIElement3D;
+                //    if (uiElement3D != null)
+                //    {
+                //        uiElement3D.AddHandler(routedEvent, handler);
+                //    }
+                //    else
+                //    {
+                throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\"." );
+                //    }
+                //}
+            }
+        }
+
+        internal static void RemoveHandler(DependencyObject d, RoutedEvent routedEvent, Delegate handler)
+        {
+            if (d == null)
+            {
+                throw new ArgumentNullException("d");
+            }
+
+            if (d is UIElement uiElement)
+            {
+                uiElement.RemoveHandler(routedEvent, handler);
+            }
+            else
+            {
+                //ContentElement contentElement = d as ContentElement;
+                //if (contentElement != null)
+                //{
+                //    contentElement.RemoveHandler(routedEvent, handler);
+                //}
+                //else
+                //{
+                //    UIElement3D uiElement3D = d as UIElement3D;
+                //    if (uiElement3D != null)
+                //    {
+                //        uiElement3D.RemoveHandler(routedEvent, handler);
+                //    }
+                //    else
+                //    {
+                throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\".");
+                //    }
+                //}
+            }
         }
 
         #endregion
