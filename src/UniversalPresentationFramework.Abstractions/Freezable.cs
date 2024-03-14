@@ -232,5 +232,27 @@ namespace Wodsoft.UI
         }
 
         #endregion
+
+        #region PropertyChange
+
+        protected void OnFreezablePropertyChanged(DependencyObject? oldValue, DependencyObject? newValue)
+        {
+            OnFreezablePropertyChanged(oldValue, newValue, null);
+        }
+
+        protected void OnFreezablePropertyChanged(DependencyObject? oldValue, DependencyObject? newValue, DependencyProperty? property)
+        {
+            if (oldValue != null)
+            {
+                RemoveSelfAsInheritanceContext(oldValue, property);
+            }
+
+            if (newValue != null)
+            {
+                ProvideSelfAsInheritanceContext(newValue, property);
+            }
+        }
+
+        #endregion
     }
 }
