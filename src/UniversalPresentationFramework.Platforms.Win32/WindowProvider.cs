@@ -54,5 +54,20 @@ namespace Wodsoft.UI.Platforms.Win32
             windowContext.Opened -= Context_CreateOpened;
             windowContext.Closed -= Context_Closed;
         }
+
+        public void CloseAll()
+        {
+            lock (_lock)
+            {
+                if (_contexts.Count == 0)
+                    return;
+                for (int i = _contexts.Count - 1; i >= 0; --i)
+                {
+                    var context = _contexts[i];
+                    _contexts.Remove(context);
+                }
+                WindowEmpty?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 }
