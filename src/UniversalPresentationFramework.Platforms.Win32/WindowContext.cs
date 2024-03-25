@@ -1,20 +1,9 @@
-﻿using SharpVk;
-using SharpVk.Khronos;
-using SharpVk.Spirv;
-using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
-using Windows.Win32.UI.Controls;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wodsoft.UI.Renderers;
 
