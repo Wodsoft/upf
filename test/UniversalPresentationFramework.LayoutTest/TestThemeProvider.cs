@@ -9,10 +9,15 @@ namespace Wodsoft.UI.Test
 {
     public class TestThemeProvider : IThemeProvider
     {
-        public string Name => "Areo";
+        public string Name => "Aero";
 
         public string Color => "NormalColor";
 
         public event EventHandler? ThemeChanged;
+
+        public object? GetResourceValue(SystemResourceKeyID key)
+        {
+            return null;
+        }
     }
 }

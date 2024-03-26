@@ -23,7 +23,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\UniversalPresentationFramework.Areo\UniversalPresentationFramework.Areo.csproj" />
+		<ProjectReference Include="..\..\src\UniversalPresentationFramework.Aero\UniversalPresentationFramework.Aero.csproj" />
 		<ProjectReference Include="..\..\src\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
 	</ItemGroup>
 
