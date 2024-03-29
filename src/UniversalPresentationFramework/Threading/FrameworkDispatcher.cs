@@ -10,7 +10,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Threading
 {
-    public abstract class FrameworkDispatcher : UIDispatcher, IFrameworkDispatcher
+    public abstract class FrameworkDispatcher : UIDispatcher
     {
         public override bool CheckAccess()
         {

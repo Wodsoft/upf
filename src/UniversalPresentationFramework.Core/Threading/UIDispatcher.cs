@@ -9,7 +9,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Threading
 {
-    public abstract class UIDispatcher : Dispatcher, IFrameworkDispatcher
+    public abstract class UIDispatcher : Dispatcher
     {
         private bool _updateLayout;
 
