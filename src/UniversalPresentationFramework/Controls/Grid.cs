@@ -284,11 +284,9 @@ namespace Wodsoft.UI.Controls
             for (int i = 0; i < _columns.Count; i++)
             {
                 var column = _columns[i];
+                column.ActualWidth = 0f;
                 if (FloatUtil.IsZero(availableWidth))
-                {
-                    column.ActualWidth = 0f;
                     continue;
-                }
                 if (column.Width.IsAbsolute)
                 {
                     var width = MathF.Min(MathF.Max(column.Width.Value, column.MinWidth), column.MaxWidth);
@@ -307,11 +305,9 @@ namespace Wodsoft.UI.Controls
             for (int i = 0; i < _rows.Count; i++)
             {
                 var row = _rows[i];
+                row.ActualHeight = 0f;
                 if (FloatUtil.IsZero(availableHeight))
-                {
-                    row.ActualHeight = 0f;
                     continue;
-                }
                 if (row.Height.IsAbsolute)
                 {
                     var height = MathF.Min(MathF.Max(row.Height.Value, row.MinHeight), row.MaxHeight);
