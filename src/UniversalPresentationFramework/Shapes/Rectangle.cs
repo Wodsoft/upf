@@ -124,7 +124,7 @@ namespace Wodsoft.UI.Shapes
         {
             drawingContext.DrawRoundedRectangle(Fill,
                 new Pen(Stroke, StrokeThickness, StrokeStartLineCap, StrokeEndLineCap, StrokeDashCap, StrokeLineJoin, StrokeMiterLimit, new DashStyle(StrokeDashArray, StrokeDashOffset)),
-                new Rect(VisualOffset, RenderSize),
+                new Rect(new Point(), RenderSize),
                 RadiusX,
                 RadiusY);
         }
