@@ -59,6 +59,8 @@ namespace Wodsoft.UI.Media
 
         public abstract void RenderContext(RenderContext renderContext);
 
+        public abstract bool HasRenderContent { get; }
+
         public virtual Size GetVisualSize()
         {
             return Size.Empty;

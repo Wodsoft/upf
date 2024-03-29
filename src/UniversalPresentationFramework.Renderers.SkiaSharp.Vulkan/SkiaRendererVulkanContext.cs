@@ -4,6 +4,7 @@ using SharpVk.Multivendor;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -29,10 +30,12 @@ namespace Wodsoft.UI.Renderers
         private Image? _image;
         private Swapchain? _swapchain;
 
-        private SkiaRendererVulkanContext(GRSharpVkBackendContext backendContext, Instance instance, Surface surface, PhysicalDevice physicalDevice, Device device,
+        private SkiaRendererVulkanContext(GRContext grContext, GRSharpVkBackendContext backendContext, Instance instance, Surface surface, PhysicalDevice physicalDevice, Device device,
             QueueFamilyIndices queueFamilies, Queue presentQueue)
-            : base(GRContext.CreateVulkan(backendContext))
+            : base(grContext)
         {
+            if (grContext == null)
+                throw new ArgumentNullException(nameof(grContext));
             _backendContext = backendContext;
             _instance = instance;
             _surface = surface;
@@ -46,27 +49,29 @@ namespace Wodsoft.UI.Renderers
 
         #region CreateContext
 
-        public static SkiaRendererVulkanContext CreateFromWindowHandle(IntPtr hinstance, IntPtr hwnd)
+        public static SkiaRendererVulkanContext? CreateFromWindowHandle(IntPtr hinstance, IntPtr hwnd)
         {
             var enabledLayers = Instance.EnumerateLayerProperties().Any(x => x.LayerName == "VK_LAYER_LUNARG_standard_validation")
                 ? new string[] { "VK_LAYER_LUNARG_standard_validation" } : null;
-            var instance = Instance.Create(enabledLayers, new[]
+            var instanceExtensions = new[]
                 {
                     KhrExtensions.Surface,
                     KhrExtensions.Win32Surface,
                     ExtExtensions.DebugReport,
-                }, applicationInfo: new ApplicationInfo
-                {
-                    ApplicationName = "UPF Application",
-                    ApplicationVersion = new Version(1, 0, 0),
-                    EngineName = "UPF",
-                    EngineVersion = new Version(0, 4, 0),
-                    ApiVersion = new Version(1, 0, 0)
-                });
+                };
+            var instance = Instance.Create(enabledLayers, instanceExtensions, applicationInfo: new ApplicationInfo
+            {
+                ApplicationName = "UPF Application",
+                ApplicationVersion = new Version(1, 0, 0),
+                EngineName = "UPF",
+                EngineVersion = new Version(1, 0, 0),
+                ApiVersion = new Version(1, 0, 0)
+            });
+            instance.CreateDebugReportCallback(DebugReport, DebugReportFlags.Error | DebugReportFlags.Warning);
             var surface = instance.CreateWin32Surface(hinstance, hwnd);
-            instance.EnumeratePhysicalDevices();
             var physicalDevice = instance.EnumeratePhysicalDevices().First(t => IsSuitableDevice(t, surface));
             QueueFamilyIndices queueFamilies = FindQueueFamilies(physicalDevice, surface);
+            var extensions = physicalDevice.EnumerateDeviceExtensionProperties(null).Select(t => t.ExtensionName).ToArray();
             var device = physicalDevice.CreateDevice(queueFamilies.Indices
                                                         .Select(index => new DeviceQueueCreateInfo
                                                         {
@@ -80,30 +85,57 @@ namespace Wodsoft.UI.Renderers
             var presentQueue = device.GetQueue(queueFamilies.PresentFamily!.Value, 0);
             //var transferQueue = device.GetQueue(queueFamilies.TransferFamily!.Value, 0);
 
+            List<string> emptyAddress = new List<string>();
             GRVkGetProcedureAddressDelegate getProc = (name, instanceHandle, deviceHandle) =>
             {
-                return instance.GetProcedureAddress(name);
+                nint address;
+                if (deviceHandle != default)
+                    address = device.GetProcedureAddress(name);
+                else
+                    address = instance.GetProcedureAddress(name);
+                if (address == default)
+                    emptyAddress.Add(name);
+                return address;
             };
-            var extensions = physicalDevice.EnumerateDeviceExtensionProperties(null).Select(t => t.ExtensionName).ToArray();
-            using var backendContext = new GRSharpVkBackendContext
+            var backendContext = new GRSharpVkBackendContext
             {
                 VkInstance = instance,
                 VkPhysicalDevice = physicalDevice,
                 VkDevice = device,
                 VkQueue = graphicsQueue,
                 VkPhysicalDeviceFeatures = physicalDevice.GetFeatures(),
-                Extensions = GRVkExtensions.Create(getProc, (IntPtr)instance.RawHandle.ToUInt64(), (IntPtr)physicalDevice.RawHandle.ToUInt64(), null, extensions),
+                //Extensions = GRVkExtensions.Create(getProc, (IntPtr)instance.RawHandle.ToUInt64(), (IntPtr)physicalDevice.RawHandle.ToUInt64(), instanceExtensions, extensions),
                 GraphicsQueueIndex = queueFamilies.GraphicsFamily!.Value,
                 GetProcedureAddress = (name, innerInstance, innerDevice) =>
                 {
+                    nint address;
                     if (innerInstance != null)
-                        return innerInstance.GetProcedureAddress(name);
-                    if (innerDevice != null)
-                        return innerDevice.GetProcedureAddress(name);
-                    return instance.GetProcedureAddress(name);
-                }
+                        address = innerInstance.GetProcedureAddress(name);
+                    else if (innerDevice != null)
+                        address = innerDevice.GetProcedureAddress(name);
+                    else
+                        address = instance.GetProcedureAddress(name);
+                    if (address == default)
+                        emptyAddress.Add(name);
+                    return address;
+                },
+                //ProtectedContext = false,
+                //MaxAPIVersion = 1 << 22
             };
-            return new SkiaRendererVulkanContext(backendContext, instance, surface, physicalDevice, device, queueFamilies, presentQueue);
+            var grContext = GRContext.CreateVulkan(backendContext);
+            if (grContext == null)
+            {
+                backendContext.Dispose();
+                return null;
+            }
+            return new SkiaRendererVulkanContext(grContext, backendContext, instance, surface, physicalDevice, device, queueFamilies, presentQueue);
+        }
+
+        private static Bool32 DebugReport(DebugReportFlags flags, DebugReportObjectType objectType, ulong @object, HostSize location, int messageCode, string layerPrefix, string message, IntPtr userData)
+        {
+            Debug.WriteLine(message);
+
+            return false;
         }
 
         private static bool IsSuitableDevice(PhysicalDevice device, Surface surface)

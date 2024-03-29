@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media;
 using Wodsoft.UI.Media.Animation;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -130,16 +131,23 @@ namespace Wodsoft.UI
 
         public void InvalidateMeasure()
         {
-            IsMeasureValid = false;
+            if (!_isMeasuring)
+            {
+                IsMeasureValid = false;
+            }
         }
 
         public void InvalidateArrange()
         {
-            IsArrangeValid = false;
+            if (!_isArranging)
+            {
+                IsArrangeValid = false;
+            }
         }
 
         public void InvalidateVisual()
         {
+            InvalidateArrange();
             _isRenderValid = false;
         }
 
@@ -212,6 +220,32 @@ namespace Wodsoft.UI
             return newValue;
         }
 
+        public void UpdateLayout()
+        {
+            if (Dispatcher is UIDispatcher uiDispatcher)
+                uiDispatcher.UpdateLayout();
+            else
+            {
+                InvalidateLayout(this);
+            }
+        }
+
+        private void InvalidateLayout(Visual visual)
+        {
+            if (visual is UIElement element)
+            {
+                element.InvalidateMeasure();
+                element.InvalidateArrange();
+            }
+            var childrenCount = visual.VisualChildrenCount;
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = visual.GetVisualChild(i);
+                if (child != null)
+                    InvalidateLayout(child);
+            }
+        }
+
         #endregion
 
         #region Render
@@ -227,6 +261,8 @@ namespace Wodsoft.UI
             if (_drawingContent != null)
                 renderContext.Render(_drawingContent);
         }
+
+        public override bool HasRenderContent => _drawingContent != null;
 
         #endregion
 
@@ -443,7 +479,7 @@ namespace Wodsoft.UI
                 //    }
                 //    else
                 //    {
-                throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\"." );
+                throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\".");
                 //    }
                 //}
             }

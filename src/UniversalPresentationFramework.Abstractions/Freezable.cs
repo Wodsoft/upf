@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -250,6 +251,21 @@ namespace Wodsoft.UI
             if (newValue != null)
             {
                 ProvideSelfAsInheritanceContext(newValue, property);
+            }
+        }
+
+        #endregion
+
+        #region Dispatcher
+
+        public override Dispatcher Dispatcher
+        {
+            get
+            {
+                var inheritanceContext = InheritanceContext;
+                if (inheritanceContext != null)
+                    return inheritanceContext.Dispatcher;
+                return base.Dispatcher;
             }
         }
 

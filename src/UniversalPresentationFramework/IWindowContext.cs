@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -42,6 +43,8 @@ namespace Wodsoft.UI
         bool IsInputProcessing { get; }
 
         bool IsActivated { get; }
+
+        Dispatcher Dispatcher { get; }
 
         public event CancelEventHandler Closing;
         public event WindowContextEventHandler Closed;

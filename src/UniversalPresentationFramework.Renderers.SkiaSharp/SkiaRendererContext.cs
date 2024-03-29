@@ -42,7 +42,7 @@ namespace Wodsoft.UI.Renderers
 
         public SKSurface? Surface => _surface;
 
-        public void Render(Visual visual)
+        public virtual void Render(Visual visual)
         {
             var size = visual.GetVisualSize();
             var dpi = visual.GetDpi();
@@ -86,12 +86,15 @@ namespace Wodsoft.UI.Renderers
 
         private void RenderCore(Visual visual, SkiaRenderContext renderContext)
         {
-            var canvas = _surface!.Canvas!;
-            canvas.Save();
-            var saveCount = canvas.SaveCount;
-            canvas.Translate(visual.VisualOffset.X, visual.VisualOffset.Y);
-            visual.RenderContext(renderContext);
-            canvas.RestoreToCount(saveCount);
+            if (visual.HasRenderContent)
+            {
+                var canvas = _surface!.Canvas!;
+                canvas.Save();
+                var saveCount = canvas.SaveCount;
+                canvas.Translate(visual.VisualOffset.X, visual.VisualOffset.Y);
+                visual.RenderContext(renderContext);
+                canvas.RestoreToCount(saveCount - 1);
+            }
             int childrenCount = VisualTreeHelper.GetChildrenCount(visual);
             for (int i = 0; i < childrenCount; i++)
             {

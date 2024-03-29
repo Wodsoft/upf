@@ -7,6 +7,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Controls;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -288,6 +289,12 @@ namespace Wodsoft.UI
         {
             return _dpiScale;
         }
+
+        #endregion
+
+        #region Dispatcher
+
+        public override Dispatcher Dispatcher => _context?.Dispatcher ?? base.Dispatcher;
 
         #endregion
     }

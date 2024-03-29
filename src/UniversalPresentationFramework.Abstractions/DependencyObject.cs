@@ -1,9 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
-    public class DependencyObject
+    public class DependencyObject : DispatcherObject
     {
         #region Values
 
@@ -406,6 +407,12 @@ namespace Wodsoft.UI
                 return false;
             }
         }
+
+        #endregion
+
+        #region Dispatcher
+
+        public override Dispatcher Dispatcher => EmptyDispatcher.Default;
 
         #endregion
     }

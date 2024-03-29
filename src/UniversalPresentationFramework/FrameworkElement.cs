@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using Wodsoft.UI.Controls;
 using Wodsoft.UI.Data;
 using Wodsoft.UI.Media;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -572,6 +573,7 @@ namespace Wodsoft.UI
                         _templatedContent.TemplatedParentChanged?.Invoke(_templatedContent, EventArgs.Empty);
                         //AddLogicalChild(_templatedContent);
                         AddVisualChild(_templatedContent);
+                        _templateGenerated = true;
                     }
                 }
                 _lastTemplate = template;
@@ -1079,6 +1081,24 @@ namespace Wodsoft.UI
             if (index != 0)
                 throw new ArgumentOutOfRangeException("index");
             return TemplatedChild;
+        }
+
+        #endregion
+
+        #region Dispatcher
+
+        public override Dispatcher Dispatcher
+        {
+            get
+            {
+                if (LogicalRoot == this)
+                {
+                    if (TemplatedParent != null)
+                        return TemplatedParent.Dispatcher;
+                    return base.Dispatcher;
+                }
+                return LogicalRoot.Dispatcher;
+            }
         }
 
         #endregion

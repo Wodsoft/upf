@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Windows.Win32;
@@ -6,6 +7,7 @@ using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wodsoft.UI.Renderers;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI.Platforms.Win32
 {
@@ -15,14 +17,16 @@ namespace Wodsoft.UI.Platforms.Win32
         private HWND _hwnd;
 
         private string _className;
-        private bool _disposed, _topMost, _inputProcessing, _isActivated;
+        private bool _disposed, _topMost, _inputProcessing, _isActivated, _isDestoryed;
         private string _title = string.Empty;
-        private Thread _windowThread, _uiThread, _inputThread;
+        private Thread _windowThread, _dispatcherThread;
         private int _x, _y, _width, _height, _clientWidth, _clientHeight;
         private WindowState _state;
         private WindowStyle _style;
         private readonly Window _window;
         private readonly Action _themeChanged;
+        private readonly Win32Dispatcher _dispatcher;
+        private SkiaRendererContext? _rendererContext;
 
         public WindowContext(Window window, Action themeChanged)
         {
@@ -40,14 +44,20 @@ namespace Wodsoft.UI.Platforms.Win32
             _instance = PInvoke.GetModuleHandle((string?)null);
             _className = "upfwindow_" + Guid.NewGuid().ToString().Replace("-", "");
             _windowThread = new Thread(ProcessWindow);
-            _uiThread = new Thread(ProcessUI);
-            _inputThread = new Thread(ProcessInput);
+            _dispatcherThread = new Thread(ProcessDispatcher);
+            _dispatcher = new Win32Dispatcher(this, _dispatcherThread);
             _window = window;
             _themeChanged = themeChanged;
             //_thread.SetApartmentState(ApartmentState.STA);
         }
 
         public bool IsClosing { get; private set; }
+
+        public Dispatcher Dispatcher => _dispatcher;
+
+        internal Window Window => _window;
+
+        internal HWND Hwnd => _hwnd;
 
         #region Window Properties
 
@@ -219,6 +229,57 @@ namespace Wodsoft.UI.Platforms.Win32
 
         #region Window Process
 
+        [MemberNotNull(nameof(_rendererContext))]
+        private void EnsureRendererContext()
+        {
+            //if (_rendererContext == null)
+            //    _rendererContext = Win32RendererD3D12Context.Create();
+            if (_rendererContext == null)
+                _rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
+            if (_rendererContext == null)
+                _rendererContext = Win32RendererOpenGLContext.Create(_hwnd);
+            if (_rendererContext == null)
+                _rendererContext = new Win32RendererSoftwareContext(_hwnd);
+        }
+
+        private void ProcessDispatcher()
+        {
+            EnsureRendererContext();
+            try
+            {
+                //PAINTSTRUCT paint;
+                ulong startTick, endTick;
+                var frameTime = 1000d / 60d;
+                TimeSpan waitTime;
+                while (!_disposed && !_hwnd.IsNull && !_isDestoryed)
+                {
+                    PInvoke.QueryUnbiasedInterruptTime(out startTick);
+
+                    _dispatcher.RunFrame();
+
+                    PInvoke.QueryUnbiasedInterruptTime(out endTick);
+                    waitTime = TimeSpan.FromMicroseconds(frameTime - (endTick - startTick) / 10);
+                    if (waitTime.TotalMilliseconds > 0)
+                        Thread.Sleep(waitTime);
+                }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(ex);
+#endif
+            }
+            finally
+            {
+                _rendererContext.Dispose();
+            }
+        }
+
+        internal void Render()
+        {
+            _rendererContext!.Render(_window);
+        }
+
         private unsafe void ProcessWindow()
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
@@ -250,58 +311,31 @@ namespace Wodsoft.UI.Platforms.Win32
             }
         }
 
-        private void ProcessUI()
-        {
-            var rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
-            PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1000d / 60d));
-            try
-            {
-                //PAINTSTRUCT paint;
-                while (!_disposed && !_hwnd.IsNull)
-                {
-                    rendererContext.Render(_window);
-                    //timer.WaitForNextTickAsync().AsTask().Wait();
-                    Thread.Sleep(10);
-                }
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(ex);
-#endif
-            }
-            rendererContext.Dispose();
-        }
-
         private bool _locationChanged, _sizeChanged, _isActivateChanged, _stateChanged;
-        private void ProcessInput()
+        internal void ProcessInput()
         {
-            while (!_disposed && !_hwnd.IsNull)
+            _inputProcessing = true;
+            if (_locationChanged)
             {
-                _inputProcessing = true;
-                if (_locationChanged)
-                {
-                    _locationChanged = false;
-                    LocationChanged?.Invoke(this);
-                }
-                if (_sizeChanged)
-                {
-                    _sizeChanged = false;
-                    SizeChanged?.Invoke(this);
-                }
-                if (_isActivateChanged)
-                {
-                    _isActivateChanged = false;
-                    IsActivateChanged?.Invoke(this);
-                }
-                if (_stateChanged)
-                {
-                    _stateChanged = false;
-                    StateChanged?.Invoke(this);
-                }
-                _inputProcessing = false;
-                Thread.Sleep(10);
+                _locationChanged = false;
+                LocationChanged?.Invoke(this);
             }
+            if (_sizeChanged)
+            {
+                _sizeChanged = false;
+                SizeChanged?.Invoke(this);
+            }
+            if (_isActivateChanged)
+            {
+                _isActivateChanged = false;
+                IsActivateChanged?.Invoke(this);
+            }
+            if (_stateChanged)
+            {
+                _stateChanged = false;
+                StateChanged?.Invoke(this);
+            }
+            _inputProcessing = false;
         }
 
         private unsafe WNDCLASSEXW GetWindowClass()
@@ -335,6 +369,8 @@ namespace Wodsoft.UI.Platforms.Win32
             {
                 case PInvoke.WM_DESTROY:
                     {
+                        _isDestoryed = true;
+                        _dispatcherThread.Join();
                         DestoryWindow();
                         break;
                     }
@@ -352,7 +388,6 @@ namespace Wodsoft.UI.Platforms.Win32
                         Opened?.Invoke(this);
                         //new Thread(ProcessUI).Start();
                         //Task.Run(ProcessUI);
-                        _inputThread.Start();
                         break;
                     }
                 case PInvoke.WM_DPICHANGED:
@@ -364,11 +399,8 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                 case PInvoke.WM_PAINT:
                     {
-                        if (_uiThread.ThreadState == ThreadState.Unstarted)
-                            _uiThread.Start();
-                        //if (_rendererContext == null)
-                        //    _rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
-                        //_rendererContext!.Render(_window);
+                        if (_dispatcherThread.ThreadState == ThreadState.Unstarted)
+                            _dispatcherThread.Start();
                         break;
                     }
                 case PInvoke.WM_MOVING:
@@ -408,11 +440,16 @@ namespace Wodsoft.UI.Platforms.Win32
                         if (_isActivated && lParam.Value != 0)
                         {
                             PInvoke.GetWindowRect(hwnd, out var rect);
-                            _width = rect.Width;
-                            _height = rect.Height;
+                            //PInvoke.GetClientRect(hwnd, out var clientRect);
                             _clientWidth = (int)(lParam.Value & 0xffff);
                             _clientHeight = (int)(lParam.Value >> 16);
+                            _width = _clientWidth;
+                            _height = _clientHeight;
                             _sizeChanged = true;
+                            _window.Width = _width;
+                            _window.Height = _height;
+                            _window.UpdateLayout();
+                            //_window.Arrange(new Rect(0, 0, _clientWidth, _clientHeight));
                         }
                         break;
                     }
@@ -459,11 +496,6 @@ namespace Wodsoft.UI.Platforms.Win32
             if (Style != WindowStyle.None)
                 style |= WINDOW_STYLE.WS_BORDER | WINDOW_STYLE.WS_CAPTION;
             return style;
-        }
-
-        private void UpdateTheme()
-        {
-
         }
 
         #endregion
