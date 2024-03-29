@@ -19,7 +19,12 @@ namespace Wodsoft.UI.Test
             var wpfGrid = (WPFControls.Grid)System.Windows.Markup.XamlReader.Parse(xaml);
             upfGrid.Arrange(new Rect(0, 0, 400, 400));
             wpfGrid.Arrange(new System.Windows.Rect(0, 0, 400, 400));
+            LayoutComparer.ComparerUIElement(upfGrid, wpfGrid);
 
+            upfGrid.UpdateLayout();
+            upfGrid.Arrange(new Rect(0, 0, 800, 800));
+            wpfGrid.UpdateLayout();
+            wpfGrid.Arrange(new System.Windows.Rect(0, 0, 800, 800));
             LayoutComparer.ComparerUIElement(upfGrid, wpfGrid);
         }
 
