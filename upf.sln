@@ -43,6 +43,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UniversalPresentationFramework.Aero", "src\UniversalPresentationFramework.Aero\UniversalPresentationFramework.Aero.csproj", "{64896691-836B-4491-830C-A7B31B48F9E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalPresentationFramework.Renderers.SkiaSharp.OpenGL", "src\UniversalPresentationFramework.Renderers.SkiaSharp.OpenGL\UniversalPresentationFramework.Renderers.SkiaSharp.OpenGL.csproj", "{0142A549-6A2B-481D-A875-2E3F8EB6B863}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,6 +111,10 @@ Global
 		{64896691-836B-4491-830C-A7B31B48F9E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64896691-836B-4491-830C-A7B31B48F9E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64896691-836B-4491-830C-A7B31B48F9E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0142A549-6A2B-481D-A875-2E3F8EB6B863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0142A549-6A2B-481D-A875-2E3F8EB6B863}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0142A549-6A2B-481D-A875-2E3F8EB6B863}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0142A549-6A2B-481D-A875-2E3F8EB6B863}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +138,7 @@ Global
 		{8B060743-AD7B-4C16-8D2B-EE0DAA892A8C} = {F0420ED7-AFAE-488A-ACFC-533557A2ECEC}
 		{166C3EE4-1DE3-4FCF-B2BF-256864980620} = {AFA242CA-3A5D-4B95-93A7-28FB7EAB64B4}
 		{64896691-836B-4491-830C-A7B31B48F9E3} = {B4E0370E-6DF6-44BB-BB93-DF58082A4610}
+		{0142A549-6A2B-481D-A875-2E3F8EB6B863} = {1D13C870-5312-4928-918C-B2B1F446DEA5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F56DE84-DAC8-4DF0-92EF-B337FDBDCE69}

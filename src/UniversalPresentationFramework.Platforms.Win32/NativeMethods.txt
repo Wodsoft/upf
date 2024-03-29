@@ -21,3 +21,12 @@ EndPaint
 GetWindowRect
 GetCurrentThemeName
 SystemParametersInfo
+StretchDIBits
+wglCreateContext
+wglDeleteContext
+ChoosePixelFormat
+SetPixelFormat
+wglMakeCurrent
+glGetIntegerv
+SwapBuffers
+QueryUnbiasedInterruptTime
