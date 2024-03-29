@@ -104,7 +104,7 @@ namespace Wodsoft.UI.Renderers
                 VkDevice = device,
                 VkQueue = graphicsQueue,
                 VkPhysicalDeviceFeatures = physicalDevice.GetFeatures(),
-                //Extensions = GRVkExtensions.Create(getProc, (IntPtr)instance.RawHandle.ToUInt64(), (IntPtr)physicalDevice.RawHandle.ToUInt64(), instanceExtensions, extensions),
+                Extensions = GRVkExtensions.Create(getProc, (IntPtr)instance.RawHandle.ToUInt64(), (IntPtr)physicalDevice.RawHandle.ToUInt64(), instanceExtensions, extensions),
                 GraphicsQueueIndex = queueFamilies.GraphicsFamily!.Value,
                 GetProcedureAddress = (name, innerInstance, innerDevice) =>
                 {
