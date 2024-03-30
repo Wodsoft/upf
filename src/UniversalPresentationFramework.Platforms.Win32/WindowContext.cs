@@ -44,7 +44,9 @@ namespace Wodsoft.UI.Platforms.Win32
             _instance = PInvoke.GetModuleHandle((string?)null);
             _className = "upfwindow_" + Guid.NewGuid().ToString().Replace("-", "");
             _windowThread = new Thread(ProcessWindow);
+            _windowThread.Name = "Window HWND Loop";
             _dispatcherThread = new Thread(ProcessDispatcher);
+            _dispatcherThread.Name = "Window Dispatcher";
             _dispatcher = new Win32Dispatcher(this, _dispatcherThread);
             _window = window;
             _themeChanged = themeChanged;
