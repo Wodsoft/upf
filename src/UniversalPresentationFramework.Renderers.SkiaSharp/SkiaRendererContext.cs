@@ -74,8 +74,8 @@ namespace Wodsoft.UI.Renderers
                 canvas.DrawText(fps.ToString(), _FpsPoint, _FpsPaint);
             }
             canvas.Flush();
-            AfterRender();
             _surface.Flush();
+            AfterRender();
             _stopwatch.Restart();
         }
 

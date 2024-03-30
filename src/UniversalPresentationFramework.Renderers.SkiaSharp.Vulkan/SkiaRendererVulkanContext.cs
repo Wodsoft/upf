@@ -25,7 +25,6 @@ namespace Wodsoft.UI.Renderers
         private readonly Device _device;
         private readonly QueueFamilyIndices _queueFamilies;
         private readonly Queue _presentQueue;
-        private readonly Semaphore _renderFinishedSemaphore, _imageAvailableSemaphore;
         private GRBackendRenderTarget? _renderTarget;
         private Image? _image;
         private Swapchain? _swapchain;
@@ -43,8 +42,6 @@ namespace Wodsoft.UI.Renderers
             _device = device;
             _queueFamilies = queueFamilies;
             _presentQueue = presentQueue;
-            _renderFinishedSemaphore = device.CreateSemaphore();
-            _imageAvailableSemaphore = device.CreateSemaphore();
         }
 
         #region CreateContext
@@ -150,8 +147,7 @@ namespace Wodsoft.UI.Renderers
         {
             if (_renderTarget != null)
                 _renderTarget.Dispose();
-            if (_image != null)
-                _image.Dispose();
+            _device.WaitIdle();
             var swapChainSupport = new SwapChainSupportDetails
             {
                 Capabilities = _physicalDevice.GetSurfaceCapabilities(_surface),
@@ -169,9 +165,20 @@ namespace Wodsoft.UI.Renderers
             //{
             //    imageCount = swapChainSupport.Capabilities.MaxImageCount;
             //}
-            var indices = _queueFamilies.Indices.ToArray();
+            uint[]? indices;
+            SharingMode sharingMode;
+            if (_queueFamilies.GraphicsFamily != _queueFamilies.PresentFamily)
+            {
+                sharingMode = SharingMode.Concurrent;
+                indices = null;
+            }
+            else
+            {
+                sharingMode = SharingMode.Exclusive;
+                indices = [_queueFamilies.GraphicsFamily!.Value, _queueFamilies.PresentFamily!.Value];
+            }
             Extent2D extent = new Extent2D((uint)width, (uint)height);
-            var sharingMode = indices.Length == 1 ? SharingMode.Exclusive : SharingMode.Concurrent;
+            var oldSwapchain = _swapchain;
             _swapchain = _device.CreateSwapchain(_surface,
                                                     1,
                                                     Format.R8G8B8A8UNorm,
@@ -186,7 +193,11 @@ namespace Wodsoft.UI.Renderers
                                                     ChooseSwapPresentMode(swapChainSupport.PresentModes),
                                                     true,
                                                     _swapchain);
-
+            if (oldSwapchain != null)
+            {
+                _device.WaitIdle();
+                oldSwapchain.Dispose();
+            }
             _image = _swapchain.GetImages()[0];
             _renderTarget = new GRBackendRenderTarget(width, height, 1, new GRVkImageInfo
             {
@@ -207,7 +218,16 @@ namespace Wodsoft.UI.Renderers
 
         protected override void AfterRender()
         {
-            _presentQueue!.Present(_renderFinishedSemaphore, _swapchain, 0, null);
+            try
+            {
+                _presentQueue!.Present(null, _swapchain, 0, null);
+            }
+            catch (SharpVkException ex)
+            {
+                //Skip frame if out of date
+                if (ex.ResultCode != Result.ErrorOutOfDate)
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw();
+            }
         }
 
         protected override void DisposeCore(bool disposing)
@@ -218,8 +238,6 @@ namespace Wodsoft.UI.Renderers
                     _renderTarget.Dispose();
                 _presentQueue.WaitIdle();
                 _device.WaitIdle();
-                _renderFinishedSemaphore.Dispose();
-                _imageAvailableSemaphore.Dispose();
                 if (_surface != null)
                     _surface.Dispose();
                 if (_image != null)
