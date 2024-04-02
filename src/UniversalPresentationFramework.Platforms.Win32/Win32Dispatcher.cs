@@ -16,7 +16,7 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             _windowContext = windowContext;
             Thread = thread;
-            MouseDevice = new Win32MouseDevice(windowContext.Hwnd);
+            MouseDevice = new Win32MouseDevice(windowContext);
         }
 
         public override Thread Thread { get; }

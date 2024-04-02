@@ -11,30 +11,14 @@ namespace Wodsoft.UI.Threading
 {
     public abstract class UIDispatcher : Dispatcher
     {
-        private bool _updateLayout;
+        #region Render
 
-        #region Operation
+        private bool _updateRender;
+        private int _continueFrames;
 
-        protected void RunInput()
+        public void UpdateRender()
         {
-            _backMouseInputs = Interlocked.Exchange(ref _mouseInputs, _backMouseInputs);
-            if (_backMouseInputs.Count != 0)
-            {
-                var count = _backMouseInputs.Count;
-                var inputs = CollectionsMarshal.AsSpan(_backMouseInputs);
-                for (int i = 0; i < count; i++)
-                {
-                    ref var input = ref inputs[i];
-
-                }
-                _backMouseInputs.Clear();
-            }
-            RunInputCore();
-        }
-
-        protected virtual void RunInputCore()
-        {
-
+            _updateRender = true;
         }
 
         protected void RunRender()
@@ -45,7 +29,17 @@ namespace Wodsoft.UI.Threading
                 InvalidateLayout(RootElement);
                 UpdateLayoutCore();
             }
-            RunRenderCore();
+            if (_updateRender || _continueFrames < 2)
+            {
+                if (_updateRender)
+                {
+                    _updateRender = false;
+                    _continueFrames = 0;
+                }
+                else
+                    _continueFrames++;
+                RunRenderCore();
+            }
         }
 
         protected abstract void RunRenderCore();
@@ -66,8 +60,7 @@ namespace Wodsoft.UI.Threading
                     ref var lastInput = ref CollectionsMarshal.AsSpan(inputs)[inputs.Count - 1];
                     if (lastInput.Actions == MouseActions.Move)
                     {
-                        lastInput.X = x;
-                        lastInput.Y = y;
+                        lastInput.Point = new MousePoint(x, y);
                         return;
                     }
                 }
@@ -76,30 +69,43 @@ namespace Wodsoft.UI.Threading
                     MessageTime = messageTime,
                     Actions = actions,
                     Button = button,
-                    X = x,
-                    Y = y,
+                    Point = new MousePoint(x, y),
                     Wheel = wheel
                 });
             }
         }
 
-        private record struct MouseInput
+        protected void RunInput()
         {
-            public int MessageTime;
-            public MouseActions Actions;
-            public MouseButton? Button;
-            public int X;
-            public int Y;
-            public int Wheel;
+            _backMouseInputs = Interlocked.Exchange(ref _mouseInputs, _backMouseInputs);
+            if (_backMouseInputs.Count != 0)
+            {
+                var count = _backMouseInputs.Count;
+                var inputs = CollectionsMarshal.AsSpan(_backMouseInputs);
+                for (int i = 0; i < count; i++)
+                {
+                    ref var input = ref inputs[i];
+                    MouseDevice.HandleInput(input);
+                }
+                _backMouseInputs.Clear();
+            }
+            RunInputCore();
+        }
+
+        protected virtual void RunInputCore()
+        {
+
         }
 
         #endregion
 
         #region Layout
 
+        private bool _updateLayout;
+
         protected abstract UIElement RootElement { get; }
 
-        public void UpdateLayout()
+        internal void UpdateLayout()
         {
             _updateLayout = true;
         }
@@ -126,7 +132,7 @@ namespace Wodsoft.UI.Threading
 
         #region Device
 
-        protected abstract MouseDevice MouseDevice { get; }
+        protected internal abstract MouseDevice MouseDevice { get; }
 
         #endregion
     }

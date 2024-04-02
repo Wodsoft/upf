@@ -79,5 +79,14 @@ namespace Wodsoft.UI.Media
         }
 
         #endregion
+
+        #region HitTest
+
+        public virtual bool HitTest(in Point point)
+        {
+            return false;
+        }
+
+        #endregion
     }
 }

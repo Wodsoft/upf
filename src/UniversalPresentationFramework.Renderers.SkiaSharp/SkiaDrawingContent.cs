@@ -24,6 +24,11 @@ namespace Wodsoft.UI.Renderers
 
         public SKPoint OriginalPoint => _originalPoint;
 
+        public bool HitTest(in Point point)
+        {
+            return _drawable.Bounds.Contains(point.X, point.Y);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

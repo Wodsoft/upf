@@ -73,6 +73,182 @@ namespace Wodsoft.UI.Input
 
         public abstract Point GetPosition(IInputElement relativeTo);
 
+        protected abstract IInputElement? GetMouseOver(in int x, in int y);
+
+        protected abstract IInputElement? GetMouseOver(in IInputElement element, in int x, in int y);
+
+        public bool Capture(IInputElement? element)
+        {
+            return Capture(element, CaptureMode.Element);
+        }
+
+        public bool Capture(IInputElement? element, CaptureMode captureMode)
+        {
+            if (captureMode == CaptureMode.None)
+                element = null;
+            if (element == null)
+            {
+                if (_captureMode != CaptureMode.None)
+                {
+                    var capturedElement = _capturedElement!;
+                    ReleaseMouse();
+                    ChangeElementMouseCaptured(capturedElement, false);
+                }
+                return true;
+            }
+            else
+            {
+                if (CaptureMouse())
+                {
+                    var capturedElement = _capturedElement;
+                    if (capturedElement != null)
+                        ChangeElementMouseCaptured(capturedElement, false);
+                    _capturedElement = element;
+                    ChangeElementMouseCaptured(element, true);
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        protected abstract bool CaptureMouse();
+
+        protected abstract void ReleaseMouse();
+
+        private void ChangeElementMouseCaptured(IInputElement inputElement, bool isCaptured)
+        {
+            var e = new MouseEventArgs(this, 0);
+            e.RoutedEvent = isCaptured ? Mouse.GotMouseCaptureEvent : Mouse.LostMouseCaptureEvent;
+            inputElement.RaiseEvent(e);
+        }
+
+        #endregion
+
+        #region Input Handle
+
+        private MousePoint _lastPoint;
+        private IInputElement? _capturedElement;
+        private CaptureMode _captureMode;
+
+        public IInputElement? Captured => _capturedElement;
+
+        protected Point MousePoint => new Point(_lastPoint.X, _lastPoint.Y);
+
+        internal void HandleInput(in MouseInput input)
+        {
+            switch (input.Actions)
+            {
+                case MouseActions.Move:
+                    {
+                        if (_lastPoint == input.Point)
+                            return;
+                        _lastPoint = input.Point;
+                        var targetElement = GetTargetElement(_lastPoint);
+                        if (targetElement != null)
+                            HandleMouseMove(targetElement, input);
+                        break;
+                    }
+                case MouseActions.Press:
+                case MouseActions.Release:
+                    {
+                        if (input.Button == null)
+                            return;
+                        IInputElement? targetElement;
+                        if (_lastPoint != input.Point)
+                        {
+                            _lastPoint = input.Point;
+                            targetElement = GetTargetElement(_lastPoint);
+                            if (targetElement != null)
+                                HandleMouseMove(targetElement, input);
+                        }
+                        else
+                            targetElement = GetTargetElement(_lastPoint);
+                        if (targetElement != null)
+                            HandleMouseButton(targetElement, input);
+                        break;
+                    }
+                case MouseActions.Wheel:
+                    {
+                        IInputElement? targetElement;
+                        if (_lastPoint != input.Point)
+                        {
+                            _lastPoint = input.Point;
+                            targetElement = GetTargetElement(_lastPoint);
+                            if (targetElement != null)
+                                HandleMouseMove(targetElement, input);
+                        }
+                        else
+                            targetElement = GetTargetElement(_lastPoint);
+                        if (targetElement != null)
+                            HandleMouseWheel(targetElement, input);
+                        break;
+                    }
+                case MouseActions.CancelCapture:
+                    {
+                        var oldCaptureElement = _capturedElement;
+                        if (oldCaptureElement == null)
+                            return;
+                        var e = new MouseEventArgs(this, input.MessageTime);
+                        e.RoutedEvent = Mouse.LostMouseCaptureEvent;
+                        oldCaptureElement.RaiseEvent(e);
+                        _captureMode = CaptureMode.None;
+                        _capturedElement = null;
+                        break;
+                    }
+            }
+        }
+
+        private IInputElement? GetTargetElement(in MousePoint point)
+        {
+            switch (_captureMode)
+            {
+                case CaptureMode.None:
+                    return GetMouseOver(point.X, point.Y);
+                case CaptureMode.Element:
+                    return _capturedElement;
+                case CaptureMode.SubTree:
+                    return GetMouseOver(_capturedElement!, point.X, point.Y);
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private void HandleMouseMove(IInputElement targetElement, in MouseInput input)
+        {
+            var e = new MouseEventArgs(this, input.MessageTime);
+            e.RoutedEvent = Mouse.PreviewMouseMoveEvent;
+            targetElement.RaiseEvent(e);
+            if (!e.Handled)
+            {
+                e.RoutedEvent = Mouse.MouseMoveEvent;
+                targetElement.RaiseEvent(e);
+            }
+        }
+
+        private void HandleMouseButton(IInputElement targetElement, in MouseInput input)
+        {
+            var e = new MouseButtonEventArgs(this, input.MessageTime, input.Button!.Value);
+            e.RoutedEvent = input.Actions == MouseActions.Press ? Mouse.PreviewMouseDownEvent : Mouse.PreviewMouseUpEvent;
+            targetElement.RaiseEvent(e);
+            if (!e.Handled)
+            {
+                e.RoutedEvent = input.Actions == MouseActions.Press ? Mouse.MouseDownEvent : Mouse.MouseUpEvent;
+                targetElement.RaiseEvent(e);
+            }
+        }
+
+        private void HandleMouseWheel(IInputElement targetElement, in MouseInput input)
+        {
+            var e = new MouseWheelEventArgs(this, input.MessageTime, input.Wheel);
+            e.RoutedEvent = Mouse.PreviewMouseWheelEvent;
+            targetElement.RaiseEvent(e);
+            if (!e.Handled)
+            {
+                e.RoutedEvent = Mouse.MouseWheelEvent;
+                targetElement.RaiseEvent(e);
+            }
+        }
+
         #endregion
     }
 }

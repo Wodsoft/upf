@@ -30,3 +30,7 @@ wglMakeCurrent
 glGetIntegerv
 SwapBuffers
 QueryUnbiasedInterruptTime
+SetCapture
+ReleaseCapture
+SendMessage
+GetMessageTime

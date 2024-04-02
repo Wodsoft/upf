@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -20,7 +21,8 @@ namespace Wodsoft.UI.Platforms.Win32
         private bool _disposed, _topMost, _inputProcessing, _isActivated, _isDestoryed;
         private string _title = string.Empty;
         private Thread _windowThread, _dispatcherThread;
-        private int _x, _y, _width, _height, _clientWidth, _clientHeight;
+        private int _x, _y, _width, _height, _clientWidth, _clientHeight, _clientX, _clientY;
+        private float _dpiX, _dpiY;
         private WindowState _state;
         private WindowStyle _style;
         private readonly Window _window;
@@ -101,6 +103,10 @@ namespace Wodsoft.UI.Platforms.Win32
             }
         }
 
+        public float DpiX => _dpiX;
+
+        public float DpiY => _dpiY;
+
         public int Width
         {
             get => _width;
@@ -122,6 +128,10 @@ namespace Wodsoft.UI.Platforms.Win32
                 _height = value;
             }
         }
+
+        public int ClientX => _clientX;
+
+        public int ClientY => _clientY;
 
         public int ClientWidth => _clientWidth;
 
@@ -251,7 +261,7 @@ namespace Wodsoft.UI.Platforms.Win32
             {
                 //PAINTSTRUCT paint;
                 ulong startTick, endTick;
-                var frameTime = 1000d / 60d;
+                var frameTime = 1000d / 60d * 1000;
                 TimeSpan waitTime;
                 while (!_disposed && !_hwnd.IsNull && !_isDestoryed)
                 {
@@ -383,7 +393,9 @@ namespace Wodsoft.UI.Platforms.Win32
                         var x = PInvoke.GetDeviceCaps(dc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
                         var y = PInvoke.GetDeviceCaps(dc, GET_DEVICE_CAPS_INDEX.LOGPIXELSY);
                         PInvoke.ReleaseDC(hwnd, dc);
-                        DpiChanged?.Invoke(this, new DpiScale(x / 96f, y / 96f));
+                        _dpiX = x / 96f;
+                        _dpiY = y / 96f;
+                        DpiChanged?.Invoke(this, new DpiScale(_dpiX, _dpiY));
                         //if (!PInvoke.GetClientRect(hwnd, out var rect))
                         //    throw new Win32Exception(Marshal.GetLastPInvokeError());
                         //SizeChanged?.Invoke(this, new Size(rect.Width, rect.Height));
@@ -396,13 +408,19 @@ namespace Wodsoft.UI.Platforms.Win32
                     {
                         var x = wParam.Value & 0xffff;
                         var y = wParam.Value >> 16;
-                        DpiChanged?.Invoke(this, new DpiScale(x / 96f, y / 96f));
+                        _dpiX = x / 96f;
+                        _dpiY = y / 96f;
+                        DpiChanged?.Invoke(this, new DpiScale(_dpiX, _dpiY));
                         break;
                     }
                 case PInvoke.WM_PAINT:
                     {
                         if (_dispatcherThread.ThreadState == ThreadState.Unstarted)
+                        {
+                            SizeChanged?.Invoke(this);
                             _dispatcherThread.Start();
+                        }
+                        _dispatcher.UpdateRender();
                         break;
                     }
                 case PInvoke.WM_MOVING:
@@ -410,6 +428,9 @@ namespace Wodsoft.UI.Platforms.Win32
                         ref RECT rect = ref Unsafe.AsRef<RECT>((void*)lParam.Value);
                         _x = rect.X;
                         _y = rect.Y;
+                        PInvoke.GetClientRect(hwnd, out var clientRect);
+                        _clientX = clientRect.X;
+                        _clientY = clientRect.Y;
                         _locationChanged = true;
                         break;
                     }
@@ -442,7 +463,19 @@ namespace Wodsoft.UI.Platforms.Win32
                         if (_isActivated && lParam.Value != 0)
                         {
                             PInvoke.GetWindowRect(hwnd, out var rect);
-                            //PInvoke.GetClientRect(hwnd, out var clientRect);
+                            if (_x != rect.X)
+                            {
+                                _x = rect.X;
+                                _locationChanged = true;
+                            }
+                            if (_y != rect.Y)
+                            {
+                                _y = rect.Y;
+                                _locationChanged = true;
+                            }
+                            PInvoke.GetClientRect(hwnd, out var clientRect);
+                            _clientX = clientRect.X;
+                            _clientY = clientRect.Y;
                             _clientWidth = (int)(lParam.Value & 0xffff);
                             _clientHeight = (int)(lParam.Value >> 16);
                             _width = _clientWidth;
@@ -466,6 +499,101 @@ namespace Wodsoft.UI.Platforms.Win32
                         _themeChanged();
                         break;
                     }
+                case PInvoke.WM_MOUSEMOVE:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Move, null, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_MOUSEWHEEL:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        int wheel = unchecked((int)wParam.Value.ToUInt32()) >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Wheel, null, x, y, wheel);
+                        break;
+                    }
+                case PInvoke.WM_LBUTTONDBLCLK:
+                case PInvoke.WM_LBUTTONDOWN:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.Left, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_LBUTTONUP:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.Left, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_RBUTTONDBLCLK:
+                case PInvoke.WM_RBUTTONDOWN:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.Right, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_RBUTTONUP:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.Right, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_MBUTTONDBLCLK:
+                case PInvoke.WM_MBUTTONDOWN:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.Middle, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_MBUTTONUP:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.Middle, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_XBUTTONDBLCLK:
+                case PInvoke.WM_XBUTTONDOWN:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.XButton1, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_XBUTTONUP:
+                    {
+                        int x = lParam.Value.ToInt32() & 0xffff;
+                        int y = lParam.Value.ToInt32() >> 16;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.XButton1, x, y, 0);
+                        break;
+                    }
+                case PInvoke.WM_CAPTURECHANGED:
+                    {
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.CancelCapture, null, 0, 0, 0);
+                        break;
+                    }
+                case _InsertMessage:
+                    while (_insertMessages.TryPop(out var action))
+                        action();
+                    break;
             }
             return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
         }
@@ -498,6 +626,15 @@ namespace Wodsoft.UI.Platforms.Win32
             if (Style != WindowStyle.None)
                 style |= WINDOW_STYLE.WS_BORDER | WINDOW_STYLE.WS_CAPTION;
             return style;
+        }
+
+        private const uint _InsertMessage = 0xffff0000;
+        private ConcurrentStack<Action> _insertMessages = new ConcurrentStack<Action>();
+
+        internal void ProcessInWindowThread(Action callback)
+        {
+            _insertMessages.Push(callback);
+            PInvoke.SendMessage(_hwnd, _InsertMessage, default, default);
         }
 
         #endregion

@@ -8,5 +8,6 @@ namespace Wodsoft.UI.Media
 {
     public interface IDrawingContent
     {
+        bool HitTest(in Point point);
     }
 }
