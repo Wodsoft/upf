@@ -36,7 +36,7 @@ namespace Wodsoft.UI.Renderers
             _stopwatch = new Stopwatch();
         }
 
-        public bool IsShowFPS { get; set; }
+        public bool IsShowFPS { get; set; } = true;
 
         protected GRContext? GRContext => _grContext;
 
@@ -69,7 +69,8 @@ namespace Wodsoft.UI.Renderers
             RenderCore(visual, renderContext);
             if (Debugger.IsAttached && IsShowFPS)
             {
-                var fps = (int)MathF.Round(1000f / _stopwatch.ElapsedMilliseconds);
+                var elapsedTime = _stopwatch.ElapsedMilliseconds;
+                var fps = (int)MathF.Round(1000f / elapsedTime);
                 fps = Math.Max(1, fps);
                 canvas.DrawText(fps.ToString(), _FpsPoint, _FpsPaint);
             }
