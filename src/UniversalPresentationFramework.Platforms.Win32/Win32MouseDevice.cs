@@ -83,7 +83,6 @@ namespace Wodsoft.UI.Platforms.Win32
 
         private Point GetPointRelateToClientRect(in Int32Point point)
         {
-            var border = SystemParameters.Border;
             float px = point.X;
             float py = point.Y;
             px /= _windowContext.DpiX;
