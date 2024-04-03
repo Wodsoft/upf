@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Input;
 
 namespace Wodsoft.UI.Media
 {
@@ -82,7 +83,21 @@ namespace Wodsoft.UI.Media
 
         #region HitTest
 
-        public virtual bool HitTest(in Point point)
+        public virtual Visual? HitTest(in Point point)
+        {
+            if (HitTestCore(point))
+                return this;
+            var childrenCount = VisualChildrenCount;
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var result = GetVisualChild(i).HitTest(point);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
+        protected virtual bool HitTestCore(in Point point)
         {
             return false;
         }

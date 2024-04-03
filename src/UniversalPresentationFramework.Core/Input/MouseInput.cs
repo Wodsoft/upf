@@ -11,7 +11,7 @@ namespace Wodsoft.UI.Input
         public int MessageTime;
         public MouseActions Actions;
         public MouseButton? Button;
-        public MousePoint Point;
+        public Int32Point Point;
         public int Wheel;
     }
 }

@@ -606,7 +606,7 @@ namespace Wodsoft.UI
 
         #region HitTest
 
-        public override bool HitTest(in Point point)
+        protected override bool HitTestCore(in Point point)
         {
             if (_drawingContent == null)
                 return false;

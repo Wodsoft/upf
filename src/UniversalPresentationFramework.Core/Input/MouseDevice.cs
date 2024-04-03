@@ -73,9 +73,9 @@ namespace Wodsoft.UI.Input
 
         public abstract Point GetPosition(IInputElement relativeTo);
 
-        protected abstract IInputElement? GetMouseOver(in int x, in int y);
+        protected abstract IInputElement? GetMouseOver(in Int32Point point);
 
-        protected abstract IInputElement? GetMouseOver(in IInputElement element, in int x, in int y);
+        protected abstract IInputElement? GetMouseOver(in IInputElement element, in Int32Point point);
 
         public bool Capture(IInputElement? element)
         {
@@ -126,13 +126,13 @@ namespace Wodsoft.UI.Input
 
         #region Input Handle
 
-        private MousePoint _lastPoint;
+        private Int32Point _lastPoint;
         private IInputElement? _capturedElement;
         private CaptureMode _captureMode;
 
         public IInputElement? Captured => _capturedElement;
 
-        protected Point MousePoint => new Point(_lastPoint.X, _lastPoint.Y);
+        protected Int32Point MousePoint => _lastPoint;
 
         internal void HandleInput(in MouseInput input)
         {
@@ -198,16 +198,16 @@ namespace Wodsoft.UI.Input
             }
         }
 
-        private IInputElement? GetTargetElement(in MousePoint point)
+        private IInputElement? GetTargetElement(in Int32Point point)
         {
             switch (_captureMode)
             {
                 case CaptureMode.None:
-                    return GetMouseOver(point.X, point.Y);
+                    return GetMouseOver(point);
                 case CaptureMode.Element:
                     return _capturedElement;
                 case CaptureMode.SubTree:
-                    return GetMouseOver(_capturedElement!, point.X, point.Y);
+                    return GetMouseOver(_capturedElement!, point);
                 default:
                     throw new NotSupportedException();
             }

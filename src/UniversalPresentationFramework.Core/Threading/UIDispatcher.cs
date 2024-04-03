@@ -60,7 +60,7 @@ namespace Wodsoft.UI.Threading
                     ref var lastInput = ref CollectionsMarshal.AsSpan(inputs)[inputs.Count - 1];
                     if (lastInput.Actions == MouseActions.Move)
                     {
-                        lastInput.Point = new MousePoint(x, y);
+                        lastInput.Point = new Int32Point(x, y);
                         return;
                     }
                 }
@@ -69,7 +69,7 @@ namespace Wodsoft.UI.Threading
                     MessageTime = messageTime,
                     Actions = actions,
                     Button = button,
-                    Point = new MousePoint(x, y),
+                    Point = new Int32Point(x, y),
                     Wheel = wheel
                 });
             }

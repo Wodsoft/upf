@@ -37,11 +37,8 @@ namespace Wodsoft.UI.Platforms.Win32
                 }
             }
 
-            var point = MousePoint;
-            point.X -= -_windowContext.X;
-            point.Y -= -_windowContext.Y;
-            point.X /= _windowContext.DpiX;
-            point.Y /= _windowContext.DpiY;
+            var mousePoint = MousePoint;
+            var point = GetPointRelateToClientRect(mousePoint);
             point.X -= visual.VisualOffset.X;
             point.Y -= visual.VisualOffset.Y;
             return point;
@@ -52,9 +49,9 @@ namespace Wodsoft.UI.Platforms.Win32
             throw new NotImplementedException();
         }
 
-        protected override IInputElement? GetMouseOver(in int x, in int y)
+        protected override IInputElement? GetMouseOver(in Int32Point point)
         {
-            var visual = GetMouseOver(_windowContext.Window, GetPointRelateToClientRect(x, y));
+            var visual = _windowContext.Window.HitTest(GetPointRelateToClientRect(point));
             if (visual == null)
                 return null;
             do
@@ -67,11 +64,11 @@ namespace Wodsoft.UI.Platforms.Win32
             return null;
         }
 
-        protected override IInputElement? GetMouseOver(in IInputElement element, in int x, in int y)
+        protected override IInputElement? GetMouseOver(in IInputElement element, in Int32Point point)
         {
             if (element is not Visual)
                 return null;
-            var visual = GetMouseOver((Visual)element, GetPointRelateToClientRect(x, y));
+            var visual = ((Visual)element).HitTest(GetPointRelateToClientRect(point));
             if (visual == null)
                 return null;
             do
@@ -84,24 +81,11 @@ namespace Wodsoft.UI.Platforms.Win32
             return null;
         }
 
-        private Visual? GetMouseOver(in Visual visual, in Point point)
+        private Point GetPointRelateToClientRect(in Int32Point point)
         {
-            if (visual.HitTest(point))
-                return visual;
-            var childrenCount = VisualTreeHelper.GetChildrenCount(visual);
-            for (int i = 0; i < childrenCount; i++)
-            {
-                var childTest = GetMouseOver(VisualTreeHelper.GetChild(visual, i), point);
-                if (childTest != null)
-                    return childTest;
-            }
-            return null;
-        }
-
-        private Point GetPointRelateToClientRect(in int x, in int y)
-        {
-            float px = x - _windowContext.X;
-            float py = y - _windowContext.Y;
+            var border = SystemParameters.Border;
+            float px = point.X;
+            float py = point.Y;
             px /= _windowContext.DpiX;
             py /= _windowContext.DpiY;
             return new Point(px, py);
