@@ -375,22 +375,32 @@ namespace Wodsoft.UI.Controls
                     {
                         child.Element.Measure(new Size());
                         var desiredSize = child.Element.DesiredSize;
-                        if (hasColumn)
+                        if (hasColumn && availableWidth > 0)
                         {
                             var column = _columns[child.Column];
                             if (child.IsAutoColumn && desiredSize.Width > column.ActualWidth)
                             {
                                 availableWidth -= desiredSize.Width - column.ActualWidth;
                                 column.ActualWidth = desiredSize.Width;
+                                if (availableWidth < 0)
+                                {
+                                    column.ActualWidth += availableWidth;
+                                    availableWidth = 0;
+                                }
                             }
                         }
-                        if (hasRow)
+                        if (hasRow && availableHeight > 0)
                         {
                             var row = _rows[child.Row];
                             if (child.IsAutoRow && desiredSize.Height > row.ActualHeight)
                             {
                                 availableHeight -= desiredSize.Height - row.ActualHeight;
                                 row.ActualHeight = desiredSize.Height;
+                                if (availableHeight < 0)
+                                {
+                                    row.ActualHeight += availableHeight;
+                                    availableHeight = 0;
+                                }
                             }
                         }
                     }
