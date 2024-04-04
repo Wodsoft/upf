@@ -13,6 +13,8 @@ namespace Wodsoft.UI
 
         internal static IThemeProvider? ThemeProvider;
 
+        internal static IParameterProvider? ParameterProvider;
+
         internal static IResourceProvider GetResourceProvider()
         {
             if (ResourceProvider == null)
@@ -25,6 +27,13 @@ namespace Wodsoft.UI
             if (ThemeProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             return ThemeProvider;
+        }
+
+        internal static IParameterProvider GetParameterProvider()
+        {
+            if (ParameterProvider == null)
+                throw new InvalidOperationException("Framework not initialized.");
+            return ParameterProvider;
         }
     }
 }

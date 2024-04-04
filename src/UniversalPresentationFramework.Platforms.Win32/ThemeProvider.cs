@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -13,7 +14,7 @@ using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI.Platforms.Win32
 {
-    public class ThemeProvider : IThemeProvider
+    public partial class ThemeProvider : IThemeProvider
     {
         private readonly object _themeLock = new object();
         private ThemeInfo? _themeInfo;
@@ -33,6 +34,8 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             switch (key)
             {
+                case SystemResourceKeyID.Border:
+                    return Border;
                 default:
                     return null;
             }

@@ -86,6 +86,18 @@ namespace Wodsoft.UI
             }
         }
 
+        private IParameterProvider? _parameterProvider;
+        public IParameterProvider? ParameterProvider
+        {
+            get => _parameterProvider;
+            set
+            {
+                if (_isRunning)
+                    throw new InvalidOperationException("Could not set parameter provider while application is running.");
+                _parameterProvider = value;
+            }
+        }
+
         public Uri? StartupUri { get; set; }
 
         #endregion
@@ -109,6 +121,7 @@ namespace Wodsoft.UI
             Current = this;
             FrameworkProvider.ResourceProvider = _resourceProvider;
             FrameworkProvider.ThemeProvider = _themeProvider;
+            FrameworkProvider.ParameterProvider = _parameterProvider;
             _lifecycleProvider.Start();
             FrameworkCoreProvider.RendererProvider = _rendererProvider;
             if (window == null)

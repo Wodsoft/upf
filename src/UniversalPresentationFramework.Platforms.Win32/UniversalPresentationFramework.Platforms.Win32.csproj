@@ -11,7 +11,9 @@
 		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
 			<PrivateAssets>all</PrivateAssets>
 			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-		</PackageReference>
+		</PackageReference>		
+		<PackageReference Include="Microsoft.Windows.SDK.Win32Metadata" Version="59.0.13-preview" />		
+		<PackageReference Include="Microsoft.Windows.WDK.Win32Metadata" Version="0.10.7-experimental" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -19,6 +19,7 @@ namespace Wodsoft.UI.Platforms.Win32
             application.LifecycleProvider = platform.LifecycleProvider;
             application.RendererProvider = platform.RendererProvider;
             application.ThemeProvider = platform.ThemeProvider;
+            application.ParameterProvider = platform.ThemeProvider;
             application.ResourceProvider = new EmbeddedResourceProvider();
         }
     }

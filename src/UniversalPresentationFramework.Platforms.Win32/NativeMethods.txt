@@ -21,6 +21,7 @@ EndPaint
 GetWindowRect
 GetCurrentThemeName
 SystemParametersInfo
+GetSystemMetrics
 StretchDIBits
 wglCreateContext
 wglDeleteContext
@@ -34,3 +35,4 @@ SetCapture
 ReleaseCapture
 SendMessage
 GetMessageTime
+NONCLIENTMETRICSW
