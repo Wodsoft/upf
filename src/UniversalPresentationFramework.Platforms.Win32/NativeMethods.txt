@@ -36,3 +36,8 @@ ReleaseCapture
 SendMessage
 GetMessageTime
 NONCLIENTMETRICSW
+GetCursorPos
+MonitorFromPoint
+GetMonitorInfo
+GetDpiForMonitor
+SetProcessDpiAwareness

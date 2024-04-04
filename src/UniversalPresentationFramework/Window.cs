@@ -196,7 +196,7 @@ namespace Wodsoft.UI
         {
             Width = context.Width;
             Height = context.Height;
-            _visualSize = new Size(context.ClientWidth, context.ClientHeight);
+            _visualSize = new Size(context.ClientWidth / _dpiScale.DpiScaleX, context.ClientHeight / _dpiScale.DpiScaleY);
         }
 
         private void Context_DpiChanged(IWindowContext context, DpiScale e)

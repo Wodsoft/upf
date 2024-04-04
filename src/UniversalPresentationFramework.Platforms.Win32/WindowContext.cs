@@ -296,12 +296,59 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
+            PInvoke.SetProcessDpiAwareness(Windows.Win32.UI.HiDpi.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
+            int x = -1, y = -1, width = _width, height = _height;
+            System.Drawing.Point point;
+            var startupLocation = _window.WindowStartupLocation;
+            switch (startupLocation)
+            {
+                case WindowStartupLocation.Manual:
+                    {
+                        x = _x;
+                        y = _y;
+                        if (x < 0 || y < 0)
+                            point = new System.Drawing.Point();
+                        else
+                            point = new System.Drawing.Point(x, y);
+                        break;
+                    }
+                case WindowStartupLocation.CenterScreen:
+                    PInvoke.GetCursorPos(out point);
+                    break;
+                case WindowStartupLocation.CenterOwner:
+                default:
+                    throw new NotImplementedException();
+            }
+            var monitor = PInvoke.MonitorFromPoint(point, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
+            if (monitor.Value != default)
+            {
+                MONITORINFO monitorInfo = new MONITORINFO();
+                monitorInfo.cbSize = (uint)sizeof(MONITORINFO);
+                if (PInvoke.GetMonitorInfo(monitor, ref monitorInfo))
+                {
+                    float scaleX, scaleY;
+                    if (PInvoke.GetDpiForMonitor(monitor, Windows.Win32.UI.HiDpi.MONITOR_DPI_TYPE.MDT_DEFAULT, out var dpiX, out var dpiY).Succeeded)
+                    {
+                        scaleX = dpiX / 96f;
+                        scaleY = dpiY / 96f;
+                    }
+                    else
+                        scaleX = scaleY = 1f;
+                    width = (int)(width * scaleX);
+                    height = (int)(height * scaleY);
+                    if (startupLocation != WindowStartupLocation.Manual)
+                    {
+                        x = monitorInfo.rcWork.X + (monitorInfo.rcWork.Width - width) / 2;
+                        y = monitorInfo.rcWork.Y + (monitorInfo.rcWork.Height - height) / 2;
+                    }
+                }
+            }
             var windowPtr = PInvoke.CreateWindowEx(
                 GetExStyle(),
                 _className,
                 _title,
                 GetStyle(),
-                _x, _y, _width, _height,
+                x, y, width, height,
                 HWND.Null, null, _instance, null);
             if (windowPtr == IntPtr.Zero)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
@@ -478,8 +525,8 @@ namespace Wodsoft.UI.Platforms.Win32
                             _clientY = clientRect.Y;
                             _clientWidth = (int)(lParam.Value & 0xffff);
                             _clientHeight = (int)(lParam.Value >> 16);
-                            _width = _clientWidth;
-                            _height = _clientHeight;
+                            _width = (int)(_clientWidth / _dpiX);
+                            _height = (int)(_clientHeight / DpiY);
                             _sizeChanged = true;
                             _window.Width = _width;
                             _window.Height = _height;
