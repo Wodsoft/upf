@@ -98,6 +98,18 @@ namespace Wodsoft.UI
             }
         }
 
+        private IClockProvider? _clockProvider;
+        public IClockProvider? ClockProvider
+        {
+            get => _clockProvider;
+            set
+            {
+                if (_isRunning)
+                    throw new InvalidOperationException("Could not set clock provider while application is running.");
+                _clockProvider = value;
+            }
+        }
+
         public Uri? StartupUri { get; set; }
 
         #endregion
@@ -124,6 +136,7 @@ namespace Wodsoft.UI
             FrameworkProvider.ParameterProvider = _parameterProvider;
             _lifecycleProvider.Start();
             FrameworkCoreProvider.RendererProvider = _rendererProvider;
+            FrameworkCoreProvider.ClockProvider = _clockProvider;
             if (window == null)
             {
                 if (StartupUri == null)

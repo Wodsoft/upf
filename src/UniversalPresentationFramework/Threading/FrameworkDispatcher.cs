@@ -235,7 +235,7 @@ namespace Wodsoft.UI.Threading
         private readonly List<DispatcherOperation?> _executeTasks = new List<DispatcherOperation?>();
         private int _executeIndex;
 
-        public void RunFrame()
+        public void RunFrame(TimeSpan elapsedTime)
         {
             RunSendOperations();
             lock (_normalLock)
@@ -258,7 +258,7 @@ namespace Wodsoft.UI.Threading
             }
             if (_executeTasks.Count != 0)
                 RunOperations(_executeTasks);
-            RunBind();
+            RunBind(elapsedTime);
             lock (_renderLock)
             {
                 if (_renderTasks != null && _renderTasks.Count != 0)
@@ -318,9 +318,12 @@ namespace Wodsoft.UI.Threading
             }
         }
 
-        protected void RunBind()
+        protected void RunBind(TimeSpan elapsedTime)
         {
-
+            if (elapsedTime != TimeSpan.Zero && FrameworkCoreProvider.ClockProvider != null)
+            {
+                FrameworkCoreProvider.ClockProvider.ApplyTick(elapsedTime);
+            }
         }
 
         private void RunOperations(List<DispatcherOperation?> operations)
@@ -431,6 +434,8 @@ namespace Wodsoft.UI.Threading
             }
             return false;
         }
+
+        protected internal abstract bool IsActived { get; }
 
         #endregion
     }

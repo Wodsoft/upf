@@ -44,5 +44,7 @@ namespace Wodsoft.UI.Platforms.Win32
         }
 
         protected override MouseDevice MouseDevice { get; }
+
+        protected override bool IsActived => _windowContext.State != WindowState.Minimized;
     }
 }

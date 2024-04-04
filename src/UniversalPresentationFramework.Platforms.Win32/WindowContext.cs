@@ -260,14 +260,17 @@ namespace Wodsoft.UI.Platforms.Win32
             try
             {
                 //PAINTSTRUCT paint;
-                ulong startTick, endTick;
+                ulong startTick, endTick = 0;
                 var frameTime = 1000d / 60d * 1000;
-                TimeSpan waitTime;
+                TimeSpan waitTime, elapsedTime;
                 while (!_disposed && !_hwnd.IsNull && !_isDestoryed)
                 {
                     PInvoke.QueryUnbiasedInterruptTime(out startTick);
-
-                    _dispatcher.RunFrame();
+                    if (endTick == 0)
+                        elapsedTime = TimeSpan.Zero;
+                    else
+                        elapsedTime = TimeSpan.FromMicroseconds((startTick - endTick) / 10);
+                    _dispatcher.RunFrame(elapsedTime);
 
                     PInvoke.QueryUnbiasedInterruptTime(out endTick);
                     waitTime = TimeSpan.FromMicroseconds(frameTime - (endTick - startTick) / 10);

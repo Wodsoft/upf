@@ -27,7 +27,7 @@ namespace Wodsoft.UI.Test
                 _clocks.Remove(clock);
         }
 
-        public void ApplyTick(TimeSpan tick)
+        public override void ApplyTick(TimeSpan tick)
         {
             _isTicking = true;
             foreach (var clock in _clocks)
