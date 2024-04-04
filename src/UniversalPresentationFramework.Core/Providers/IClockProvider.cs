@@ -10,6 +10,8 @@ namespace Wodsoft.UI.Providers
     public interface IClockProvider
     {
         void RegisterClock(DependencyObject d, Clock clock);
+
+        void ApplyTick(TimeSpan elapsedTime);
     }
 
     public delegate void ClockTickHandler(TimeSpan elapsedTime);

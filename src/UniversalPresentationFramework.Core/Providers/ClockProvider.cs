@@ -37,5 +37,7 @@ namespace Wodsoft.UI.Providers
         {
             clock.ApplyTick(tick);
         }
+
+        public abstract void ApplyTick(TimeSpan elapsedTime);
     }
 }
