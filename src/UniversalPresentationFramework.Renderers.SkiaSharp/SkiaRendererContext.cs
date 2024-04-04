@@ -45,6 +45,8 @@ namespace Wodsoft.UI.Renderers
         public virtual void Render(Visual visual)
         {
             var size = visual.GetVisualSize();
+            if (size.IsEmpty)
+                return;
             var dpi = visual.GetDpi();
             int width = (int)(size.Width * dpi.DpiScaleX);
             int height = (int)(size.Height * dpi.DpiScaleY);
