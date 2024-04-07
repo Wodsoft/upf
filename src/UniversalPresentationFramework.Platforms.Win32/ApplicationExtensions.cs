@@ -22,6 +22,8 @@ namespace Wodsoft.UI.Platforms.Win32
             application.ParameterProvider = platform.ThemeProvider;
             application.ClockProvider = new FrameworkClockProvider();
             application.ResourceProvider = new EmbeddedResourceProvider();
+
+            Windows.Win32.PInvoke.SetProcessDpiAwareness(Windows.Win32.UI.HiDpi.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
         }
     }
 }

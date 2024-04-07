@@ -13,4 +13,10 @@
 	  <ProjectReference Include="..\UniversalPresentationFramework.Test\UniversalPresentationFramework.Test.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="runtimes\win-x64\native\libSkiaSharp.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

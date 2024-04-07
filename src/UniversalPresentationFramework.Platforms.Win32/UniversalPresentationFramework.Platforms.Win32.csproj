@@ -7,13 +7,14 @@
 		<RootNamespace>Wodsoft.UI.Platforms.Win32</RootNamespace>
 	</PropertyGroup>
 
-	<ItemGroup>		
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
 			<PrivateAssets>all</PrivateAssets>
 			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-		</PackageReference>		
-		<PackageReference Include="Microsoft.Windows.SDK.Win32Metadata" Version="59.0.13-preview" />		
+		</PackageReference>
+		<PackageReference Include="Microsoft.Windows.SDK.Win32Metadata" Version="59.0.13-preview" />
 		<PackageReference Include="Microsoft.Windows.WDK.Win32Metadata" Version="0.10.7-experimental" />
+		<PackageReference Include="Vortice.Direct3D12" Version="3.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -244,8 +244,8 @@ namespace Wodsoft.UI.Platforms.Win32
         [MemberNotNull(nameof(_rendererContext))]
         private void EnsureRendererContext()
         {
-            //if (_rendererContext == null)
-            //    _rendererContext = Win32RendererD3D12Context.Create();
+            if (_rendererContext == null)
+                _rendererContext = Win32RendererD3D12Context.Create(_hwnd);
             if (_rendererContext == null)
                 _rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
             if (_rendererContext == null)
@@ -298,8 +298,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private unsafe void ProcessWindow()
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
-                throw new Win32Exception(Marshal.GetLastPInvokeError());
-            PInvoke.SetProcessDpiAwareness(Windows.Win32.UI.HiDpi.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
+                throw new Win32Exception(Marshal.GetLastPInvokeError());            
             int x = -1, y = -1, width = _width, height = _height;
             System.Drawing.Point point;
             var startupLocation = _window.WindowStartupLocation;
