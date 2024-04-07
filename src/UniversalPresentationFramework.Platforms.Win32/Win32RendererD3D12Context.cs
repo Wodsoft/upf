@@ -317,15 +317,5 @@ namespace Wodsoft.UI.Platforms.Win32
             public uint fSampleQualityPattern;
             public bool fProtected;
         }
-
-        public abstract class A
-        {
-            public abstract A? Children { get; set; }
-        }
-
-        public abstract class B : A
-        {
-            public override B? Children { get; set; } 
-        }
     }
 }
