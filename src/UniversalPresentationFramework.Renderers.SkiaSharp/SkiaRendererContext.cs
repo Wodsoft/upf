@@ -13,7 +13,6 @@ namespace Wodsoft.UI.Renderers
     public abstract class SkiaRendererContext : IRendererContext, IDisposable
     {
         private GRContext? _grContext;
-        private SKSurface? _surface;
         private bool _disposed;
         private int _width, _height;
         private Stopwatch _stopwatch;
@@ -40,7 +39,9 @@ namespace Wodsoft.UI.Renderers
 
         protected GRContext? GRContext => _grContext;
 
-        public SKSurface? Surface => _surface;
+        public int Width => _width;
+
+        public int Height => _height;
 
         public virtual void Render(Visual visual)
         {
@@ -52,22 +53,24 @@ namespace Wodsoft.UI.Renderers
             int height = (int)(size.Height * dpi.DpiScaleY);
             if (width == 0 || height == 0)
                 return;
-            if (_surface == null || ShouldCreateNewSurface(width, height))
+            SKSurface? surface = GetSurface();
+            if (surface == null || ShouldCreateNewSurface(width, height))
             {
-                if (_surface != null)
-                    _surface.Dispose();
-                _surface = CreateSurface(width, height);
-                if (_surface == null)
+                if (surface != null)
+                    DeleteSurfaces();
+                CreateSurfaces(width, height);
+                surface = GetSurface();
+                if (surface == null)
                     throw new NotSupportedException("Failed to create surface.");
                 _width = width;
                 _height = height;
             }
             BeforeRender();
-            var canvas = _surface.Canvas;
+            var canvas = surface.Canvas;
             canvas.Clear(new SKColor(255, 255, 255, 0));
             canvas.ResetMatrix();
             canvas.Scale(dpi.DpiScaleX, dpi.DpiScaleY);
-            SkiaRenderContext renderContext = new SkiaRenderContext(_surface!);
+            SkiaRenderContext renderContext = new SkiaRenderContext(canvas);
             RenderCore(visual, renderContext);
             if (Debugger.IsAttached && IsShowFPS)
             {
@@ -76,8 +79,8 @@ namespace Wodsoft.UI.Renderers
                 fps = Math.Max(1, fps);
                 canvas.DrawText(fps.ToString(), _FpsPoint, _FpsPaint);
             }
-            canvas.Flush();
-            _surface.Flush();
+            //canvas.Flush();
+            surface.Flush();
             AfterRender();
             _stopwatch.Restart();
         }
@@ -91,7 +94,7 @@ namespace Wodsoft.UI.Renderers
         {
             if (visual.HasRenderContent)
             {
-                var canvas = _surface!.Canvas!;
+                var canvas = renderContext.Canvas;
                 canvas.Save();
                 var saveCount = canvas.SaveCount;
                 canvas.Translate(visual.VisualOffset.X, visual.VisualOffset.Y);
@@ -115,7 +118,11 @@ namespace Wodsoft.UI.Renderers
 
         }
 
-        protected abstract SKSurface CreateSurface(int width, int height);
+        protected abstract void CreateSurfaces(int width, int height);
+
+        protected abstract SKSurface? GetSurface();
+
+        protected abstract void DeleteSurfaces();
 
         #region Dispose
 
@@ -127,6 +134,7 @@ namespace Wodsoft.UI.Renderers
                 if (disposing)
                 {
                     // TODO: 释放托管状态(托管对象)
+                    DeleteSurfaces();
                     if (_grContext != null)
                     {
                         _grContext.Dispose();

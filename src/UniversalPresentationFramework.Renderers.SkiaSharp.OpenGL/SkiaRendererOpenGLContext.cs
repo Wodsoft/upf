@@ -10,6 +10,7 @@ namespace Wodsoft.UI.Renderers
     public abstract class SkiaRendererOpenGLContext : SkiaRendererContext
     {
         private GRBackendRenderTarget? _renderTarget;
+        private SKSurface? _surface;
 
         public SkiaRendererOpenGLContext(GRContext? grContext) : base(grContext)
         {
@@ -17,7 +18,7 @@ namespace Wodsoft.UI.Renderers
                 throw new ArgumentNullException(nameof(grContext));
         }
 
-        protected override SKSurface CreateSurface(int width, int height)
+        protected override void CreateSurfaces(int width, int height)
         {
             if (_renderTarget != null)
                 _renderTarget.Dispose();
@@ -29,9 +30,19 @@ namespace Wodsoft.UI.Renderers
                 samples = maxSamples;
             var glInfo = new GRGlFramebufferInfo((uint)frameBuffer, SKColorType.Rgba8888.ToGlSizedFormat());
             _renderTarget = new GRBackendRenderTarget(width, height, samples, stencil, glInfo);
-            var surface = SKSurface.Create(GRContext, _renderTarget, GRSurfaceOrigin.BottomLeft, SKColorType.Rgba8888);
-            return surface;
+            _surface = SKSurface.Create(GRContext, _renderTarget, GRSurfaceOrigin.BottomLeft, SKColorType.Rgba8888);
         }
+
+        protected override void DeleteSurfaces()
+        {
+            if (_surface != null)
+            {
+                _surface.Dispose();
+                _surface = null;
+            }
+        }
+
+        protected override SKSurface? GetSurface() => _surface;
 
         protected abstract int GetInteger(int code);
 

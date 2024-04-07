@@ -10,14 +10,14 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRenderContext : RenderContext
     {
-        private readonly SKSurface _surface;
         private readonly SKCanvas _canvas;
 
-        public SkiaRenderContext(SKSurface surface)
+        public SkiaRenderContext(SKCanvas canvas)
         {
-            _surface = surface;
-            _canvas = surface.Canvas;
+            _canvas = canvas;
         }
+
+        public SKCanvas Canvas => _canvas;
 
         public override void Render(IDrawingContent drawingContent)
         {

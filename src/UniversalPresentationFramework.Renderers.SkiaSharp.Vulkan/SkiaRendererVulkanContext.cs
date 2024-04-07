@@ -28,6 +28,7 @@ namespace Wodsoft.UI.Renderers
         private GRBackendRenderTarget? _renderTarget;
         private Image? _image;
         private Swapchain? _swapchain;
+        private SKSurface? _skSurface;
 
         private SkiaRendererVulkanContext(GRContext grContext, GRSharpVkBackendContext backendContext, Instance instance, Surface surface, PhysicalDevice physicalDevice, Device device,
             QueueFamilyIndices queueFamilies, Queue presentQueue)
@@ -143,7 +144,7 @@ namespace Wodsoft.UI.Renderers
 
         #endregion
 
-        protected override SKSurface CreateSurface(int width, int height)
+        protected override void CreateSurfaces(int width, int height)
         {
             if (_renderTarget != null)
                 _renderTarget.Dispose();
@@ -212,9 +213,19 @@ namespace Wodsoft.UI.Renderers
                 ImageUsageFlags = (uint)imageUsageFlags,
                 SharingMode = (uint)sharingMode
             });
-            var surface = SKSurface.Create(GRContext, _renderTarget, GRSurfaceOrigin.TopLeft, SKColorType.Rgba8888);
-            return surface;
+            _skSurface = SKSurface.Create(GRContext, _renderTarget, GRSurfaceOrigin.TopLeft, SKColorType.Rgba8888);
         }
+
+        protected override void DeleteSurfaces()
+        {
+            if (_skSurface != null)
+            {
+                _skSurface!.Dispose();
+                _skSurface = null;
+            }
+        }
+
+        protected override SKSurface? GetSurface() => _skSurface;
 
         protected override void AfterRender()
         {

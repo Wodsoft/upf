@@ -11,6 +11,7 @@ namespace Wodsoft.UI.Renderers
     public class SkiaRendererSoftwareContext : SkiaRendererContext
     {
         private readonly SKPixmap? _pixmap;
+        private SKSurface? _surface;
 
         public SkiaRendererSoftwareContext() : base(null)
         {
@@ -28,7 +29,12 @@ namespace Wodsoft.UI.Renderers
             return _pixmap == null;
         }
 
-        protected override SKSurface CreateSurface(int width, int height)
+        protected override void CreateSurfaces(int width, int height)
+        {
+            _surface = CreateSurface(width, height);
+        }
+
+        protected virtual SKSurface CreateSurface(int width, int height)
         {
             if (_pixmap == null)
                 return SKSurface.Create(new SKImageInfo
@@ -42,9 +48,22 @@ namespace Wodsoft.UI.Renderers
                 return SKSurface.Create(_pixmap);
         }
 
+        protected override void DeleteSurfaces()
+        {
+            if (_surface != null)
+            {
+                _surface.Dispose();
+                _surface = null;
+            }
+        }
+
+        protected override SKSurface? GetSurface() => _surface;
+
         public SKImage GetImage()
         {
-            return Surface!.Snapshot();
+            if (_surface == null)
+                throw new InvalidOperationException("Surface not created.");
+            return _surface!.Snapshot();
         }
     }
 }
