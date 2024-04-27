@@ -16,6 +16,7 @@ namespace Wodsoft.UI.Renderers
         {
             var pixels = bitmap.PeekPixels();
             _rendererContext = new SkiaRendererSoftwareContext(pixels);
+            _rendererContext.IsShowFPS = false;
         }
 
         public void Render(Visual visual)

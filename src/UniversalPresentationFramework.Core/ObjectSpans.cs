@@ -414,6 +414,31 @@ namespace Wodsoft.UI
             }
         }
 
+        public ObjectSpan<T> FindSpan(int position)
+        {
+            FindSpan(position, position, out var index);
+            if (index == -1)
+                return new ObjectSpan<T> { Start = 0, End = _length - 1, Value = _defaultValue };
+            var spans = CollectionsMarshal.AsSpan(_spans);
+            ref var span = ref spans[index];
+            if (span.Start <= position && span.End >= position)
+                return span;
+            if (span.Start > position)
+            {
+                if (index == 0)
+                    return new ObjectSpan<T> { Start = 0, End = span.Start - 1, Value = _defaultValue };
+                ref var leftSpan = ref spans[index - 1];
+                return new ObjectSpan<T> { Start = leftSpan.End + 1, End = span.Start - 1, Value = _defaultValue };
+            }
+            else
+            {
+                if (index == spans.Length - 1)
+                    return new ObjectSpan<T> { Start = span.End + 1, End = _length - 1, Value = _defaultValue };
+                ref var rightSpan = ref spans[index - 1];
+                return new ObjectSpan<T> { Start = span.End + 1, End = rightSpan.Start - 1, Value = _defaultValue };
+            }
+        }
+
         private void FindSpan(int start, int end, out int index)
         {
             if (_spans.Count == 0)

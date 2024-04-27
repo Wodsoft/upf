@@ -241,5 +241,15 @@ namespace Wodsoft.UI.Renderers
             bitsPerPixel += (byte)(8 - (bitsPerPixel % 8));
             return new PixelFormat((byte)channels.Sum(t => t), space, isPremutilplied, channelOrder, channels, isFloat);
         }
+
+        public static SKFontStyleSlant GetFontStyle(FontStyle style)
+        {
+            if (style == FontStyles.Italic)
+                return SKFontStyleSlant.Italic;
+            else if (style == FontStyles.Oblique)
+                return SKFontStyleSlant.Oblique;
+            else
+                return SKFontStyleSlant.Upright;
+        }
     }
 }

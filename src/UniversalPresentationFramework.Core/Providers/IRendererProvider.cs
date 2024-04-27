@@ -24,5 +24,7 @@ namespace Wodsoft.UI.Providers
         IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat);
 
         StreamGeometryContext CreateGeometryContext();
+
+        GlyphTypeface? CreateGlyphTypeface(string familyName, FontStyle style, FontWeight weight, FontStretch stretch);
     }
 }

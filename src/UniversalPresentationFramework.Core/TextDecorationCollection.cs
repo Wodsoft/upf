@@ -507,6 +507,29 @@ namespace Wodsoft.UI
             return canFreeze;
         }
 
+
+        internal bool ValueEquals(TextDecorationCollection? textDecorations)
+        {
+            if (textDecorations == null)
+                return false;   // o is either null or not TextDecorations object
+
+            if (this == textDecorations)
+                return true;    // Reference equality.
+
+            if (this.Count != textDecorations.Count)
+                return false;   // Two counts are different.
+
+            // To be considered equal, TextDecorations should be same in the exact order.
+            // Order matters because they imply the Z-order of the text decorations on screen.
+            // Same set of text decorations drawn with different orders may have different result.
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (!this[i].ValueEquals(textDecorations[i]))
+                    return false;
+            }
+            return true;
+        }
+
         #endregion
     }
 }

@@ -9,6 +9,32 @@ namespace Wodsoft.UI.Media
     public abstract class DrawingContext
     {
         /// <summary>
+        /// Draw Text at the location specified.
+        /// </summary>
+        /// <param name="formattedText"> The FormattedText to draw. </param>
+        /// <param name="origin"> The location at which to draw the text. </param>
+        /// <exception cref="ObjectDisposedException">
+        /// This call is illegal if this object has already been closed or disposed.
+        /// </exception>
+        public void DrawText(FormattedText formattedText,
+                             Point origin)
+        {
+            if (formattedText == null)
+                return;
+            formattedText.Draw(this, origin);
+        }
+
+        public void DrawText(ReadOnlySpan<char> text, FontFamily fontFamily, float fontSize, FontStyle style, FontWeight weight, FontStretch stretch, Brush foreground, Point origin)
+        {
+            var glyphTypeface = fontFamily.GetGlyphTypeface(style, weight, stretch);
+            if (glyphTypeface == null)
+                return;
+            DrawText(text, glyphTypeface, fontSize, foreground, origin);
+        }
+
+        public abstract void DrawText(ReadOnlySpan<char> text, GlyphTypeface glyphTypeface, float fontSize, Brush foreground, Point origin);
+
+        /// <summary>
         ///     DrawLine - 
         ///     Draws a line with the specified pen.
         ///     Note that this API does not accept a Brush, as there is no area to fill.

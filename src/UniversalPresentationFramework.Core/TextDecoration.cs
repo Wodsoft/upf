@@ -34,7 +34,7 @@ namespace Wodsoft.UI
         #endregion
 
         #region Clone
-        
+
         protected override Freezable CreateInstanceCore()
         {
             return new TextDecoration();
@@ -130,5 +130,22 @@ namespace Wodsoft.UI
         }
 
         #endregion
+
+        internal bool ValueEquals(TextDecoration textDecoration)
+        {
+            if (textDecoration == null)
+                return false; // o is either null or not a TextDecoration object.
+
+            if (this == textDecoration)
+                return true; // reference equality.
+
+            return (
+               Location == textDecoration.Location
+            && PenOffset == textDecoration.PenOffset
+            && PenOffsetUnit == textDecoration.PenOffsetUnit
+            && PenThicknessUnit == textDecoration.PenThicknessUnit
+            && (Pen == null ? textDecoration.Pen == null : Pen.Equals(textDecoration.Pen))
+            );
+        }
     }
 }

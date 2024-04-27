@@ -9,6 +9,8 @@ namespace Wodsoft.UI.Media
 {
     public class FontFamily
     {
+        private string _familyName;
+
         /// <summary>
         /// Constructs FontFamily from a string.
         /// </summary>
@@ -33,6 +35,8 @@ namespace Wodsoft.UI.Media
 
             if (baseUri != null && !baseUri.IsAbsoluteUri)
                 throw new ArgumentException("Uri must be absolute.", "baseUri");
+
+            _familyName = familyName;
         }
 
         //internal FontFamily(FontFamilyIdentifier familyIdentifier)
@@ -46,7 +50,16 @@ namespace Wodsoft.UI.Media
         /// </summary>
         public FontFamily()
         {
+            _familyName = string.Empty;
+        }
 
+        internal const string GlobalUI = "#GLOBAL USER INTERFACE";
+
+        internal static FontFamily FontFamilyGlobalUI = new FontFamily(GlobalUI);
+
+        public GlyphTypeface? GetGlyphTypeface(FontStyle style, FontWeight weight, FontStretch stretch)
+        {
+            return FrameworkCoreProvider.GetRendererProvider().CreateGlyphTypeface(_familyName, style, weight, stretch);
         }
     }
 }

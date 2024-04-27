@@ -89,7 +89,7 @@ namespace Wodsoft.UI.Media
                         "MiterLimit",
                         typeof(float),
                         typeof(Pen),
-                        new PropertyMetadata(10.0));
+                        new PropertyMetadata(10.0f));
         public float MiterLimit { get { return (float)GetValue(MiterLimitProperty)!; } set { SetValue(MiterLimitProperty, value); } }
 
         public static readonly DependencyProperty LineJoinProperty =

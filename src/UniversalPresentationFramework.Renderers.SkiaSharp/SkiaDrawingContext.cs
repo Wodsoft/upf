@@ -168,5 +168,13 @@ namespace Wodsoft.UI.Renderers
                 }
             }
         }
+
+        public override void DrawText(ReadOnlySpan<char> text, GlyphTypeface glyphTypeface, float fontSize, Brush foreground, Point origin)
+        {
+            if (glyphTypeface is not SkiaGlyphTypeface skiaGlyphTypeface)
+                throw new NotSupportedException("Only support SkiaGlyphTypeface.");
+            var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
+            _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y - font.Metrics.Ascent, SkiaHelper.GetPaint(foreground, null));
+        }
     }
 }

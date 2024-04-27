@@ -51,6 +51,11 @@ namespace Wodsoft.UI.Renderers
             return new SkiaGeometryContext();
         }
 
+        public GlyphTypeface? CreateGlyphTypeface(string familyName, FontStyle style, FontWeight weight, FontStretch stretch)
+        {
+            return SkiaGlyphTypeface.Create(familyName, style, weight, stretch);
+        }
+
         public IImageContext CreateImageContext(Stream stream, int newWidth, int newHeight, Rotation rotation)
         {
             var image = SKImage.FromEncodedData(stream);
@@ -62,7 +67,7 @@ namespace Wodsoft.UI.Renderers
                     newHeight = newWidth * image.Height / image.Width;
                 var bitmap = SKBitmap.FromImage(image);
                 image.Dispose();
-                var resizedBitmap = bitmap.Resize(new SKSizeI { Width = newWidth, Height = newHeight }, SKFilterQuality.High);
+                var resizedBitmap = bitmap.Resize(new SKSizeI { Width = newWidth, Height = newHeight }, new SKSamplingOptions());
                 bitmap.Dispose();
                 image = SKImage.FromBitmap(resizedBitmap);
             }
