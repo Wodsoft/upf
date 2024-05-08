@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.Graphics.OpenGL;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wodsoft.UI.Renderers;
 using Wodsoft.UI.Threading;
@@ -26,11 +27,13 @@ namespace Wodsoft.UI.Platforms.Win32
         private WindowState _state;
         private WindowStyle _style;
         private readonly Window _window;
+        private readonly SkiaRendererProvider _rendererProvider;
+        private readonly Win32RendererContextType _contextType;
         private readonly Action _themeChanged;
         private readonly Win32Dispatcher _dispatcher;
         private SkiaRendererContext? _rendererContext;
 
-        public WindowContext(Window window, Action themeChanged)
+        public WindowContext(Window window, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
         {
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
@@ -51,6 +54,8 @@ namespace Wodsoft.UI.Platforms.Win32
             _dispatcherThread.Name = "Window Dispatcher";
             _dispatcher = new Win32Dispatcher(this, _dispatcherThread);
             _window = window;
+            _rendererProvider = rendererProvider;
+            _contextType = contextType;
             _themeChanged = themeChanged;
             //_thread.SetApartmentState(ApartmentState.STA);
         }
@@ -62,6 +67,8 @@ namespace Wodsoft.UI.Platforms.Win32
         internal Window Window => _window;
 
         internal HWND Hwnd => _hwnd;
+
+        internal FreeLibrarySafeHandle Instance => _instance;
 
         #region Window Properties
 
@@ -245,13 +252,23 @@ namespace Wodsoft.UI.Platforms.Win32
         private void EnsureRendererContext()
         {
             if (_rendererContext == null)
-                _rendererContext = Win32RendererD3D12Context.Create(_hwnd);
-            if (_rendererContext == null)
-                _rendererContext = SkiaRendererVulkanContext.CreateFromWindowHandle(_instance.DangerousGetHandle(), _hwnd);
-            if (_rendererContext == null)
-                _rendererContext = Win32RendererOpenGLContext.Create(_hwnd);
-            if (_rendererContext == null)
-                _rendererContext = new Win32RendererSoftwareContext(_hwnd);
+            {
+                switch (_contextType)
+                {
+                    case Win32RendererContextType.Direct3D12:
+                        _rendererContext = new SkiaWindowRendererD3D12Context((ISkiaDirect3DContext)_rendererProvider, new Win32WindowDirect3DContext(this));
+                        break;
+                    case Win32RendererContextType.Vulkan:
+                        _rendererContext = new SkiaWindowRendererVulkanContext((ISkiaVulkanContext)_rendererProvider, new Win32WindowVulkanContext(this));
+                        break;
+                    case Win32RendererContextType.OpenGL:
+                        _rendererContext = new SkiaWindowRendererOpenGLContext(new Win32WindowOpenGLContext(this));
+                        break;
+                    default:
+                        _rendererContext = new Win32RendererSoftwareContext(this);
+                        break;
+                }
+            }
         }
 
         private void ProcessDispatcher()
@@ -298,7 +315,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private unsafe void ProcessWindow()
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
-                throw new Win32Exception(Marshal.GetLastPInvokeError());            
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
             int x = -1, y = -1, width = _width, height = _height;
             System.Drawing.Point point;
             var startupLocation = _window.WindowStartupLocation;

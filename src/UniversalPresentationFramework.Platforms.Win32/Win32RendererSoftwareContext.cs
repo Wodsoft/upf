@@ -14,25 +14,20 @@ using Windows.Win32.Foundation;
 
 namespace Wodsoft.UI.Platforms.Win32
 {
-    public sealed class Win32RendererSoftwareContext : SkiaRendererSoftwareContext
+    public sealed class Win32RendererSoftwareContext : SkiaWindowRendererSoftwareContext
     {
-        private readonly HWND _hwnd;
+        private readonly WindowContext _windowContext;
         private nint _buffer;
         private int _width, _height;
 
-        internal Win32RendererSoftwareContext(HWND hwnd)
+        internal Win32RendererSoftwareContext(WindowContext windowContext) : base(new Win32WindowContext(windowContext))
         {
-            _hwnd = hwnd;
+            _windowContext = windowContext;
         }
 
         private static unsafe int _HeaderSize = sizeof(BITMAPINFOHEADER);
 
-        protected override bool ShouldCreateNewSurface(int width, int height)
-        {
-            return width != _width || height != _height;
-        }
-
-        protected override unsafe SKSurface CreateSurface(int width, int height)
+        protected unsafe override SKSurface[] CreateSurfaces(int width, int height)
         {
             if (_buffer != default)
                 Marshal.FreeHGlobal(_buffer);
@@ -47,27 +42,27 @@ namespace Wodsoft.UI.Platforms.Win32
             bitmapInfo.bmiHeader.biHeight = -height;
             bitmapInfo.bmiHeader.biBitCount = 32;
             bitmapInfo.bmiHeader.biCompression = 0;
-            return SKSurface.Create(new SKImageInfo
+            return [SKSurface.Create(new SKImageInfo
             {
                 Width = width,
                 Height = height,
                 ColorType = SKColorType.Bgra8888,
                 AlphaType = SKAlphaType.Premul
-            }, _buffer + _HeaderSize);
+            }, _buffer + _HeaderSize)];
         }
 
-        public unsafe override void Render(Visual visual)
+        protected unsafe override void AfterRender()
         {
-            base.Render(visual);
             var width = _width;
             var height = _height;
-            var hdc = PInvoke.GetDC(_hwnd);
+            var hdc = PInvoke.GetDC(_windowContext.Hwnd);
             PInvoke.StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, (_buffer + _HeaderSize).ToPointer(), in Unsafe.AsRef<BITMAPINFO>(_buffer.ToPointer()), 0, ROP_CODE.SRCCOPY);
-            PInvoke.ReleaseDC(_hwnd, hdc);
+            PInvoke.ReleaseDC(_windowContext.Hwnd, hdc);
         }
 
         protected override void DisposeCore(bool disposing)
         {
+            base.DisposeCore(disposing);
             if (disposing)
             {
                 if (_buffer != default)

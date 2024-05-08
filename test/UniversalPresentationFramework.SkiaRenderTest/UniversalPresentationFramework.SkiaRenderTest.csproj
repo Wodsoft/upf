@@ -25,8 +25,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\src\UniversalPresentationFramework.Renderer.SkiaSharp.Direct3D\UniversalPresentationFramework.Renderer.SkiaSharp.Direct3D.csproj" />
+	  <ProjectReference Include="..\..\src\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan.csproj" />
 	  <ProjectReference Include="..\..\src\UniversalPresentationFramework.Renderers.SkiaSharp\UniversalPresentationFramework.Renderers.SkiaSharp.csproj" />
 	  <ProjectReference Include="..\..\src\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="runtimes\win-x64\native\libSkiaSharp.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

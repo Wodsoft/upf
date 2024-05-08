@@ -13,11 +13,33 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly SkiaRendererProvider _rendererProvider;
         private readonly ThemeProvider _themeProvider;
         private readonly LifecycleProvider _lifecycleProvider;
+        private readonly Win32RendererContextType _rendererContextType;
 
         public Win32Platform()
         {
+            //if (SkiaRendererD3D12Provider.TryCreate(out var d3d12Provider))
+            //{
+            //    _rendererProvider = d3d12Provider;
+            //    _rendererContextType = Win32RendererContextType.Direct3D12;
+            //}
+            //else
+            //if (Win32RendererOpenGLProvider.TryCreate(out var openGLProvider))
+            //{
+            //    _rendererProvider = openGLProvider;
+            //    _rendererContextType = Win32RendererContextType.OpenGL;
+            //}
+            //else
+            if (Win32RendererVulkanProvider.TryCreate(out var vulkanProvider))
+            {
+                _rendererProvider = vulkanProvider;
+                _rendererContextType = Win32RendererContextType.Vulkan;
+            }
+            else
+            {
+                _rendererProvider = new SkiaRendererProvider();
+                _rendererContextType = Win32RendererContextType.Software;
+            }
             _windowProvider = new WindowProvider(this);
-            _rendererProvider = new SkiaRendererProvider();
             _themeProvider = new ThemeProvider();
             _lifecycleProvider = new LifecycleProvider(_windowProvider);
         }
@@ -29,6 +51,8 @@ namespace Wodsoft.UI.Platforms.Win32
         public ThemeProvider ThemeProvider => _themeProvider;
 
         public LifecycleProvider LifecycleProvider => _lifecycleProvider;
+
+        public Win32RendererContextType RendererContextType => _rendererContextType;
 
         public void Dispose()
         {

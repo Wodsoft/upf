@@ -23,12 +23,14 @@ GetCurrentThemeName
 SystemParametersInfo
 GetSystemMetrics
 StretchDIBits
+wglGetCurrentDC
 wglCreateContext
 wglDeleteContext
 ChoosePixelFormat
 SetPixelFormat
 wglMakeCurrent
 glGetIntegerv
+glGetString
 SwapBuffers
 QueryUnbiasedInterruptTime
 SetCapture
@@ -41,3 +43,10 @@ MonitorFromPoint
 GetMonitorInfo
 GetDpiForMonitor
 SetProcessDpiAwareness
+SelectObject
+CreateDIBSection
+BitBlt
+CreateCompatibleDC
+DeleteObject
+GL_*
+glGetError

@@ -16,8 +16,6 @@ namespace Wodsoft.UI.Media
 
         void Unlock();
 
-        void WritePixels(Int32Rect sourceRect, IntPtr sourceBuffer, int sourceBufferSize, int sourceBufferStride, int destinationX, int destinationY);
-
-        void CopyPixels(IImageContext imageContext);
+        void WritePixels(Int32Rect sourceRect, IntPtr sourceBuffer, int sourceBufferSize, int sourceBufferStride, int destinationX, int destinationY);        
     }
 }

@@ -5,10 +5,18 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Wodsoft.UI.Renderers</RootNamespace>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Vortice.Direct3D12" Version="3.5.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
 		<ProjectReference Include="..\UniversalPresentationFramework.Renderers.SkiaSharp\UniversalPresentationFramework.Renderers.SkiaSharp.csproj" />
 	</ItemGroup>
-
+	
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
 </Project>

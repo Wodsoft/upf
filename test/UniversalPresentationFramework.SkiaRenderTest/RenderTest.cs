@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Wodsoft.UI.Renderers;
+using Wodsoft.UI.Test.Renderers;
 using UPF = Wodsoft.UI;
 using WPF = System.Windows;
 
@@ -18,7 +19,12 @@ namespace Wodsoft.UI.Test
     {
         public RenderTest()
         {
-            FrameworkCoreProvider.RendererProvider = new SkiaRendererProvider();
+            if (SkiaRendererD3D12Provider.TryCreate(out var d3d12Provider))
+                FrameworkCoreProvider.RendererProvider = d3d12Provider;
+            else if (TestRendererVulkanProvider.TryCreate(out var vulkanProvider))
+                FrameworkCoreProvider.RendererProvider = vulkanProvider;
+            else
+                FrameworkCoreProvider.RendererProvider = new SkiaRendererProvider();
         }
 
         protected void RenderToBitmap(UPF.UIElement element)
@@ -47,7 +53,7 @@ namespace Wodsoft.UI.Test
 
         protected void RenderToBitmap(WPF.UIElement element)
         {
-            var renderTargetBitmap = new WPF.Media.Imaging.RenderTargetBitmap((int)element.RenderSize.Width, (int)element.RenderSize.Height, 96,96, WPF.Media.PixelFormats.Default);
+            var renderTargetBitmap = new WPF.Media.Imaging.RenderTargetBitmap((int)element.RenderSize.Width, (int)element.RenderSize.Height, 96, 96, WPF.Media.PixelFormats.Default);
             renderTargetBitmap.Render(element);
 
             using Bitmap bitmap = new Bitmap((int)element.RenderSize.Width, (int)element.RenderSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);

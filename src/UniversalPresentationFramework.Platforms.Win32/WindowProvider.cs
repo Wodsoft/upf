@@ -20,7 +20,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public IWindowContext CreateContext(Window window)
         {
-            var context = new WindowContext(window, _platform.ThemeProvider.OnThemeChanged);
+            var context = new WindowContext(window, _platform.RendererProvider, _platform.RendererContextType, _platform.ThemeProvider.OnThemeChanged);
             context.Disposed += Context_Disposed;
             context.Opened += Context_CreateOpened;
             context.Closed += Context_Closed;

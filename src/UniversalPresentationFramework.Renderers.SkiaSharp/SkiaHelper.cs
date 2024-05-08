@@ -9,7 +9,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Renderers
 {
-    internal static class SkiaHelper
+    public static class SkiaHelper
     {
         public static SKPaint GetPaint(Brush? brush, Pen? pen)
         {
@@ -87,14 +87,23 @@ namespace Wodsoft.UI.Renderers
             {
                 case PixelFormatChannelOrder.ChannelOrderBGRA:
                     if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 8, 8, 8, 8 }))
-                        return SKColorType.Bgra8888;
+                        return SKColorType.Rgba8888;
                     else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 10, 10, 10, 2 }))
-                        return SKColorType.Bgra1010102;
+                        return SKColorType.Rgba1010102;
+                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 16, 16, 16, 16 }))
+                        if (pixelFormat.IsFloat)
+                            return SKColorType.RgbaF16;
+                        else
+                            return SKColorType.Rgba16161616;
                     else
                         throw new NotSupportedException($"Skia renderer provider do not support BGRA with \"{string.Join('-', pixelFormat.ChannelBits)}\" channels.");
                 case PixelFormatChannelOrder.ChannelOrderBGR:
-                    if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 10, 10, 10 }))
-                        return SKColorType.Bgr101010x;
+                    if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 5, 6, 5 }))
+                        return SKColorType.Rgb565;
+                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 8, 8, 8 }))
+                        return SKColorType.Rgb888x;
+                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 10, 10, 10 }))
+                        return SKColorType.Rgb101010x;
                     else
                         throw new NotSupportedException($"Skia renderer provider do not support BGR with \"{string.Join('-', pixelFormat.ChannelBits)}\" channels.");
                 case PixelFormatChannelOrder.ChannelOrderARGB:
@@ -105,26 +114,15 @@ namespace Wodsoft.UI.Renderers
                 case PixelFormatChannelOrder.ChannelOrderABGR:
                     throw new NotSupportedException($"Skia renderer provider do not support ABGR.");
                 case PixelFormatChannelOrder.ChannelOrderRGB:
-                    if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 5, 6, 5 }))
-                        return SKColorType.Rgb565;
-                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 8, 8, 8 }))
-                        return SKColorType.Rgb888x;
-                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 10, 10, 10 }))
-                        return SKColorType.Rgb101010x;
+                    if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 10, 10, 10 }))
+                        return SKColorType.Bgr101010x;
                     else
                         throw new NotSupportedException($"Skia renderer provider do not support RGB with \"{string.Join('-', pixelFormat.ChannelBits)}\" channels.");
                 case PixelFormatChannelOrder.ChannelOrderRGBA:
                     if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 8, 8, 8, 8 }))
-                        return SKColorType.Rgba8888;
+                        return SKColorType.Bgra8888;
                     else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 10, 10, 10, 2 }))
-                        return SKColorType.Rgba1010102;
-                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 16, 16, 16, 16 }))
-                        if (pixelFormat.IsFloat)
-                            return SKColorType.RgbaF16;
-                        else
-                            return SKColorType.Rgba16161616;
-                    else if (pixelFormat.ChannelBits.SequenceEqual(new byte[] { 32, 32, 32, 32 }))
-                        return SKColorType.RgbaF32;
+                        return SKColorType.Bgra1010102;
                     else
                         throw new NotSupportedException($"Skia renderer provider do not support RGB with \"{string.Join('-', pixelFormat.ChannelBits)}\" channels.");
             }

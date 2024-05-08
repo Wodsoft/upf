@@ -86,7 +86,7 @@ namespace Wodsoft.UI.Renderers
         {
             if (imageSource.Context == null)
                 return;
-            if (imageSource.Context is not SkiaImageContext context)
+            if (imageSource.Context is not ISkiaImageContext context)
                 throw new NotSupportedException("Only support skia image context.");
             CheckClosed();
             switch (context.Rotation)

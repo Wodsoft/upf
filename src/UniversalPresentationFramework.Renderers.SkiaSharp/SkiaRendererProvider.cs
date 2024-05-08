@@ -12,7 +12,7 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererProvider : IRendererProvider
     {
-        public IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette? palette)
+        public virtual IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette? palette)
         {
             if (pixelFormat.IsPalettized)
                 throw new NotSupportedException("Skia do not support palettized pixel format.");
@@ -31,7 +31,7 @@ namespace Wodsoft.UI.Renderers
             return new SkiaBitmapContext(new SKBitmap(info));
         }
 
-        public IBitmapContext CreateBitmapContext(IImageContext context)
+        public virtual IBitmapContext CreateBitmapContext(IImageContext context)
         {
             if (context is SkiaImageContext skiaImageContext)
                 return new SkiaBitmapContext(SKBitmap.FromImage(skiaImageContext.Image));
@@ -41,25 +41,25 @@ namespace Wodsoft.UI.Renderers
                 throw new NotSupportedException("Only support skia image context.");
         }
 
-        public VisualDrawingContext CreateDrawingContext(Visual visual)
+        public virtual VisualDrawingContext CreateDrawingContext(Visual visual)
         {
             return new SkiaDrawingContext(0, 0);
         }
 
-        public StreamGeometryContext CreateGeometryContext()
+        public virtual StreamGeometryContext CreateGeometryContext()
         {
             return new SkiaGeometryContext();
         }
 
-        public GlyphTypeface? CreateGlyphTypeface(string familyName, FontStyle style, FontWeight weight, FontStretch stretch)
+        public virtual GlyphTypeface? CreateGlyphTypeface(string familyName, FontStyle style, FontWeight weight, FontStretch stretch)
         {
             return SkiaGlyphTypeface.Create(familyName, style, weight, stretch);
         }
 
-        public IImageContext CreateImageContext(Stream stream, int newWidth, int newHeight, Rotation rotation)
+        public virtual IImageContext CreateImageContext(Stream stream, int newWidth, int newHeight, Rotation rotation)
         {
             var image = SKImage.FromEncodedData(stream);
-            if (newWidth != 0 || newHeight != 0)
+            if (newWidth != 0 && newWidth != image.Width || newHeight != 0 && newHeight != image.Height)
             {
                 if (newWidth == 0)
                     newWidth = newHeight * image.Width / image.Height;
@@ -74,7 +74,7 @@ namespace Wodsoft.UI.Renderers
             return new SkiaImageContext(image, rotation);
         }
 
-        public IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
+        public virtual IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
         {
             SKImageInfo info = new SKImageInfo();
             info.Width = pixelWidth;
@@ -88,7 +88,8 @@ namespace Wodsoft.UI.Renderers
                     info.ColorSpace = pixelFormat.ColorSpace == PixelFormatColorSpace.IsSRGB ? SKColorSpace.CreateSrgb() : SKColorSpace.CreateSrgbLinear();
                     break;
             }
-            return new SkiaRenderBitmapContext(new SKBitmap(info));
+            var rendererContext = new SkiaTextureRendererSoftwareContext(info);
+            return new SkiaRenderBitmapContext(rendererContext, pixelFormat);
         }
     }
 }

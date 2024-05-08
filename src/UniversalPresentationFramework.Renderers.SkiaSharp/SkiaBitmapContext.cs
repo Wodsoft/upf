@@ -9,26 +9,20 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Renderers
 {
-    public class SkiaBitmapContext : IBitmapContext
+    public class SkiaBitmapContext : SkiaImageContext, IBitmapContext
     {
         private readonly SKBitmap _bitmap;
         private readonly PixelFormat _pixelFormat;
         private SKPixmap? _pixmap;
         private object _lock = new object();
 
-        public SkiaBitmapContext(SKBitmap bitmap)
+        public SkiaBitmapContext(SKBitmap bitmap) : base(SKImage.FromBitmap(bitmap))
         {
             _bitmap = bitmap;
             _pixelFormat = SkiaHelper.GetPixelFormat(bitmap.ColorType, bitmap.AlphaType, bitmap.ColorSpace);
         }
 
         public SKBitmap Bitmap => _bitmap;
-
-        public int Width => _bitmap.Width;
-
-        public int Height => _bitmap.Height;
-
-        public PixelFormat PixelFormat => _pixelFormat;
 
         public nint BackBuffer => _bitmap.GetPixels();
 
@@ -51,29 +45,6 @@ namespace Wodsoft.UI.Renderers
                 if (_pixmap == null)
                     return;
                 _pixmap.Dispose();
-            }
-        }
-
-        public void CopyPixels(Int32Rect sourceRect, nint buffer, int bufferSize, int stride)
-        {
-            if (sourceRect.X < 0)
-                throw new ArgumentOutOfRangeException("Source rectangle x can not be negative.");
-            if (sourceRect.X >= _bitmap.Width)
-                throw new ArgumentOutOfRangeException("Source rectangle x can not large or equal than bitmap width.");
-            if (sourceRect.Y < 0)
-                throw new ArgumentOutOfRangeException("Source rectangle y can not be negative.");
-            if (sourceRect.Y >= _bitmap.Height)
-                throw new ArgumentOutOfRangeException("Source rectangle y can not large or equal than bitmap width.");
-
-            if (stride * (sourceRect.Height - 1) + sourceRect.Width * _bitmap.BytesPerPixel > bufferSize)
-                throw new ArgumentOutOfRangeException(nameof(bufferSize), "Buffer size less than pxiels length.");
-            var imageInfo = new SKImageInfo(sourceRect.Width, sourceRect.Height);
-            imageInfo.ColorSpace = _bitmap.ColorSpace;
-            imageInfo.AlphaType = _bitmap.AlphaType;
-            imageInfo.ColorType = _bitmap.ColorType;
-            using (var pixmap = new SKPixmap(imageInfo, buffer, stride))
-            {
-                _bitmap.PeekPixels().ReadPixels(pixmap, sourceRect.X, sourceRect.Y);
             }
         }
 
@@ -115,16 +86,6 @@ namespace Wodsoft.UI.Renderers
                 }
                 pixmap.Dispose();
             }
-        }
-
-        public void CopyPixels(IImageContext imageContext)
-        {
-            if (imageContext is not SkiaImageContext skiaImageContext)
-                throw new NotSupportedException("Only support copy pixels from skia image context.");
-            var sourcePixmap = skiaImageContext.Image.PeekPixels();
-            var destPixmap = _bitmap.PeekPixels();
-            destPixmap.ReadPixels(sourcePixmap);
-            destPixmap.Dispose();
         }
     }
 }

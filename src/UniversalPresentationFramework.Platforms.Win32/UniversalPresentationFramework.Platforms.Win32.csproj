@@ -18,6 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\UniversalPresentationFramework.Renderer.SkiaSharp.Direct3D\UniversalPresentationFramework.Renderer.SkiaSharp.Direct3D.csproj" />
 		<ProjectReference Include="..\UniversalPresentationFramework.Renderers.SkiaSharp.OpenGL\UniversalPresentationFramework.Renderers.SkiaSharp.OpenGL.csproj" />
 		<ProjectReference Include="..\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan\UniversalPresentationFramework.Renderers.SkiaSharp.Vulkan.csproj" />
 		<ProjectReference Include="..\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />

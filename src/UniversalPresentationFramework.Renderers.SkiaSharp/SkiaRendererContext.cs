@@ -12,36 +12,26 @@ namespace Wodsoft.UI.Renderers
 {
     public abstract class SkiaRendererContext : IRendererContext, IDisposable
     {
-        private GRContext? _grContext;
         private bool _disposed;
-        private int _width, _height;
         private Stopwatch _stopwatch;
 
         private static SKPoint _FpsPoint;
-        private static SKPaint _FpsPaint = new SKPaint(new SKFont(SKTypeface.Default, 24, 1, 0));
+        private static SKFont _FpsFont = new SKFont(SKTypeface.Default, 24, 1, 0);
+        private static SKPaint _FpsPaint = new SKPaint();
         static SkiaRendererContext()
         {
             _FpsPaint.SetColor(new SKColorF(1f, 1f, 0), null);
             _FpsPaint.Style = SKPaintStyle.Fill;
-            _FpsPaint.TextAlign = SKTextAlign.Left;
-            var rect = new SKRect();
-            _FpsPaint.MeasureText("0", ref rect);
+            _FpsFont.MeasureText("0", out var rect);
             _FpsPoint = new SKPoint(10 - rect.Left, 10 - rect.Top);
         }
 
-        public SkiaRendererContext(GRContext? grContext)
+        public SkiaRendererContext()
         {
-            _grContext = grContext;
             _stopwatch = new Stopwatch();
         }
 
         public bool IsShowFPS { get; set; } = true;
-
-        protected GRContext? GRContext => _grContext;
-
-        public int Width => _width;
-
-        public int Height => _height;
 
         public virtual void Render(Visual visual)
         {
@@ -53,18 +43,7 @@ namespace Wodsoft.UI.Renderers
             int height = (int)(size.Height * dpi.DpiScaleY);
             if (width == 0 || height == 0)
                 return;
-            SKSurface? surface = GetSurface();
-            if (surface == null || ShouldCreateNewSurface(width, height))
-            {
-                if (surface != null)
-                    DeleteSurfaces();
-                CreateSurfaces(width, height);
-                surface = GetSurface();
-                if (surface == null)
-                    throw new NotSupportedException("Failed to create surface.");
-                _width = width;
-                _height = height;
-            }
+            SKSurface surface = GetSurface();
             BeforeRender();
             var canvas = surface.Canvas;
             canvas.Clear(new SKColor(255, 255, 255, 0));
@@ -77,17 +56,12 @@ namespace Wodsoft.UI.Renderers
                 var elapsedTime = _stopwatch.ElapsedMilliseconds;
                 var fps = (int)MathF.Round(1000f / elapsedTime);
                 fps = Math.Max(1, fps);
-                canvas.DrawText(fps.ToString(), _FpsPoint, _FpsPaint);
+                canvas.DrawText(fps.ToString(), _FpsPoint, _FpsFont, _FpsPaint);
             }
             //canvas.Flush();
             surface.Flush();
             AfterRender();
             _stopwatch.Restart();
-        }
-
-        protected virtual bool ShouldCreateNewSurface(int width, int height)
-        {
-            return _width != width || _height != height;
         }
 
         private void RenderCore(Visual visual, SkiaRenderContext renderContext)
@@ -118,11 +92,7 @@ namespace Wodsoft.UI.Renderers
 
         }
 
-        protected abstract void CreateSurfaces(int width, int height);
-
-        protected abstract SKSurface? GetSurface();
-
-        protected abstract void DeleteSurfaces();
+        protected abstract SKSurface GetSurface();
 
         #region Dispose
 
@@ -131,16 +101,6 @@ namespace Wodsoft.UI.Renderers
             if (!_disposed)
             {
                 DisposeCore(disposing);
-                if (disposing)
-                {
-                    // TODO: 释放托管状态(托管对象)
-                    DeleteSurfaces();
-                    if (_grContext != null)
-                    {
-                        _grContext.Dispose();
-                        _grContext = null;
-                    }
-                }
 
                 // TODO: 释放未托管的资源(未托管的对象)并重写终结器
                 // TODO: 将大型字段设置为 null

@@ -293,7 +293,10 @@ namespace Wodsoft.UI.Media.Imaging
         private static void RotationPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             BitmapImage image = (BitmapImage)d;
-            image._rotation = (Rotation)e.NewValue!;
+            var rotation = (Rotation)e.NewValue!;
+            image._rotation = rotation;
+            if (image._context != null)
+                image._context.Rotation = rotation;
         }
         private static object? CoerceRotation(DependencyObject d, object? baseValue)
         {
