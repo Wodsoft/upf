@@ -311,6 +311,40 @@ namespace Wodsoft.UI.Renderers
             }
         }
 
+        protected unsafe override void DisposeCore(bool disposing)
+        {
+            base.DisposeCore(disposing);
+            if (disposing)
+            {
+                if (_renderTargets != null)
+                {
+                    for (int i = 0; i < _renderTargets.Length; i++)
+                        _renderTargets[i].Dispose();
+                    _renderTargets = null;
+                }
+                if (_images != null)
+                    _images = null;
+                if (_swapchain != null)
+                {
+                    Vulkan.vkDestroySwapchainKHR(_device!.Value, _swapchain.Value);
+                    _swapchain = null;
+                    Vulkan.vkDestroySemaphore(_device.Value, _renderFinishedSemaphore);
+                    _renderFinishedSemaphore = default;
+                }
+                if (_device != null)
+                {
+                    Vulkan.vkDestroyDevice(_device.Value);
+                    _device = null;
+                }
+                if (_grContext != null)
+                {
+                    _grContext.Dispose();
+                    _grContext = null;
+                }
+                _physicalDevice = null;
+            }
+        }
+
         private static bool IsSuitableDevice(VkPhysicalDevice device, VkSurfaceKHR surface)
         {
             return Vulkan.vkEnumerateDeviceExtensionProperties(device).Any(extension => extension.GetExtensionName() == Vulkan.VK_KHR_SWAPCHAIN_EXTENSION_NAME)

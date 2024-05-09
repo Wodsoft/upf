@@ -229,5 +229,38 @@ namespace Wodsoft.UI.Renderers
         public override SKAlphaType AlphaType => _alphaType;
 
         public override GRSurfaceOrigin SurfaceOrigin => GRSurfaceOrigin.TopLeft;
+
+        protected unsafe override void DisposeCore(bool disposing)
+        {
+            base.DisposeCore(disposing);
+            if (disposing)
+            {
+                if (_texture != null)
+                {
+                    _texture.Dispose();
+                    _texture = null;
+                }
+                if (_image != null)
+                {
+                    Vulkan.vkDestroyImage(_device!.Value, _image.Value);
+                    _image = null;
+                }
+                if (_memory != null)
+                {
+                    Vulkan.vkFreeMemory(_device!.Value, _memory.Value);
+                    _memory = null;
+                }
+                if (_grContext != null)
+                {
+                    _grContext.Dispose();
+                    _grContext = null;
+                }
+                if (_device != null)
+                {
+                    Vulkan.vkDestroyDevice(_device.Value);
+                    _device = null;
+                }                
+            }
+        }
     }
 }
