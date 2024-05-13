@@ -240,6 +240,7 @@ namespace Wodsoft.UI.Media.TextFormatting
                 var bound = _textBounds[i];
                 if (bound.TextRun.Properties.ForegroundBrush != null)
                     drawingContext.DrawText(bound.TextRun.Characters, bound.GlyphTypeface, bound.TextRun.Properties.FontRenderingEmSize, bound.TextRun.Properties.ForegroundBrush, new Point(origin.X + offset, origin.Y));
+                offset += bound.TextRunWidth;
             }
         }
 
