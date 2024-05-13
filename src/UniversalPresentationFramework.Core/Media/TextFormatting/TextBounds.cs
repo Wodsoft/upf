@@ -9,7 +9,7 @@ namespace Wodsoft.UI.Media.TextFormatting
 {
     public class TextBounds
     {
-        public TextBounds(TextRun textRun, ReadOnlyMemory<float> textWidths, float textRunWidth, GlyphTypeface glyphTypeface)
+        public TextBounds(TextRun textRun, ReadOnlyMemory<float> textWidths, float textRunWidth, float textRunHeight, GlyphTypeface glyphTypeface)
         {
             if (textRun == null)
                 throw new ArgumentNullException(nameof(textRun));
@@ -18,6 +18,7 @@ namespace Wodsoft.UI.Media.TextFormatting
             TextRun = textRun;
             TextWidths = textWidths;
             TextRunWidth = textRunWidth;
+            TextRunHeight = textRunHeight;
             GlyphTypeface = glyphTypeface;
         }
 
@@ -26,6 +27,8 @@ namespace Wodsoft.UI.Media.TextFormatting
         public ReadOnlyMemory<float> TextWidths { get; }
 
         public float TextRunWidth { get; }
+
+        public float TextRunHeight { get; }
 
         public GlyphTypeface GlyphTypeface { get; }
     }

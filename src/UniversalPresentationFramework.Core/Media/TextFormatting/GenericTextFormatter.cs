@@ -52,8 +52,8 @@ namespace Wodsoft.UI.Media.TextFormatting
                     for (int i = 0; i < textWidths.Length; i++)
                         width += textWidths.Span[i];
                 }
-                currentWidth += width;
-                bounds.Add(new TextBounds(textRun, textWidths, width, glyphTypeface));
+                currentWidth += width;                
+                bounds.Add(new TextBounds(textRun, textWidths, width, glyphTypeface.Height * textRun.Properties.FontRenderingEmSize, glyphTypeface));
                 if (textRun.IsEndOfNewLine)
                     break;
                 if (currentWidth >= paragraphWidth)

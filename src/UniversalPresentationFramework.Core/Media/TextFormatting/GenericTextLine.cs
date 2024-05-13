@@ -30,7 +30,7 @@ namespace Wodsoft.UI.Media.TextFormatting
             if (_paragraphProperties.LineHeight > 0)
                 _height = _paragraphProperties.LineHeight;
             else
-                _height = _defaultGlyphTypeface.Height * _emSize;
+                _height = textBounds.Max(t => t.TextRunHeight);
         }
 
         public override bool HasOverflowed => _hasBreakText;
@@ -96,7 +96,7 @@ namespace Wodsoft.UI.Media.TextFormatting
             }
             else
             {
-                leftBounds[boundIndex] = new TextBounds(splitBound.TextRun.Slice(0, boundLength), splitBound.TextWidths.Slice(0, boundLength), boundWidth, splitBound.GlyphTypeface);
+                leftBounds[boundIndex] = new TextBounds(splitBound.TextRun.Slice(0, boundLength), splitBound.TextWidths.Slice(0, boundLength), boundWidth, splitBound.TextRunHeight, splitBound.GlyphTypeface);
                 leftWidth += boundWidth;
             }
             return new GenericTextLine(leftBounds, leftWidth, false, true, _paragraphProperties, _defaultGlyphTypeface);
@@ -134,7 +134,7 @@ namespace Wodsoft.UI.Media.TextFormatting
             }
             else
             {
-                leftBounds[boundIndex] = new TextBounds(splitBound.TextRun.Slice(0, boundLength), splitBound.TextWidths.Slice(0, boundLength), boundWidth, splitBound.GlyphTypeface);
+                leftBounds[boundIndex] = new TextBounds(splitBound.TextRun.Slice(0, boundLength), splitBound.TextWidths.Slice(0, boundLength), boundWidth, splitBound.TextRunHeight, splitBound.GlyphTypeface);
                 leftWidth += boundWidth;
                 rightBounds = new TextBounds[_textBounds.Count - boundIndex];
                 var rightRun = splitBound.TextRun.Slice(boundLength);
@@ -147,7 +147,7 @@ namespace Wodsoft.UI.Media.TextFormatting
                     for (int i = 0; i < trimmedLength; i++)
                         rightRunWidth -= splitBound.TextWidths.Span[boundLength + i];
                 }
-                rightBounds[0] = new TextBounds(rightRun, splitBound.TextWidths.Slice(splitBound.TextWidths.Length-rightRun.Length), rightRunWidth, splitBound.GlyphTypeface);
+                rightBounds[0] = new TextBounds(rightRun, splitBound.TextWidths.Slice(splitBound.TextWidths.Length - rightRun.Length), rightRunWidth, splitBound.TextRunHeight, splitBound.GlyphTypeface);
                 rightWidth += rightBounds[0].TextRunWidth;
                 for (int i = boundIndex + 1; i < _textBounds.Count; i++)
                 {
