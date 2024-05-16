@@ -12,6 +12,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly Win32Platform _platform;
         private readonly List<IWindowContext> _contexts = new List<IWindowContext>();
         private readonly object _lock = new object();
+        private Exception? _exception;
 
         public WindowProvider(Win32Platform platform)
         {
@@ -29,13 +30,31 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public event EventHandler? WindowEmpty;
 
+        internal Exception? Exception => _exception;
+
         private void Context_Closed(IWindowContext context)
         {
             lock (_lock)
             {
+                var ex = ((WindowContext)context).Exception;
                 _contexts.Remove(context);
-                if (_contexts.Count == 0)
+                if (ex == null)
+                {
+                    if (_contexts.Count == 0)
+                        WindowEmpty?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    _exception = ex;
+                    for (int i = _contexts.Count - 1; i >= 0; --i)
+                    {
+                        var c = _contexts[i];
+                        Context_Disposed(c);
+                        ((WindowContext)c).DestoryWindow();
+                        _contexts.Remove(c);
+                    }
                     WindowEmpty?.Invoke(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -64,10 +83,12 @@ namespace Wodsoft.UI.Platforms.Win32
                 for (int i = _contexts.Count - 1; i >= 0; --i)
                 {
                     var context = _contexts[i];
+                    Context_Disposed(context);
+                    ((WindowContext)context).DestoryWindow();
                     _contexts.Remove(context);
                 }
-                WindowEmpty?.Invoke(this, EventArgs.Empty);
             }
+            WindowEmpty?.Invoke(this, EventArgs.Empty);
         }
     }
 }

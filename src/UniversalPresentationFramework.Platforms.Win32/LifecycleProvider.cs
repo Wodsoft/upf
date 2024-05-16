@@ -51,6 +51,8 @@ namespace Wodsoft.UI.Platforms.Win32
             if (!_isRunning)
                 return;
             _eventEvent?.WaitOne();
+            if (_windowProvider.Exception != null)
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(_windowProvider.Exception).Throw();
         }
     }
 }

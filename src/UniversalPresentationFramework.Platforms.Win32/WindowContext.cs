@@ -32,6 +32,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly Action _themeChanged;
         private readonly Win32Dispatcher _dispatcher;
         private SkiaRendererContext? _rendererContext;
+        private Exception? _exception;
 
         public WindowContext(Window window, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
         {
@@ -170,6 +171,8 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public bool IsActivated => _isActivated;
 
+        internal Exception? Exception => _exception;
+
         #endregion
 
         #region Window Operations
@@ -219,7 +222,7 @@ namespace Wodsoft.UI.Platforms.Win32
             return !e.Cancel;
         }
 
-        private void DestoryWindow()
+        internal void DestoryWindow()
         {
             var hwnd = _hwnd;
             if (!hwnd.IsNull)
@@ -300,6 +303,8 @@ namespace Wodsoft.UI.Platforms.Win32
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(ex);
 #endif
+                _exception = ex;
+                DestoryWindow();
             }
             finally
             {
