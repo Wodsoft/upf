@@ -50,3 +50,4 @@ CreateCompatibleDC
 DeleteObject
 GL_*
 glGetError
+GetSysColor
