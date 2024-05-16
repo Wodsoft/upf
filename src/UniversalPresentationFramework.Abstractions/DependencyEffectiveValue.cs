@@ -14,7 +14,11 @@ namespace Wodsoft.UI
         private bool _hasValue;
         private IDependencyModifiedValue? _modifiedValue;
 
-        public DependencyEffectiveValue(Expression expression)
+        public DependencyEffectiveValue(Expression expression) : this(expression, DependencyEffectiveSource.Expression)
+        {
+        }
+
+        public DependencyEffectiveValue(Expression expression, DependencyEffectiveSource source)
         {
             _expression = expression;
             _source = DependencyEffectiveSource.Expression;
