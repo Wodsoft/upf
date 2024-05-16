@@ -253,7 +253,7 @@ namespace UniversalPresentationFramework.SourceGenerators
                         _resourceBuilder.Append($"DateTime.Parse(\"{value}\")");
                         break;
                     default:
-                        _resourceBuilder.Append($"\"{value}\"");
+                        _resourceBuilder.Append($"@\"{value}\"");
                         break;
                 }
             }
