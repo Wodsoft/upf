@@ -331,15 +331,15 @@ namespace Wodsoft.UI.Renderers
                     Vulkan.vkDestroySemaphore(_device.Value, _renderFinishedSemaphore);
                     _renderFinishedSemaphore = default;
                 }
-                if (_device != null)
-                {
-                    Vulkan.vkDestroyDevice(_device.Value);
-                    _device = null;
-                }
                 if (_grContext != null)
                 {
                     _grContext.Dispose();
                     _grContext = null;
+                }
+                if (_device != null)
+                {
+                    Vulkan.vkDestroyDevice(_device.Value);
+                    _device = null;
                 }
                 _physicalDevice = null;
             }
