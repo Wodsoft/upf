@@ -20,6 +20,9 @@ namespace Wodsoft.UI
             if (value != DependencyProperty.UnsetValue)
                 return value;
             value = FindResourceInApplication(key);
+            if (value != DependencyProperty.UnsetValue)
+                return value;
+            value = FindResourceInSystem(logicalObject, key);
             return value;
         }
 
@@ -65,6 +68,18 @@ namespace Wodsoft.UI
             return app.Resources[key];
         }
 
+        private static object? FindResourceInSystem(LogicalObject target, object key)
+        {
+            if (FrameworkProvider.ResourceProvider != null)
+            {
+                object? resource = FrameworkProvider.ResourceProvider.FindSystemResource(key);
+                if (resource != null)
+                {
+                    return resource;
+                }
+            }
+            return DependencyProperty.UnsetValue;
+        }
 
         public static object? FindTemplateResource(LogicalObject target, object item, Type templateType)
         {
