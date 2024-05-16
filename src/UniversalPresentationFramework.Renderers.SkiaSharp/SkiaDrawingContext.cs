@@ -174,7 +174,8 @@ namespace Wodsoft.UI.Renderers
             if (glyphTypeface is not SkiaGlyphTypeface skiaGlyphTypeface)
                 throw new NotSupportedException("Only support SkiaGlyphTypeface.");
             var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
-            _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y - font.Metrics.Ascent, SkiaHelper.GetPaint(foreground, null));
+            _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y, SkiaHelper.GetPaint(foreground, null));
+            _hasContent = true;
         }
     }
 }
