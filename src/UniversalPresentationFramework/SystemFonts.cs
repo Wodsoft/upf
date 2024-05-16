@@ -58,7 +58,7 @@ namespace Wodsoft.UI
         {
             get
             {
-                return FrameworkProvider.GetParameterProvider().FontWeight;
+                return FrameworkProvider.GetParameterProvider().IconFontWeight;
             }
         }
 
