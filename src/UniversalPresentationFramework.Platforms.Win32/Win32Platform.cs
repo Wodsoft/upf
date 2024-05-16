@@ -17,22 +17,22 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public Win32Platform()
         {
-            //if (SkiaRendererD3D12Provider.TryCreate(out var d3d12Provider))
-            //{
-            //    _rendererProvider = d3d12Provider;
-            //    _rendererContextType = Win32RendererContextType.Direct3D12;
-            //}
-            //else
-            //if (Win32RendererOpenGLProvider.TryCreate(out var openGLProvider))
-            //{
-            //    _rendererProvider = openGLProvider;
-            //    _rendererContextType = Win32RendererContextType.OpenGL;
-            //}
-            //else
+            if (SkiaRendererD3D12Provider.TryCreate(out var d3d12Provider))
+            {
+                _rendererProvider = d3d12Provider;
+                _rendererContextType = Win32RendererContextType.Direct3D12;
+            }
+            else
             if (Win32RendererVulkanProvider.TryCreate(out var vulkanProvider))
             {
                 _rendererProvider = vulkanProvider;
                 _rendererContextType = Win32RendererContextType.Vulkan;
+            }
+            else
+            if (Win32RendererOpenGLProvider.TryCreate(out var openGLProvider))
+            {
+                _rendererProvider = openGLProvider;
+                _rendererContextType = Win32RendererContextType.OpenGL;
             }
             else
             {
