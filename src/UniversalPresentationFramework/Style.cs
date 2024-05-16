@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
 using Wodsoft.UI.Controls;
+using Wodsoft.UI.Data;
 using Wodsoft.UI.Markup;
 
 namespace Wodsoft.UI
@@ -403,7 +404,7 @@ namespace Wodsoft.UI
                         foreach (var condition in multiTrigger.Conditions)
                             if (condition.SourceName != null)
                                 throw new InvalidOperationException("Style multiple trigger's condition can not have source name.");
-                    }                    
+                    }
 
                     bool isMerged = false;
                     for (int ii = 0; ii < _mergedTriggers.Count; ii++)
@@ -488,11 +489,16 @@ namespace Wodsoft.UI
         private List<EventSetter> _eventSetters = new List<EventSetter>();
         private List<TriggerBase> _mergedTriggers = new List<TriggerBase>();
 
-        internal bool TryApplyProperty(DependencyProperty dp, ref DependencyEffectiveValue effectiveValue)
+        internal bool TryApplyProperty(FrameworkElement element, DependencyProperty dp, ref DependencyEffectiveValue effectiveValue)
         {
             if (_propertySetters.TryGetValue(dp, out var value))
             {
-                effectiveValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Internal);
+                if (value is DynamicResourceExtension dynamicResourceExtension)
+                    effectiveValue = new DependencyEffectiveValue(ResourceHelper.FindResource(element, dynamicResourceExtension.ResourceKey!), DependencyEffectiveSource.Internal);
+                else if (value is BindingBase bindingBase)
+                    effectiveValue = new DependencyEffectiveValue(bindingBase.CreateBindingExpression(element, dp), DependencyEffectiveSource.Internal);
+                else
+                    effectiveValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Internal);
                 return true;
             }
             return false;
