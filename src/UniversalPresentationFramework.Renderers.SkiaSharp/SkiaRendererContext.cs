@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Controls;
@@ -66,20 +67,23 @@ namespace Wodsoft.UI.Renderers
 
         private void RenderCore(Visual visual, SkiaRenderContext renderContext)
         {
-            if (visual.HasRenderContent)
+            var offset = visual.VisualOffset;
+            var canvas = renderContext.Canvas;
+            var saveCount = canvas.SaveCount;
+            if (offset != Vector2.Zero)
             {
-                var canvas = renderContext.Canvas;
                 canvas.Save();
-                var saveCount = canvas.SaveCount;
                 canvas.Translate(visual.VisualOffset.X, visual.VisualOffset.Y);
-                visual.RenderContext(renderContext);
-                canvas.RestoreToCount(saveCount - 1);
             }
+            if (visual.HasRenderContent)
+                visual.RenderContext(renderContext);
             int childrenCount = VisualTreeHelper.GetChildrenCount(visual);
             for (int i = 0; i < childrenCount; i++)
             {
                 RenderCore(VisualTreeHelper.GetChild(visual, i), renderContext);
             }
+            if (offset != Vector2.Zero)
+                canvas.RestoreToCount(saveCount - 1);
         }
 
         protected virtual void BeforeRender()
