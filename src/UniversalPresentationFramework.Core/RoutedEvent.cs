@@ -137,19 +137,35 @@ namespace Wodsoft.UI
             if (!_listeners.TryGetValue(classType, out var list))
             {
                 list = new List<RoutedEventHandlerInfo>();
+                //get base type listeners
+                foreach (var kv in _listeners)
+                    if (classType.IsSubclassOf(kv.Key))
+                        list.AddRange(kv.Value);
                 _listeners.Add(classType, list);
             }
             var info = new RoutedEventHandlerInfo(handler, handledEventsToo);
             if (!list.Contains(info))
+            {
                 list.Add(info);
+                //add listener to subclasses
+                foreach (var kv in _listeners)
+                    if (kv.Key.IsSubclassOf(classType) && !kv.Value.Contains(info))
+                        kv.Value.Add(info);
+            }
         }
 
-        internal List<RoutedEventHandlerInfo>? GetClassHandlers(Type classType)
+        internal List<RoutedEventHandlerInfo> GetClassHandlers(Type classType)
         {
             if (_listeners.TryGetValue(classType, out var list))
                 return list;
-            return null;
-        }
+            //get base type listeners
+            list = new List<RoutedEventHandlerInfo>();
+            foreach (var kv in _listeners)
+                if (classType.IsSubclassOf(kv.Key))
+                    list.AddRange(kv.Value);
+            _listeners.Add(classType, list);
+            return list;
+        }               
 
         #endregion External API
 
