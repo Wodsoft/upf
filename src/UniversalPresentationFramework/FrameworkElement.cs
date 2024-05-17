@@ -11,6 +11,7 @@ using System.Xaml.Markup;
 using System.Xml.Linq;
 using Wodsoft.UI.Controls;
 using Wodsoft.UI.Data;
+using Wodsoft.UI.Input;
 using Wodsoft.UI.Media;
 using Wodsoft.UI.Threading;
 
@@ -489,12 +490,6 @@ namespace Wodsoft.UI
             }
             if (e.Metadata is FrameworkPropertyMetadata metadata)
             {
-                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsMeasure))
-                    InvalidateMeasure();
-                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsArrange))
-                    InvalidateArrange();
-                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsRender))
-                    InvalidateVisual();
                 var affectParentMeasure = metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsParentMeasure);
                 var affectParentArrange = metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsParentArrange);
                 if (affectParentArrange || affectParentMeasure)
@@ -512,6 +507,12 @@ namespace Wodsoft.UI
                         }
                     }
                 }
+                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsMeasure))
+                    InvalidateMeasure();
+                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsArrange))
+                    InvalidateArrange();
+                if (metadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsRender))
+                    InvalidateVisual();
             }
         }
 
@@ -788,7 +789,7 @@ namespace Wodsoft.UI
             }
             else
             {
-                if (_style != null && _style.TryApplyProperty(dp, ref effectiveValue))
+                if (_style != null && _style.TryApplyProperty(this, dp, ref effectiveValue))
                     return;
                 if (triggerStorage == null && _triggerStorages.TryGetValue(dp.GlobalIndex, out triggerStorage))
                 {
@@ -852,7 +853,6 @@ namespace Wodsoft.UI
                 value?.AddOwner(this);
             }
         }
-
 
         public object? FindResource(object resourceKey)
         {
@@ -1099,6 +1099,98 @@ namespace Wodsoft.UI
                 }
                 return LogicalRoot.Dispatcher;
             }
+        }
+
+        #endregion
+
+        #region Text
+
+        public static readonly DependencyProperty FlowDirectionProperty =
+                    DependencyProperty.RegisterAttached(
+                                "FlowDirection",
+                                typeof(FlowDirection),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                            FlowDirection.LeftToRight, // default value
+                                            FrameworkPropertyMetadataOptions.Inherits
+                                          | FrameworkPropertyMetadataOptions.AffectsParentArrange,
+                                            new PropertyChangedCallback(OnFlowDirectionChanged),
+                                            new CoerceValueCallback(CoerceFlowDirectionProperty)),
+                                new ValidateValueCallback(IsValidFlowDirection));
+        private static object? CoerceFlowDirectionProperty(DependencyObject d, object? value)
+        {
+            if (d is FrameworkElement fe)
+            {
+                fe.InvalidateArrange();
+                fe.InvalidateVisual();
+                //fe.AreTransformsClean = false;
+            }
+            return value;
+        }
+        private static void OnFlowDirectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // Check that d is a FrameworkElement since the property inherits and this can be called
+            // on non-FEs.
+            if (d is FrameworkElement fe)
+            {
+                // Cache the new value as a bit to optimize accessing the FlowDirection property's CLR accessor
+                //fe.IsRightToLeft = ((FlowDirection)e.NewValue!) == FlowDirection.RightToLeft;
+                //fe.AreTransformsClean = false;
+            }
+        }
+        public FlowDirection FlowDirection
+        {
+            get { return IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight; }
+            set { SetValue(FlowDirectionProperty, value); }
+        }
+        /// <summary>
+        /// Queries the attached property FlowDirection from the given element.
+        /// </summary>
+        /// <seealso cref="DockPanel.DockProperty" />
+        public static FlowDirection GetFlowDirection(DependencyObject element)
+        {
+            if (element == null) { throw new ArgumentNullException("element"); }
+            return (FlowDirection)element.GetValue(FlowDirectionProperty)!;
+        }
+        /// <summary>
+        /// Writes the attached property FlowDirection to the given element.
+        /// </summary>
+        /// <seealso cref="DockPanel.DockProperty" />
+        public static void SetFlowDirection(DependencyObject element, FlowDirection value)
+        {
+            if (element == null) { throw new ArgumentNullException("element"); }
+            element.SetValue(FlowDirectionProperty, value);
+        }
+        internal bool IsRightToLeft;
+        private static bool IsValidFlowDirection(object o)
+        {
+            FlowDirection value = (FlowDirection)o;
+            return value == FlowDirection.LeftToRight || value == FlowDirection.RightToLeft;
+        }
+
+        #endregion
+
+        #region Mouse
+
+        public static readonly DependencyProperty CursorProperty =
+                    DependencyProperty.Register(
+                                "Cursor",
+                                typeof(Cursor),
+                                typeof(FrameworkElement),
+                                new FrameworkPropertyMetadata(
+                                            null, // default value
+                                            0,
+                                            new PropertyChangedCallback(OnCursorChanged)));
+        static private void OnCursorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {            
+            FrameworkElement fe = ((FrameworkElement)d);
+            if (fe.IsMouseOver && fe.Dispatcher is UIDispatcher dispatcher)
+                dispatcher.MouseDevice.UpdateCursor();
+        }
+        public Cursor? Cursor
+        {
+            get { return (Cursor?)GetValue(CursorProperty); }
+            set { SetValue(CursorProperty, value); }
         }
 
         #endregion

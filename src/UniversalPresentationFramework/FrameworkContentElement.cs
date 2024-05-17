@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI
 {
-    public class FrameworkContentElement : LogicalObject
+    public class FrameworkContentElement : ContentElement
     {
+        #region NameScope
+
         public static readonly DependencyProperty NameProperty =
             DependencyProperty.Register(
                         "Name",
@@ -66,6 +69,9 @@ namespace Wodsoft.UI
             return null;
         }
 
+        #endregion
+
+        #region Resource
 
         private ResourceDictionary? _resources;
         [Ambient]
@@ -82,5 +88,7 @@ namespace Wodsoft.UI
                 _resources = value;
             }
         }
+
+        #endregion
     }
 }

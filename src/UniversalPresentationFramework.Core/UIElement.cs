@@ -14,6 +14,15 @@ namespace Wodsoft.UI
 {
     public class UIElement : Visual, IAnimatable, IInputElement
     {
+        #region Constructor
+
+        static UIElement()
+        {
+            RegisterEvents(typeof(UIElement));
+        }
+
+        #endregion
+
         #region Layout
 
         private Size _previousAvailableSize;
@@ -308,7 +317,7 @@ namespace Wodsoft.UI
 
         #region Event
 
-        private readonly Dictionary<int, List<RoutedEventHandlerInfo>> _eventHandlers = new Dictionary<int, List<RoutedEventHandlerInfo>>();
+        internal readonly Dictionary<int, List<RoutedEventHandlerInfo>> EventHandlers = new Dictionary<int, List<RoutedEventHandlerInfo>>();
 
         public void AddHandler(RoutedEvent routedEvent, Delegate handler)
         {
@@ -324,10 +333,10 @@ namespace Wodsoft.UI
             if (!routedEvent.IsLegalHandler(handler))
                 throw new ArgumentException("Event handler type invalid.");
 
-            if (!_eventHandlers.TryGetValue(routedEvent.GlobalIndex, out var list))
+            if (!EventHandlers.TryGetValue(routedEvent.GlobalIndex, out var list))
             {
                 list = new List<RoutedEventHandlerInfo>();
-                _eventHandlers.Add(routedEvent.GlobalIndex, list);
+                EventHandlers.Add(routedEvent.GlobalIndex, list);
             }
             list.Add(new RoutedEventHandlerInfo(handler, handledEventsToo));
         }
@@ -341,7 +350,7 @@ namespace Wodsoft.UI
             if (!routedEvent.IsLegalHandler(handler))
                 throw new ArgumentException("Event handler type invalid.");
 
-            if (_eventHandlers.TryGetValue(routedEvent.GlobalIndex, out var list))
+            if (EventHandlers.TryGetValue(routedEvent.GlobalIndex, out var list))
             {
                 var i = list.FindIndex(t => t.Handler == handler);
                 if (i != -1)
@@ -359,23 +368,34 @@ namespace Wodsoft.UI
 
             e.Source = this;
 
-            List<Visual> list = new List<Visual>();
+            List<LogicalObject> list = new List<LogicalObject>();
             List<List<RoutedEventHandlerInfo>?> handlers = new List<List<RoutedEventHandlerInfo>?>();
-            Visual? visual = this;
-            while (visual != null)
+            LogicalObject? element = this;
+            while (element != null)
             {
-                list.Add(visual);
-                if (visual is UIElement element)
+                list.Add(element);
+                if (element is UIElement ue)
                 {
-                    handlers.Add(e.RoutedEvent.GetClassHandlers(visual.GetType()));
-                    if (element._eventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
+                    handlers.Add(e.RoutedEvent.GetClassHandlers(ue.GetType()));
+                    if (ue.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
                         handlers.Add(delegates);
                     else
                         handlers.Add(null);
+                    element = ue.VisualParent;
                 }
+                else if (element is ContentElement ce)
+                {
+                    handlers.Add(e.RoutedEvent.GetClassHandlers(ce.GetType()));
+                    if (ce.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
+                        handlers.Add(delegates);
+                    else
+                        handlers.Add(null);
+                    element = ce.LogicalParent;
+                }
+                else
+                    element = null;
                 if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
                     break;
-                visual = visual.VisualParent;
                 if (list.Count > 4096)
                     throw new InvalidOperationException("Routed event have more than 4096 levels.");
             }
@@ -470,23 +490,22 @@ namespace Wodsoft.UI
             }
             else
             {
-                //ContentElement contentElement = d as ContentElement;
-                //if (contentElement != null)
-                //{
-                //    contentElement.AddHandler(routedEvent, handler);
-                //}
-                //else
-                //{
-                //    UIElement3D uiElement3D = d as UIElement3D;
-                //    if (uiElement3D != null)
-                //    {
-                //        uiElement3D.AddHandler(routedEvent, handler);
-                //    }
-                //    else
-                //    {
-                throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\".");
-                //    }
-                //}
+                if (d is ContentElement contentElement)
+                {
+                    contentElement.AddHandler(routedEvent, handler);
+                }
+                else
+                {
+                    //UIElement3D uiElement3D = d as UIElement3D;
+                    //if (uiElement3D != null)
+                    //{
+                    //    uiElement3D.AddHandler(routedEvent, handler);
+                    //}
+                    //else
+                    //{
+                    throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\".");
+                    //}
+                }
             }
         }
 
@@ -503,23 +522,22 @@ namespace Wodsoft.UI
             }
             else
             {
-                //ContentElement contentElement = d as ContentElement;
-                //if (contentElement != null)
-                //{
-                //    contentElement.RemoveHandler(routedEvent, handler);
-                //}
-                //else
-                //{
-                //    UIElement3D uiElement3D = d as UIElement3D;
-                //    if (uiElement3D != null)
-                //    {
-                //        uiElement3D.RemoveHandler(routedEvent, handler);
-                //    }
-                //    else
-                //    {
-                throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\".");
-                //    }
-                //}
+                if (d is ContentElement contentElement)
+                {
+                    contentElement.AddHandler(routedEvent, handler);
+                }
+                else
+                {
+                    //UIElement3D uiElement3D = d as UIElement3D;
+                    //if (uiElement3D != null)
+                    //{
+                    //    uiElement3D.RemoveHandler(routedEvent, handler);
+                    //}
+                    //else
+                    //{
+                    throw new ArgumentException($"Invalid input element \"{d.GetType().FullName}\".");
+                    //}
+                }
             }
         }
 
@@ -652,11 +670,28 @@ namespace Wodsoft.UI
         public event MouseEventHandler GotMouseCapture { add { AddHandler(GotMouseCaptureEvent, value); } remove { RemoveHandler(GotMouseCaptureEvent, value); } }
         public event MouseEventHandler LostMouseCapture { add { AddHandler(LostMouseCaptureEvent, value); } remove { RemoveHandler(LostMouseCaptureEvent, value); } }
 
-        public bool IsMouseOver => throw new NotImplementedException();
 
-        public bool IsMouseDirectlyOver => throw new NotImplementedException();
+        internal static readonly DependencyPropertyKey IsMouseOverPropertyKey =
+                    DependencyProperty.RegisterReadOnly(
+                                "IsMouseOver",
+                                typeof(bool),
+                                typeof(UIElement),
+                                new PropertyMetadata(false));
+        public static readonly DependencyProperty IsMouseOverProperty = IsMouseOverPropertyKey.DependencyProperty;
 
-        public bool IsMouseCaptured => throw new NotImplementedException();
+        public bool IsMouseOver { get; internal set; }
+
+        public bool IsMouseDirectlyOver => IsMouseOver && Dispatcher is UIDispatcher uiDispatcher && uiDispatcher.MouseDevice.Target == this;
+
+
+        internal static readonly DependencyPropertyKey IsMouseCapturedPropertyKey =
+                    DependencyProperty.RegisterReadOnly(
+                                "IsMouseCaptured",
+                                typeof(bool),
+                                typeof(UIElement),
+                                new PropertyMetadata(false));
+        public static readonly DependencyProperty IsMouseCapturedProperty = IsMouseCapturedPropertyKey.DependencyProperty;
+        public bool IsMouseCaptured => (bool)GetValue(IsMouseCapturedProperty)!;
 
         public bool CaptureMouse()
         {
@@ -669,6 +704,40 @@ namespace Wodsoft.UI
         {
             if (Dispatcher is UIDispatcher uiDispatcher && uiDispatcher.MouseDevice.Captured == this)
                 uiDispatcher.MouseDevice.Capture(null);
+        }
+
+        internal static void RegisterEvents(Type type)
+        {
+            EventManager.RegisterClassHandler(type, Mouse.MouseEnterEvent, new MouseEventHandler(OnMouseEnterThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseLeaveEvent, new MouseEventHandler(OnMouseLeaveThunk), false);
+        }
+
+        private static void OnMouseLeaveThunk(object sender, MouseEventArgs e)
+        {
+            if (e.Source is UIElement ue)
+            {
+                ue.IsMouseOver = false;
+                ue.SetValue(IsMouseOverPropertyKey, false);
+            }
+            else if (e.Source is ContentElement ce)
+            {
+                ce.IsMouseOver = false;
+                ce.SetValue(IsMouseOverPropertyKey, false);
+            }
+        }
+
+        private static void OnMouseEnterThunk(object sender, MouseEventArgs e)
+        {
+            if (e.Source is UIElement ue)
+            {
+                ue.IsMouseOver = true;
+                ue.SetValue(IsMouseOverPropertyKey, true);
+            }
+            else if (e.Source is ContentElement ce)
+            {
+                ce.IsMouseOver = true;
+                ce.SetValue(IsMouseOverPropertyKey, true);
+            }
         }
 
         #endregion
