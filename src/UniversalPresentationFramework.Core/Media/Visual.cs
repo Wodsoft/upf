@@ -90,7 +90,8 @@ namespace Wodsoft.UI.Media
             var childrenCount = VisualChildrenCount;
             for (int i = 0; i < childrenCount; i++)
             {
-                var result = GetVisualChild(i).HitTest(point);
+                var child = GetVisualChild(i);
+                var result = child.HitTest(point - child.VisualOffset);
                 if (result != null)
                     return result;
             }
