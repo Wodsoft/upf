@@ -98,6 +98,18 @@ namespace Wodsoft.UI
             }
         }
 
+        private IInputProvider? _inputProvider;
+        public IInputProvider? InputProvider
+        {
+            get => _inputProvider;
+            set
+            {
+                if (_isRunning)
+                    throw new InvalidOperationException("Could not set input provider while application is running.");
+                _inputProvider = value;
+            }
+        }
+
         private IClockProvider? _clockProvider;
         public IClockProvider? ClockProvider
         {
@@ -137,6 +149,7 @@ namespace Wodsoft.UI
             _lifecycleProvider.Start();
             FrameworkCoreProvider.RendererProvider = _rendererProvider;
             FrameworkCoreProvider.ClockProvider = _clockProvider;
+            FrameworkCoreProvider.InputProvider = _inputProvider;
             if (window == null)
             {
                 if (StartupUri == null)
