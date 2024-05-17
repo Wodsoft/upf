@@ -20,6 +20,7 @@ namespace Wodsoft.UI.Platforms.Win32
             application.RendererProvider = platform.RendererProvider;
             application.ThemeProvider = platform.ThemeProvider;
             application.ParameterProvider = platform.ThemeProvider;
+            application.InputProvider = platform.InputProvider;
             application.ClockProvider = new FrameworkClockProvider();
             application.ResourceProvider = new EmbeddedResourceProvider();
 

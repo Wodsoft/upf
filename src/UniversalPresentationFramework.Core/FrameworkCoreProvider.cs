@@ -13,6 +13,8 @@ namespace Wodsoft.UI
 
         internal static IClockProvider? ClockProvider;
 
+        internal static IInputProvider? InputProvider;
+
         internal static IRendererProvider GetRendererProvider()
         {
             if (RendererProvider == null)
@@ -25,6 +27,13 @@ namespace Wodsoft.UI
             if (ClockProvider == null)
                 throw new InvalidOperationException("Framework not initialized.");
             return ClockProvider;
+        }
+
+        internal static IInputProvider GetInputProvider()
+        {
+            if (InputProvider == null)
+                throw new InvalidOperationException("Framework not initialized.");
+            return InputProvider;
         }
     }
 }

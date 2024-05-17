@@ -53,7 +53,7 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             var visual = _windowContext.Window.HitTest(GetPointRelateToClientRect(point));
             if (visual == null)
-                return null;
+                return _windowContext.Window;
             do
             {
                 if (visual is IInputElement inputElement)
@@ -61,7 +61,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 visual = visual.VisualParent;
             }
             while (visual != null);
-            return null;
+            return _windowContext.Window;
         }
 
         protected override IInputElement? GetMouseOver(in IInputElement element, in Int32Point point)
@@ -98,6 +98,22 @@ namespace Wodsoft.UI.Platforms.Win32
         protected override void ReleaseMouse()
         {
             _windowContext.ProcessInWindowThread(() => PInvoke.ReleaseCapture());
+        }
+
+        public override void UpdateCursor()
+        {
+            if (Target is FrameworkElement fe)
+            {
+                var cursor = fe.Cursor ?? Cursors.Arrow;
+                if (cursor.CursorType == CursorType.Custom)
+                {
+                    if (cursor.Context is not Win32CursorContext context)
+                        throw new InvalidOperationException("Invalid cursor context.");
+                    InputProvider.SetCursor(context);
+                }
+                else
+                    InputProvider.SetCursor(cursor.CursorType);
+            }
         }
     }
 }

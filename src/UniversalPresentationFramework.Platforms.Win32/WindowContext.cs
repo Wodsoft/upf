@@ -7,6 +7,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.Graphics.OpenGL;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wodsoft.UI.Renderers;
 using Wodsoft.UI.Threading;
@@ -33,6 +34,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly Win32Dispatcher _dispatcher;
         private SkiaRendererContext? _rendererContext;
         private Exception? _exception;
+        private bool _mouseLeave;
 
         public WindowContext(Window window, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
         {
@@ -367,6 +369,7 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                 }
             }
+            _mouseLeave = true;
             var windowPtr = PInvoke.CreateWindowEx(
                 GetExStyle(),
                 _className,
@@ -576,6 +579,19 @@ namespace Wodsoft.UI.Platforms.Win32
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
                         _dispatcher.PushMouseInput(time, Input.MouseActions.Move, null, x, y, 0);
+                        if (_mouseLeave)
+                        {
+                            _mouseLeave = false;
+                            var trackMouseEvent = new TRACKMOUSEEVENT
+                            {
+                                cbSize = (uint)sizeof(TRACKMOUSEEVENT),
+                                dwFlags = TRACKMOUSEEVENT_FLAGS.TME_LEAVE,
+                                dwHoverTime = 0,
+                                hwndTrack = _hwnd
+                            };
+                            if (!PInvoke.TrackMouseEvent(ref trackMouseEvent))
+                                throw new Win32Exception(Marshal.GetLastPInvokeError());
+                        }
                         break;
                     }
                 case PInvoke.WM_MOUSEWHEEL:
@@ -585,6 +601,13 @@ namespace Wodsoft.UI.Platforms.Win32
                         int wheel = unchecked((int)wParam.Value.ToUInt32()) >> 16;
                         var time = PInvoke.GetMessageTime();
                         _dispatcher.PushMouseInput(time, Input.MouseActions.Wheel, null, x, y, wheel);
+                        break;
+                    }
+                case PInvoke.WM_MOUSELEAVE:
+                    {
+                        _mouseLeave = true;
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushMouseInput(time, Input.MouseActions.Leave, null, 0, 0, 0);
                         break;
                     }
                 case PInvoke.WM_LBUTTONDBLCLK:
@@ -699,7 +722,7 @@ namespace Wodsoft.UI.Platforms.Win32
             return style;
         }
 
-        private const uint _InsertMessage = 0xffff0000;
+        private const uint _InsertMessage = PInvoke.WM_USER + 1;
         private ConcurrentStack<Action> _insertMessages = new ConcurrentStack<Action>();
 
         internal void ProcessInWindowThread(Action callback)

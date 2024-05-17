@@ -78,7 +78,8 @@ namespace Wodsoft.UI.Threading
         protected void RunInput()
         {
             _backMouseInputs = Interlocked.Exchange(ref _mouseInputs, _backMouseInputs);
-            if (_backMouseInputs.Count != 0)
+            bool hasMouseInput = _backMouseInputs.Count != 0;
+            if (hasMouseInput)
             {
                 var count = _backMouseInputs.Count;
                 var inputs = CollectionsMarshal.AsSpan(_backMouseInputs);
@@ -89,10 +90,10 @@ namespace Wodsoft.UI.Threading
                 }
                 _backMouseInputs.Clear();
             }
-            RunInputCore();
+            RunInputCore(hasMouseInput);
         }
 
-        protected virtual void RunInputCore()
+        protected virtual void RunInputCore(bool hasMouseInput)
         {
 
         }

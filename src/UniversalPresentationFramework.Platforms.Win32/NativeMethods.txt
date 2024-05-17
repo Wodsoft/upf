@@ -51,3 +51,10 @@ DeleteObject
 GL_*
 glGetError
 GetSysColor
+TrackMouseEvent
+HoverDefault
+LoadCursorFromFile
+LoadCursor
+SetCursor
+DestroyCursor
+IDC_*

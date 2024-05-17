@@ -6,13 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Input
 {
-    public enum MouseActions
+    public interface ICursorContext : IDisposable
     {
-        Move,
-        Press,
-        Release,
-        Wheel,
-        CancelCapture,
-        Leave
     }
 }

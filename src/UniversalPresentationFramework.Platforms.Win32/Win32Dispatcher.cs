@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace Wodsoft.UI.Platforms.Win32
     public sealed class Win32Dispatcher : FrameworkDispatcher
     {
         private readonly WindowContext _windowContext;
+        private FrameworkElement? _mouseOver;
 
         public Win32Dispatcher(WindowContext windowContext, Thread thread)
         {
@@ -33,8 +35,29 @@ namespace Wodsoft.UI.Platforms.Win32
             _windowContext.Render();
         }
 
-        protected override void RunInputCore()
+        protected override void RunInputCore(bool hasMouseInput)
         {
+            if (hasMouseInput)
+            {
+                if (MouseDevice.Target == null && _mouseOver != null)
+                {
+                    _mouseOver = null;
+                    _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(CursorType.Arrow));
+                }
+                else if (MouseDevice.Target is FrameworkElement fe && _mouseOver != fe)
+                {
+                    _mouseOver = fe;
+                    var cursor = fe.Cursor ?? Cursors.Arrow;
+                    if (cursor.CursorType == CursorType.Custom)
+                    {
+                        if (cursor.Context is not Win32CursorContext context)
+                            throw new InvalidOperationException("Invalid cursor context.");
+                        _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(context));
+                    }
+                    else
+                        _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(cursor.CursorType));
+                }
+            }
             _windowContext.ProcessInput();
         }
 

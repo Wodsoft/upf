@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Input
 {
@@ -127,12 +129,15 @@ namespace Wodsoft.UI.Input
         #region Input Handle
 
         private Int32Point _lastPoint;
-        private IInputElement? _capturedElement;
+        private IInputElement? _capturedElement, _mouseOver;
         private CaptureMode _captureMode;
+        private List<IInputElement> _mouseOverTree = new List<IInputElement>();
 
         public IInputElement? Captured => _capturedElement;
 
         protected Int32Point MousePoint => _lastPoint;
+
+        public IInputElement? Target => _mouseOver;
 
         internal void HandleInput(in MouseInput input)
         {
@@ -195,6 +200,16 @@ namespace Wodsoft.UI.Input
                         _capturedElement = null;
                         break;
                     }
+                case MouseActions.Leave:
+                    {
+                        if (_captureMode == CaptureMode.None)
+                        {
+                            var oldMouseOver = _mouseOver;
+                            _mouseOver = null;
+                            MouseOverChange(oldMouseOver, null, input.MessageTime);
+                        }
+                        break;
+                    }
             }
         }
 
@@ -215,6 +230,9 @@ namespace Wodsoft.UI.Input
 
         private void HandleMouseMove(IInputElement targetElement, in MouseInput input)
         {
+            var oldMouseOver = _mouseOver;
+            _mouseOver = targetElement;
+            MouseOverChange(oldMouseOver, targetElement, input.MessageTime);
             var e = new MouseEventArgs(this, input.MessageTime);
             e.RoutedEvent = Mouse.PreviewMouseMoveEvent;
             targetElement.RaiseEvent(e);
@@ -246,6 +264,78 @@ namespace Wodsoft.UI.Input
             {
                 e.RoutedEvent = Mouse.MouseWheelEvent;
                 targetElement.RaiseEvent(e);
+            }
+        }
+
+        public abstract void UpdateCursor();
+
+        private void MouseOverChange(IInputElement? oldMouseOver, IInputElement? newMouseOver, int messageTime)
+        {
+            if (newMouseOver == null && oldMouseOver != null)
+            {
+                var e = new MouseEventArgs(this, messageTime);
+                e.RoutedEvent = Mouse.MouseLeaveEvent;
+                oldMouseOver.RaiseEvent(e);
+                for (int i = _mouseOverTree.Count - 1; i >= 0; i--)
+                {
+                    var element = _mouseOverTree[i];
+                    element.RaiseEvent(e);
+                }
+                _mouseOverTree.Clear();
+                return;
+            }
+            else if (newMouseOver != null && oldMouseOver != newMouseOver)
+            {
+                List<IInputElement> parents = new List<IInputElement>();
+                LogicalObject? current = newMouseOver as LogicalObject;
+                int treeIndex = -1;
+                while (current != null)
+                {
+                    IInputElement? inputParent;
+                    if (current is Visual visual)
+                    {
+                        if (visual.VisualParent == null)
+                            break;
+                        current = visual.VisualParent;
+                    }
+                    else
+                    {
+                        if (current.LogicalParent == null)
+                            break;
+                        current = current.LogicalParent;
+                    }
+                    inputParent = current as IInputElement;
+                    if (inputParent != null)
+                    {
+                        treeIndex = _mouseOverTree.IndexOf(inputParent);
+                        if (treeIndex != -1)
+                            break;
+                        parents.Add(inputParent);
+                    }
+                }
+                var e = new MouseEventArgs(this, messageTime);
+                e.RoutedEvent = Mouse.MouseLeaveEvent;
+                for (int i = _mouseOverTree.Count - 1; i > treeIndex; i--)
+                {
+                    var element = _mouseOverTree[i];
+                    element.RaiseEvent(e);
+                }
+                if (treeIndex == -1)
+                {
+                    _mouseOverTree.Clear();
+                }
+                else
+                {
+                    _mouseOverTree.RemoveRange(treeIndex + 1, _mouseOverTree.Count - treeIndex - 1);
+                }
+                e.RoutedEvent = Mouse.MouseEnterEvent;
+                for (int i = parents.Count - 1; i >= 0; i--)
+                {
+                    var element = parents[i];
+                    element.RaiseEvent(e);
+                    _mouseOverTree.Add(element);
+                }
+                newMouseOver.RaiseEvent(e);
             }
         }
 
