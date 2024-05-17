@@ -54,13 +54,10 @@ namespace Wodsoft.UI.Media.TextFormatting
                 }
                 currentWidth += width;                
                 bounds.Add(new TextBounds(textRun, textWidths, width, glyphTypeface.Height * textRun.Properties.FontRenderingEmSize, glyphTypeface));
+                if (currentWidth >= paragraphWidth)
+                    hasBreakText = true;
                 if (textRun.IsEndOfNewLine)
                     break;
-                if (currentWidth >= paragraphWidth)
-                {
-                    hasBreakText = true;
-                    break;
-                }
                 currentPosition += textRun.Length;
             }
             if (bounds.Count == 0)

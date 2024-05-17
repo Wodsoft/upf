@@ -15,7 +15,7 @@ namespace Wodsoft.UI.Media.TextFormatting
         private readonly bool _hasBreakText, _hasCollapsed;
         private readonly TextParagraphProperties _paragraphProperties;
         private readonly GlyphTypeface _defaultGlyphTypeface;
-        private readonly float _width, _height, _textHeight, _emSize;
+        private readonly float _width, _height, _textHeight, _emSize, _baseline;
         private TextRunCollection? _textRuns;
 
         public GenericTextLine(IReadOnlyList<TextBounds> textBounds, float width, bool hasBreakText, bool hasCollapsed, TextParagraphProperties paragraphProperties, GlyphTypeface defaultGlyphTypeface)
@@ -31,6 +31,8 @@ namespace Wodsoft.UI.Media.TextFormatting
                 _height = _paragraphProperties.LineHeight;
             else
                 _height = textBounds.Max(t => t.TextRunHeight);
+            var highestBound = textBounds.OrderByDescending(t => t.TextRunHeight).First();
+            _baseline = highestBound.GlyphTypeface.Ascent * highestBound.TextRun.Properties.FontRenderingEmSize;
         }
 
         public override bool HasOverflowed => _hasBreakText;
@@ -75,9 +77,9 @@ namespace Wodsoft.UI.Media.TextFormatting
 
         public override float OverhangAfter => 0f;
 
-        public override TextLine Collapse(TextTrimming trimming, float maxLineLength)
+        public override TextLine Collapse(TextTrimming trimming, float maxLineLength, bool overflow)
         {
-            Collapse(trimming, maxLineLength, out var boundIndex, out var boundLength, out var boundWidth);
+            Collapse(trimming, maxLineLength, overflow, out var boundIndex, out var boundLength, out var boundWidth);
             if (boundIndex == -1)
                 return Empty;
             float leftWidth = 0f;
@@ -102,9 +104,9 @@ namespace Wodsoft.UI.Media.TextFormatting
             return new GenericTextLine(leftBounds, leftWidth, false, true, _paragraphProperties, _defaultGlyphTypeface);
         }
 
-        public override TextLine Collapse(TextTrimming trimming, float maxLineLength, out TextLine? collapsedLine)
+        public override TextLine Collapse(TextTrimming trimming, float maxLineLength, bool overflow, out TextLine? collapsedLine)
         {
-            Collapse(trimming, maxLineLength, out var boundIndex, out var boundLength, out var boundWidth);
+            Collapse(trimming, maxLineLength, overflow, out var boundIndex, out var boundLength, out var boundWidth);
             if (boundIndex == -1)
             {
                 collapsedLine = this;
@@ -160,7 +162,7 @@ namespace Wodsoft.UI.Media.TextFormatting
             return new GenericTextLine(leftBounds, leftWidth, false, true, _paragraphProperties, _defaultGlyphTypeface);
         }
 
-        private void Collapse(TextTrimming trimming, float maxLineLength, out int boundIndex, out int boundLength, out float boundWidth)
+        private void Collapse(TextTrimming trimming, float maxLineLength, bool overflow, out int boundIndex, out int boundLength, out float boundWidth)
         {
             if (!_hasBreakText)
             {
@@ -239,7 +241,7 @@ namespace Wodsoft.UI.Media.TextFormatting
             {
                 var bound = _textBounds[i];
                 if (bound.TextRun.Properties.ForegroundBrush != null)
-                    drawingContext.DrawText(bound.TextRun.Characters, bound.GlyphTypeface, bound.TextRun.Properties.FontRenderingEmSize, bound.TextRun.Properties.ForegroundBrush, new Point(origin.X + offset, origin.Y));
+                    drawingContext.DrawText(bound.TextRun.Characters, bound.GlyphTypeface, bound.TextRun.Properties.FontRenderingEmSize, bound.TextRun.Properties.ForegroundBrush, new Point(origin.X + offset, origin.Y + _baseline));
                 offset += bound.TextRunWidth;
             }
         }

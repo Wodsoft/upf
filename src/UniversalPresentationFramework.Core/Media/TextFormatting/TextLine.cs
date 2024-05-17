@@ -34,9 +34,9 @@ namespace Wodsoft.UI.Media.TextFormatting
         /// </summary>
         public abstract IReadOnlyList<TextRun> GetTextRunSpans();
 
-        public abstract TextLine Collapse(TextTrimming trimming, float maxLineLength);
+        public abstract TextLine Collapse(TextTrimming trimming, float maxLineLength, bool overflow);
 
-        public abstract TextLine Collapse(TextTrimming trimming, float maxLineLength, out TextLine? collapsedLine);
+        public abstract TextLine Collapse(TextTrimming trimming, float maxLineLength, bool overflow, out TextLine? collapsedLine);
 
         ///// <summary>
         ///// Client to get IndexedGlyphRuns enumerable to enumerate each IndexedGlyphRun object 

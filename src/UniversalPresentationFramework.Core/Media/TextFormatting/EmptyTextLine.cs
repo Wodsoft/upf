@@ -42,12 +42,12 @@ namespace Wodsoft.UI.Media.TextFormatting
 
         public override float OverhangAfter => 0f;
 
-        public override TextLine Collapse(TextTrimming trimming, float maxLineLength)
+        public override TextLine Collapse(TextTrimming trimming, float maxLineLength, bool overflow)
         {
             return this;
         }
 
-        public override TextLine Collapse(TextTrimming trimming, float maxLineLength, out TextLine? collapsedLine)
+        public override TextLine Collapse(TextTrimming trimming, float maxLineLength, bool overflow, out TextLine? collapsedLine)
         {
             collapsedLine = null;
             return this;

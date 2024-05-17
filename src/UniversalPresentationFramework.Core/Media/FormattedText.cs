@@ -740,7 +740,7 @@ namespace Wodsoft.UI.Media
                 }
 
                 if (_that._trimming != TextTrimming.None && _currentLine.HasOverflowed)
-                    _currentLine = _currentLine.Collapse(_that._trimming, MaxLineLength(_lineCount), out _nextLine);
+                    _currentLine = _currentLine.Collapse(_that._trimming, MaxLineLength(_lineCount), false, out _nextLine);
 
                 // this line is guaranteed to fit the text height
                 Debug.Assert(_totalHeight + _currentLine.Height <= _that._maxTextHeight);
@@ -1438,7 +1438,6 @@ namespace Wodsoft.UI.Media
                             metrics.Baseline = currentLine.Baseline;
                             first = false;
                         }
-
                         AdvanceLineOrigin(ref origin, currentLine);
                     }
                 }
