@@ -267,7 +267,20 @@ namespace Wodsoft.UI.Input
             }
         }
 
-        public abstract void UpdateCursor();
+        public void UpdateCursor()
+        {
+            if (_mouseOver != null)
+            {
+                var e = new QueryCursorEventArgs(this, Environment.TickCount);
+                e.RoutedEvent = Mouse.QueryCursorEvent;
+                _mouseOver.RaiseEvent(e);
+                if (e.Cursor == null)
+                    e.Cursor = Cursors.Arrow;
+                UpdateCursor(e.Cursor);
+            }
+        }
+
+        protected abstract void UpdateCursor(Cursor cursor);
 
         private void MouseOverChange(IInputElement? oldMouseOver, IInputElement? newMouseOver, int messageTime)
         {

@@ -323,6 +323,8 @@ namespace Wodsoft.UI
                 uiDispatcher.MouseDevice.Capture(null);
         }
 
+        protected internal virtual void OnQueryCursor(QueryCursorEventArgs e) { }
+
         #endregion
     }
 }

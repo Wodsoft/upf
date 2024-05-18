@@ -100,20 +100,16 @@ namespace Wodsoft.UI.Platforms.Win32
             _windowContext.ProcessInWindowThread(() => PInvoke.ReleaseCapture());
         }
 
-        public override void UpdateCursor()
+        protected override void UpdateCursor(Cursor cursor)
         {
-            if (Target is FrameworkElement fe)
+            if (cursor.CursorType == CursorType.Custom)
             {
-                var cursor = fe.Cursor ?? Cursors.Arrow;
-                if (cursor.CursorType == CursorType.Custom)
-                {
-                    if (cursor.Context is not Win32CursorContext context)
-                        throw new InvalidOperationException("Invalid cursor context.");
-                    InputProvider.SetCursor(context);
-                }
-                else
-                    InputProvider.SetCursor(cursor.CursorType);
+                if (cursor.Context is not Win32CursorContext context)
+                    throw new InvalidOperationException("Invalid cursor context.");
+                _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(context));
             }
+            else
+                _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(cursor.CursorType));
         }
     }
 }

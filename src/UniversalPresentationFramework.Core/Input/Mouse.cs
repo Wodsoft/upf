@@ -367,30 +367,30 @@ namespace Wodsoft.UI.Input
             UIElement.RemoveHandler(element, LostMouseCaptureEvent, handler);
         }
 
-        ///// <summary>
-        /////     QueryCursor
-        ///// </summary>
-        //public static readonly RoutedEvent QueryCursorEvent = EventManager.RegisterRoutedEvent("QueryCursor", RoutingStrategy.Bubble, typeof(QueryCursorEventHandler), typeof(Mouse));
+        /// <summary>
+        ///     QueryCursor
+        /// </summary>
+        public static readonly RoutedEvent QueryCursorEvent = EventManager.RegisterRoutedEvent("QueryCursor", RoutingStrategy.Bubble, typeof(QueryCursorEventHandler), typeof(Mouse));
 
-        ///// <summary>
-        /////     Adds a handler for the QueryCursor attached event
-        ///// </summary>
-        ///// <param name="element">UIElement or ContentElement that listens to this event</param>
-        ///// <param name="handler">Event Handler to be added</param>
-        //public static void AddQueryCursorHandler(DependencyObject element, QueryCursorEventHandler handler)
-        //{
-        //    UIElement.AddHandler(element, QueryCursorEvent, handler);
-        //}
+        /// <summary>
+        ///     Adds a handler for the QueryCursor attached event
+        /// </summary>
+        /// <param name="element">UIElement or ContentElement that listens to this event</param>
+        /// <param name="handler">Event Handler to be added</param>
+        public static void AddQueryCursorHandler(DependencyObject element, QueryCursorEventHandler handler)
+        {
+            UIElement.AddHandler(element, QueryCursorEvent, handler);
+        }
 
-        ///// <summary>
-        /////     Removes a handler for the QueryCursor attached event
-        ///// </summary>
-        ///// <param name="element">UIElement or ContentElement that listens to this event</param>
-        ///// <param name="handler">Event Handler to be removed</param>
-        //public static void RemoveQueryCursorHandler(DependencyObject element, QueryCursorEventHandler handler)
-        //{
-        //    UIElement.RemoveHandler(element, QueryCursorEvent, handler);
-        //}
+        /// <summary>
+        ///     Removes a handler for the QueryCursor attached event
+        /// </summary>
+        /// <param name="element">UIElement or ContentElement that listens to this event</param>
+        /// <param name="handler">Event Handler to be removed</param>
+        public static void RemoveQueryCursorHandler(DependencyObject element, QueryCursorEventHandler handler)
+        {
+            UIElement.RemoveHandler(element, QueryCursorEvent, handler);
+        }
 
         ///// <summary>
         /////     Returns the element that the mouse is over.

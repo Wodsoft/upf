@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Input;
 
 namespace Wodsoft.UI
 {
@@ -188,8 +189,8 @@ namespace Wodsoft.UI
                 throw new ArgumentNullException("handler");
             }
 
-            if (!typeof(UIElement).IsAssignableFrom(classType))
-                throw new ArgumentException("Class type must inherit from UIElement.");
+            if (!typeof(IInputElement).IsAssignableFrom(classType))
+                throw new ArgumentException("Class type must implement IInputElement interface.");
 
             if (!routedEvent.IsLegalHandler(handler))
                 throw new ArgumentException("Event handler type invalid.");

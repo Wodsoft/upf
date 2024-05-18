@@ -710,6 +710,7 @@ namespace Wodsoft.UI
         {
             EventManager.RegisterClassHandler(type, Mouse.MouseEnterEvent, new MouseEventHandler(OnMouseEnterThunk), false);
             EventManager.RegisterClassHandler(type, Mouse.MouseLeaveEvent, new MouseEventHandler(OnMouseLeaveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.QueryCursorEvent, new QueryCursorEventHandler(OnQueryCursorThunk), false);
         }
 
         private static void OnMouseLeaveThunk(object sender, MouseEventArgs e)
@@ -739,6 +740,19 @@ namespace Wodsoft.UI
                 ce.SetValue(IsMouseOverPropertyKey, true);
             }
         }
+        private static void OnQueryCursorThunk(object sender, QueryCursorEventArgs e)
+        {
+            if (e.Source is UIElement ue)
+            {
+                ue.OnQueryCursor(e);
+            }
+            else if (e.Source is ContentElement ce)
+            {
+                ce.OnQueryCursor(e);
+            }
+        }
+
+        protected virtual void OnQueryCursor(QueryCursorEventArgs e) { }
 
         #endregion
     }

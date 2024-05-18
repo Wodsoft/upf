@@ -46,16 +46,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 }
                 else if (MouseDevice.Target is FrameworkElement fe && _mouseOver != fe)
                 {
-                    _mouseOver = fe;
-                    var cursor = fe.Cursor ?? Cursors.Arrow;
-                    if (cursor.CursorType == CursorType.Custom)
-                    {
-                        if (cursor.Context is not Win32CursorContext context)
-                            throw new InvalidOperationException("Invalid cursor context.");
-                        _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(context));
-                    }
-                    else
-                        _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(cursor.CursorType));
+                    MouseDevice.UpdateCursor();
                 }
             }
             _windowContext.ProcessInput();
