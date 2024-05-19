@@ -85,8 +85,6 @@ namespace Wodsoft.UI.Media
 
         public virtual Visual? HitTest(in Point point)
         {
-            if (HitTestCore(point))
-                return this;
             var childrenCount = VisualChildrenCount;
             for (int i = 0; i < childrenCount; i++)
             {
@@ -95,6 +93,8 @@ namespace Wodsoft.UI.Media
                 if (result != null)
                     return result;
             }
+            if (HitTestCore(point))
+                return this;
             return null;
         }
 
