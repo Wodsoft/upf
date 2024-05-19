@@ -630,7 +630,7 @@ namespace Wodsoft.UI
         {
             if (_drawingContent == null)
                 return false;
-            return _drawingContent.HitTest(point - VisualOffset);
+            return _drawingContent.HitTest(point);
         }
 
         #endregion
