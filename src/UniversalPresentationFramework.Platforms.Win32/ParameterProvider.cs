@@ -55,7 +55,9 @@ namespace Wodsoft.UI.Platforms.Win32
                 {
                     var clientMetrics = new NONCLIENTMETRICSW();
                     clientMetrics.cbSize = (uint)sizeof(NONCLIENTMETRICSW);
-                    PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETNONCLIENTMETRICS, clientMetrics.cbSize, &clientMetrics, 0);
+#pragma warning disable CA1416 // 验证平台兼容性
+                    PInvoke.SystemParametersInfoForDpi((uint)SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETNONCLIENTMETRICS, clientMetrics.cbSize, &clientMetrics, 0, 96);
+#pragma warning restore CA1416 // 验证平台兼容性
                     _clientMetrics = clientMetrics;
                 }
                 return _clientMetrics.Value;

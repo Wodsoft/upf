@@ -21,6 +21,7 @@ EndPaint
 GetWindowRect
 GetCurrentThemeName
 SystemParametersInfo
+SystemParametersInfoForDpi
 GetSystemMetrics
 StretchDIBits
 wglGetCurrentDC
