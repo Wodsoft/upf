@@ -22,25 +22,20 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public override Point GetPosition(IInputElement relativeTo)
         {
-            Visual? visual = relativeTo as Visual;
-            if (visual == null)
-            {
-                LogicalObject? logicalObject = relativeTo as LogicalObject;
-                if (logicalObject == null)
-                    return new Point(0, 0);
-                while (visual == null)
-                {
-                    logicalObject = LogicalTreeHelper.GetParent(logicalObject!);
-                    if (logicalObject == null)
-                        return new Point(0, 0);
-                    visual = logicalObject as Visual;
-                }
-            }
-
             var mousePoint = MousePoint;
             var point = GetPointRelateToClientRect(mousePoint);
-            point.X -= visual.VisualOffset.X;
-            point.Y -= visual.VisualOffset.Y;
+            LogicalObject? current = relativeTo as LogicalObject;
+            while (current != null)
+            {
+                if (current is Visual visual)
+                {
+                    point.X -= visual.VisualOffset.X;
+                    point.Y -= visual.VisualOffset.Y;
+                    current = visual.VisualParent;
+                }
+                else
+                    current = LogicalTreeHelper.GetParent(current);
+            }
             return point;
         }
 
