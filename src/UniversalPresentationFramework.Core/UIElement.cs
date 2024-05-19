@@ -374,27 +374,27 @@ namespace Wodsoft.UI
         internal void RaiseEventCore(RoutedEventArgs e)
         {
             List<LogicalObject> list = new List<LogicalObject>();
-            List<List<RoutedEventHandlerInfo>?> handlers = new List<List<RoutedEventHandlerInfo>?>();
+            List<(IInputElement Element, List<RoutedEventHandlerInfo>? Delegates)> handlers = new List<(IInputElement, List<RoutedEventHandlerInfo>?)>();
             LogicalObject? element = this;
             while (element != null)
             {
                 list.Add(element);
                 if (element is UIElement ue)
                 {
-                    handlers.Add(e.RoutedEvent!.GetClassHandlers(ue.GetType()));
+                    handlers.Add((ue, e.RoutedEvent!.GetClassHandlers(ue.GetType())));
                     if (ue.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
-                        handlers.Add(delegates);
+                        handlers.Add((ue, delegates));
                     else
-                        handlers.Add(null);
+                        handlers.Add((ue, null));
                     element = ue.VisualParent;
                 }
                 else if (element is ContentElement ce)
                 {
-                    handlers.Add(e.RoutedEvent!.GetClassHandlers(ce.GetType()));
+                    handlers.Add((ce, e.RoutedEvent!.GetClassHandlers(ce.GetType())));
                     if (ce.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
-                        handlers.Add(delegates);
+                        handlers.Add((ce, delegates));
                     else
-                        handlers.Add(null);
+                        handlers.Add((ce, null));
                     element = ce.LogicalParent;
                 }
                 else
@@ -411,32 +411,32 @@ namespace Wodsoft.UI
                 {
                     e.OverrideSource(list[i]);
                     var classHandlers = handlers[i * 2];
-                    if (classHandlers != null)
+                    if (classHandlers.Delegates != null)
                     {
-                        for (int ii = 0; ii < classHandlers.Count; ii++)
+                        for (int ii = 0; ii < classHandlers.Delegates.Count; ii++)
                         {
-                            var handler = classHandlers[ii];
+                            var handler = classHandlers.Delegates[ii];
                             if (!e.Handled || handler.HandledEventsToo)
                             {
                                 if (handler.Handler is RoutedEventHandler reh)
-                                    reh(this, e);
+                                    reh(classHandlers.Element, e);
                                 else
-                                    e.InvokeHandler(handler.Handler, this);
+                                    e.InvokeHandler(handler.Handler, classHandlers.Element);
                             }
                         }
                     }
                     var routedHandlers = handlers[i * 2 + 1];
-                    if (routedHandlers != null)
+                    if (routedHandlers.Delegates != null)
                     {
-                        for (int ii = 0; ii < routedHandlers.Count; ii++)
+                        for (int ii = 0; ii < routedHandlers.Delegates.Count; ii++)
                         {
-                            var handler = routedHandlers[ii];
+                            var handler = routedHandlers.Delegates[ii];
                             if (!e.Handled || handler.HandledEventsToo)
                             {
                                 if (handler.Handler is RoutedEventHandler reh)
-                                    reh(this, e);
+                                    reh(routedHandlers.Element, e);
                                 else
-                                    e.InvokeHandler(handler.Handler, this);
+                                    e.InvokeHandler(handler.Handler, routedHandlers.Element);
                             }
                         }
                     }
@@ -448,32 +448,32 @@ namespace Wodsoft.UI
                 {
                     e.OverrideSource(list[i]);
                     var classHandlers = handlers[i * 2];
-                    if (classHandlers != null)
+                    if (classHandlers.Delegates != null)
                     {
-                        for (int ii = 0; ii < classHandlers.Count; ii++)
+                        for (int ii = 0; ii < classHandlers.Delegates.Count; ii++)
                         {
-                            var handler = classHandlers[ii];
+                            var handler = classHandlers.Delegates[ii];
                             if (!e.Handled || handler.HandledEventsToo)
                             {
                                 if (handler.Handler is RoutedEventHandler reh)
-                                    reh(this, e);
+                                    reh(classHandlers.Element, e);
                                 else
-                                    e.InvokeHandler(handler.Handler, this);
+                                    e.InvokeHandler(handler.Handler, classHandlers.Element);
                             }
                         }
                     }
                     var routedHandlers = handlers[i * 2 + 1];
-                    if (routedHandlers != null)
+                    if (routedHandlers.Delegates != null)
                     {
-                        for (int ii = 0; ii < routedHandlers.Count; ii++)
+                        for (int ii = 0; ii < routedHandlers.Delegates.Count; ii++)
                         {
-                            var handler = routedHandlers[ii];
+                            var handler = routedHandlers.Delegates[ii];
                             if (!e.Handled || handler.HandledEventsToo)
                             {
                                 if (handler.Handler is RoutedEventHandler reh)
-                                    reh(this, e);
+                                    reh(routedHandlers.Element, e);
                                 else
-                                    e.InvokeHandler(handler.Handler, this);
+                                    e.InvokeHandler(handler.Handler, routedHandlers.Element);
                             }
                         }
                     }
