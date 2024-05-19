@@ -150,9 +150,14 @@ namespace Wodsoft.UI
             if (e.RoutedEvent == null)
                 throw new InvalidOperationException("RoutedEventArgs must have RoutedEvent.");
             e.MarkAsUserInitiated();
-
             e.Source = this;
+            RaiseEventCore(e);
+            e.Source = e.OriginalSource;
+            e.ClearUserInitiated();
+        }
 
+        internal void RaiseEventCore(RoutedEventArgs e)
+        {
             List<LogicalObject> list = new List<LogicalObject>();
             List<List<RoutedEventHandlerInfo>?> handlers = new List<List<RoutedEventHandlerInfo>?>();
             LogicalObject? element = this;
@@ -161,7 +166,7 @@ namespace Wodsoft.UI
                 list.Add(element);
                 if (element is UIElement ue)
                 {
-                    handlers.Add(e.RoutedEvent.GetClassHandlers(ue.GetType()));
+                    handlers.Add(e.RoutedEvent!.GetClassHandlers(ue.GetType()));
                     if (ue.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
                         handlers.Add(delegates);
                     else
@@ -170,7 +175,7 @@ namespace Wodsoft.UI
                 }
                 else if (element is ContentElement ce)
                 {
-                    handlers.Add(e.RoutedEvent.GetClassHandlers(ce.GetType()));
+                    handlers.Add(e.RoutedEvent!.GetClassHandlers(ce.GetType()));
                     if (ce.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
                         handlers.Add(delegates);
                     else
@@ -179,17 +184,17 @@ namespace Wodsoft.UI
                 }
                 else
                     element = null;
-                if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
+                if (e.RoutedEvent!.RoutingStrategy == RoutingStrategy.Direct)
                     break;
                 if (list.Count > 4096)
                     throw new InvalidOperationException("Routed event have more than 4096 levels.");
             }
 
-            if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Bubble || e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
+            if (e.RoutedEvent!.RoutingStrategy == RoutingStrategy.Bubble || e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    e.Source = list[i];
+                    e.OverrideSource(list[i]);
                     var classHandlers = handlers[i * 2];
                     if (classHandlers != null)
                     {
@@ -226,7 +231,7 @@ namespace Wodsoft.UI
             {
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    e.Source = list[i];
+                    e.OverrideSource(list[i]);
                     var classHandlers = handlers[i * 2];
                     if (classHandlers != null)
                     {
@@ -259,9 +264,6 @@ namespace Wodsoft.UI
                     }
                 }
             }
-
-            e.Source = e.OriginalSource;
-            e.ClearUserInitiated();
         }
 
         #endregion
@@ -322,6 +324,46 @@ namespace Wodsoft.UI
             if (Dispatcher is UIDispatcher uiDispatcher && uiDispatcher.MouseDevice.Captured == this)
                 uiDispatcher.MouseDevice.Capture(null);
         }
+
+        protected internal virtual void OnPreviewMouseDown(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnMouseDown(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseUp(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnMouseUp(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnMouseLeftButtonDown(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseLeftButtonUp(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnMouseLeftButtonUp(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseRightButtonDown(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnMouseRightButtonDown(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseRightButtonUp(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnMouseRightButtonUp(MouseButtonEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseMove(MouseEventArgs e) { }
+
+        protected internal virtual void OnMouseMove(MouseEventArgs e) { }
+
+        protected internal virtual void OnPreviewMouseWheel(MouseWheelEventArgs e) { }
+
+        protected internal virtual void OnMouseWheel(MouseWheelEventArgs e) { }
+
+        protected internal virtual void OnMouseEnter(MouseEventArgs e) { }
+
+        protected internal virtual void OnMouseLeave(MouseEventArgs e) { }
+
+        protected internal virtual void OnGotMouseCapture(MouseEventArgs e) { }
+
+        protected internal virtual void OnLostMouseCapture(MouseEventArgs e) { }
 
         protected internal virtual void OnQueryCursor(QueryCursorEventArgs e) { }
 

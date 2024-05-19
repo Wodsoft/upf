@@ -294,9 +294,9 @@ namespace Wodsoft.UI
 
         private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            UIElement uie = (UIElement)d;
+            UIElement ue = (UIElement)d;
             Visibility newVisibility = (Visibility)e.NewValue!;
-            uie._visibility = newVisibility;
+            ue._visibility = newVisibility;
         }
 
         private static bool ValidateVisibility(object? o)
@@ -365,9 +365,14 @@ namespace Wodsoft.UI
             if (e.RoutedEvent == null)
                 throw new InvalidOperationException("RoutedEventArgs must have RoutedEvent.");
             e.MarkAsUserInitiated();
-
             e.Source = this;
+            RaiseEventCore(e);
+            e.Source = e.OriginalSource;
+            e.ClearUserInitiated();
+        }
 
+        internal void RaiseEventCore(RoutedEventArgs e)
+        {
             List<LogicalObject> list = new List<LogicalObject>();
             List<List<RoutedEventHandlerInfo>?> handlers = new List<List<RoutedEventHandlerInfo>?>();
             LogicalObject? element = this;
@@ -376,7 +381,7 @@ namespace Wodsoft.UI
                 list.Add(element);
                 if (element is UIElement ue)
                 {
-                    handlers.Add(e.RoutedEvent.GetClassHandlers(ue.GetType()));
+                    handlers.Add(e.RoutedEvent!.GetClassHandlers(ue.GetType()));
                     if (ue.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
                         handlers.Add(delegates);
                     else
@@ -385,7 +390,7 @@ namespace Wodsoft.UI
                 }
                 else if (element is ContentElement ce)
                 {
-                    handlers.Add(e.RoutedEvent.GetClassHandlers(ce.GetType()));
+                    handlers.Add(e.RoutedEvent!.GetClassHandlers(ce.GetType()));
                     if (ce.EventHandlers.TryGetValue(e.RoutedEvent.GlobalIndex, out var delegates))
                         handlers.Add(delegates);
                     else
@@ -394,17 +399,17 @@ namespace Wodsoft.UI
                 }
                 else
                     element = null;
-                if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
+                if (e.RoutedEvent!.RoutingStrategy == RoutingStrategy.Direct)
                     break;
                 if (list.Count > 4096)
                     throw new InvalidOperationException("Routed event have more than 4096 levels.");
             }
 
-            if (e.RoutedEvent.RoutingStrategy == RoutingStrategy.Bubble || e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
+            if (e.RoutedEvent!.RoutingStrategy == RoutingStrategy.Bubble || e.RoutedEvent.RoutingStrategy == RoutingStrategy.Direct)
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    e.Source = list[i];
+                    e.OverrideSource(list[i]);
                     var classHandlers = handlers[i * 2];
                     if (classHandlers != null)
                     {
@@ -441,7 +446,7 @@ namespace Wodsoft.UI
             {
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    e.Source = list[i];
+                    e.OverrideSource(list[i]);
                     var classHandlers = handlers[i * 2];
                     if (classHandlers != null)
                     {
@@ -474,9 +479,6 @@ namespace Wodsoft.UI
                     }
                 }
             }
-
-            e.Source = e.OriginalSource;
-            e.ClearUserInitiated();
         }
 
         internal static void AddHandler(DependencyObject d, RoutedEvent routedEvent, Delegate handler)
@@ -708,19 +710,265 @@ namespace Wodsoft.UI
 
         internal static void RegisterEvents(Type type)
         {
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDownThunk), true);
+            EventManager.RegisterClassHandler(type, Mouse.MouseDownEvent, new MouseButtonEventHandler(OnMouseDownThunk), true);
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseUpEvent, new MouseButtonEventHandler(OnPreviewMouseUpThunk), true);
+            EventManager.RegisterClassHandler(type, Mouse.MouseUpEvent, new MouseButtonEventHandler(OnMouseUpThunk), true);
+            EventManager.RegisterClassHandler(type, PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(OnPreviewMouseLeftButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, MouseLeftButtonDownEvent, new MouseButtonEventHandler(OnMouseLeftButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, PreviewMouseLeftButtonUpEvent, new MouseButtonEventHandler(OnPreviewMouseLeftButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, MouseLeftButtonUpEvent, new MouseButtonEventHandler(OnMouseLeftButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, PreviewMouseRightButtonDownEvent, new MouseButtonEventHandler(OnPreviewMouseRightButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, MouseRightButtonDownEvent, new MouseButtonEventHandler(OnMouseRightButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, PreviewMouseRightButtonUpEvent, new MouseButtonEventHandler(OnPreviewMouseRightButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, MouseRightButtonUpEvent, new MouseButtonEventHandler(OnMouseRightButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseMoveEvent, new MouseEventHandler(OnPreviewMouseMoveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseMoveEvent, new MouseEventHandler(OnMouseMoveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseWheelEvent, new MouseWheelEventHandler(OnPreviewMouseWheelThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseWheelEvent, new MouseWheelEventHandler(OnMouseWheelThunk), false);
             EventManager.RegisterClassHandler(type, Mouse.MouseEnterEvent, new MouseEventHandler(OnMouseEnterThunk), false);
             EventManager.RegisterClassHandler(type, Mouse.MouseLeaveEvent, new MouseEventHandler(OnMouseLeaveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.GotMouseCaptureEvent, new MouseEventHandler(OnGotMouseCaptureThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.LostMouseCaptureEvent, new MouseEventHandler(OnLostMouseCaptureThunk), false);
             EventManager.RegisterClassHandler(type, Mouse.QueryCursorEvent, new QueryCursorEventHandler(OnQueryCursorThunk), false);
+        }
+
+        private static void OnPreviewMouseDownThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (sender is UIElement ue)
+                {
+                    ue.OnPreviewMouseDown(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnPreviewMouseDown(e);
+                }
+            }
+
+            // Always raise this "sub-event", but we pass along the handledness.
+            UIElement.CrackMouseButtonEventAndReRaiseEvent((DependencyObject)sender, e);
+        }
+
+        private static void OnMouseDownThunk(object sender, MouseButtonEventArgs e)
+        {
+            //if (!e.Handled)
+            //{
+            //    CommandManager.TranslateInput((IInputElement)sender, e);
+            //}
+
+            if (!e.Handled)
+            {
+                if (sender is UIElement ue)
+                {
+                    ue.OnMouseDown(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnMouseDown(e);
+                }
+            }
+
+            // Always raise this "sub-event", but we pass along the handledness.
+            UIElement.CrackMouseButtonEventAndReRaiseEvent((DependencyObject)sender, e);
+        }
+
+        private static void OnPreviewMouseUpThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (sender is UIElement ue)
+                {
+                    ue.OnPreviewMouseUp(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnPreviewMouseUp(e);
+                }
+            }
+
+            // Always raise this "sub-event", but we pass along the handledness.
+            UIElement.CrackMouseButtonEventAndReRaiseEvent((DependencyObject)sender, e);
+        }
+
+        private static void OnMouseUpThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (sender is UIElement ue)
+                {
+                    ue.OnMouseUp(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnMouseUp(e);
+                }
+            }
+
+            // Always raise this "sub-event", but we pass along the handledness.
+            UIElement.CrackMouseButtonEventAndReRaiseEvent((DependencyObject)sender, e);
+        }
+
+        private static void OnPreviewMouseLeftButtonDownThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnPreviewMouseLeftButtonDown(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnPreviewMouseLeftButtonDown(e);
+            }
+        }
+
+        private static void OnMouseLeftButtonDownThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnMouseLeftButtonDown(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnMouseLeftButtonDown(e);
+            }
+        }
+
+        private static void OnPreviewMouseLeftButtonUpThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnPreviewMouseLeftButtonUp(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnPreviewMouseLeftButtonUp(e);
+            }
+        }
+
+        private static void OnMouseLeftButtonUpThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnMouseLeftButtonUp(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnMouseLeftButtonUp(e);
+            }
+        }
+
+        private static void OnPreviewMouseRightButtonDownThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnPreviewMouseRightButtonDown(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnPreviewMouseRightButtonDown(e);
+            }
+        }
+
+        private static void OnMouseRightButtonDownThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnMouseRightButtonDown(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnMouseRightButtonDown(e);
+            }
+        }
+
+        private static void OnPreviewMouseRightButtonUpThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnPreviewMouseRightButtonUp(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnPreviewMouseRightButtonUp(e);
+            }
+        }
+
+        private static void OnMouseRightButtonUpThunk(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnMouseRightButtonUp(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnMouseRightButtonUp(e);
+            }
+        }
+
+        private static void OnPreviewMouseMoveThunk(object sender, MouseEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnPreviewMouseMove(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnPreviewMouseMove(e);
+            }
+        }
+
+        private static void OnMouseMoveThunk(object sender, MouseEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnMouseMove(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnMouseMove(e);
+            }
+        }
+
+        private static void OnPreviewMouseWheelThunk(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnPreviewMouseWheel(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnPreviewMouseWheel(e);
+            }
+        }
+
+        private static void OnMouseWheelThunk(object sender, MouseWheelEventArgs e)
+        {
+            //CommandManager.TranslateInput((IInputElement)sender, e);
+
+            if (!e.Handled)
+            {
+
+
+                if (sender is UIElement ue)
+                {
+                    ue.OnMouseWheel(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnMouseWheel(e);
+                }
+            }
         }
 
         private static void OnMouseLeaveThunk(object sender, MouseEventArgs e)
         {
-            if (e.Source is UIElement ue)
+            if (sender is UIElement ue)
             {
                 ue.IsMouseOver = false;
                 ue.SetValue(IsMouseOverPropertyKey, false);
             }
-            else if (e.Source is ContentElement ce)
+            else if (sender is ContentElement ce)
             {
                 ce.IsMouseOver = false;
                 ce.SetValue(IsMouseOverPropertyKey, false);
@@ -729,28 +977,145 @@ namespace Wodsoft.UI
 
         private static void OnMouseEnterThunk(object sender, MouseEventArgs e)
         {
-            if (e.Source is UIElement ue)
+            if (sender is UIElement ue)
             {
                 ue.IsMouseOver = true;
                 ue.SetValue(IsMouseOverPropertyKey, true);
             }
-            else if (e.Source is ContentElement ce)
+            else if (sender is ContentElement ce)
             {
                 ce.IsMouseOver = true;
                 ce.SetValue(IsMouseOverPropertyKey, true);
             }
         }
+
+        private static void OnGotMouseCaptureThunk(object sender, MouseEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnGotMouseCapture(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnGotMouseCapture(e);
+            }
+        }
+
+        private static void OnLostMouseCaptureThunk(object sender, MouseEventArgs e)
+        {
+            if (sender is UIElement ue)
+            {
+                ue.OnLostMouseCapture(e);
+            }
+            else if (sender is ContentElement ce)
+            {
+                ce.OnLostMouseCapture(e);
+            }
+        }
+
         private static void OnQueryCursorThunk(object sender, QueryCursorEventArgs e)
         {
-            if (e.Source is UIElement ue)
+            if (sender is UIElement ue)
             {
                 ue.OnQueryCursor(e);
             }
-            else if (e.Source is ContentElement ce)
+            else if (sender is ContentElement ce)
             {
                 ce.OnQueryCursor(e);
             }
         }
+
+        private static void CrackMouseButtonEventAndReRaiseEvent(DependencyObject sender, MouseButtonEventArgs e)
+        {
+            RoutedEvent? newEvent = CrackMouseButtonEvent(e);
+            if (newEvent != null)
+            {
+                var previousSource = e.Source;
+                var previousRoute = e.RoutedEvent;
+                e.OverrideRoutedEvent(newEvent);
+                e.OverrideSource(sender);
+                if (sender is UIElement ue)
+                    ue.RaiseEventCore(e);
+                else if (sender is ContentElement ce)
+                    ce.RaiseEventCore(e);
+                e.OverrideSource(previousSource!);
+                e.OverrideRoutedEvent(previousRoute!);
+            }
+        }
+
+        private static RoutedEvent? CrackMouseButtonEvent(MouseButtonEventArgs e)
+        {
+            RoutedEvent? newEvent;
+
+            switch (e.ChangedButton)
+            {
+                case MouseButton.Left:
+                    if (e.RoutedEvent == Mouse.PreviewMouseDownEvent)
+                        newEvent = UIElement.PreviewMouseLeftButtonDownEvent;
+                    else if (e.RoutedEvent == Mouse.MouseDownEvent)
+                        newEvent = UIElement.MouseLeftButtonDownEvent;
+                    else if (e.RoutedEvent == Mouse.PreviewMouseUpEvent)
+                        newEvent = UIElement.PreviewMouseLeftButtonUpEvent;
+                    else
+                        newEvent = UIElement.MouseLeftButtonUpEvent;
+                    break;
+                case MouseButton.Right:
+                    if (e.RoutedEvent == Mouse.PreviewMouseDownEvent)
+                        newEvent = UIElement.PreviewMouseRightButtonDownEvent;
+                    else if (e.RoutedEvent == Mouse.MouseDownEvent)
+                        newEvent = UIElement.MouseRightButtonDownEvent;
+                    else if (e.RoutedEvent == Mouse.PreviewMouseUpEvent)
+                        newEvent = UIElement.PreviewMouseRightButtonUpEvent;
+                    else
+                        newEvent = UIElement.MouseRightButtonUpEvent;
+                    break;
+                default:
+                    // No wrappers exposed for the other buttons.
+                    newEvent = null;
+                    break;
+            }
+            return newEvent;
+        }
+
+        protected virtual void OnPreviewMouseDown(MouseButtonEventArgs e) { }
+
+        protected virtual void OnMouseDown(MouseButtonEventArgs e) { }
+
+        protected virtual void OnPreviewMouseUp(MouseButtonEventArgs e) { }
+
+        protected virtual void OnMouseUp(MouseButtonEventArgs e) { }
+
+        protected virtual void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e) { }
+
+        protected virtual void OnMouseLeftButtonDown(MouseButtonEventArgs e) { }
+
+        protected virtual void OnPreviewMouseLeftButtonUp(MouseButtonEventArgs e) { }
+
+        protected virtual void OnMouseLeftButtonUp(MouseButtonEventArgs e) { }
+
+        protected virtual void OnPreviewMouseRightButtonDown(MouseButtonEventArgs e) { }
+
+        protected virtual void OnMouseRightButtonDown(MouseButtonEventArgs e) { }
+
+        protected virtual void OnPreviewMouseRightButtonUp(MouseButtonEventArgs e) { }
+
+        protected virtual void OnMouseRightButtonUp(MouseButtonEventArgs e) { }
+
+        protected virtual void OnPreviewMouseMove(MouseEventArgs e) { }
+
+        protected virtual void OnMouseMove(MouseEventArgs e) { }
+
+        protected virtual void OnPreviewMouseWheel(MouseWheelEventArgs e) { }
+
+        protected virtual void OnMouseWheel(MouseWheelEventArgs e) { }
+
+        protected virtual void OnMouseEnter(MouseEventArgs e) { }
+
+        protected virtual void OnMouseLeave(MouseEventArgs e) { }
+
+        protected virtual void OnGotMouseCapture(MouseEventArgs e) { }
+
+        protected virtual void OnLostMouseCapture(MouseEventArgs e) { }
 
         protected virtual void OnQueryCursor(QueryCursorEventArgs e) { }
 
