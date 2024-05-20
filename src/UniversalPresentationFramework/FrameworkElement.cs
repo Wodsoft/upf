@@ -1182,7 +1182,7 @@ namespace Wodsoft.UI
                                             0,
                                             new PropertyChangedCallback(OnCursorChanged)));
         static private void OnCursorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {            
+        {
             FrameworkElement fe = ((FrameworkElement)d);
             if (fe.IsMouseOver && fe.Dispatcher is UIDispatcher dispatcher)
                 dispatcher.MouseDevice.UpdateCursor();
@@ -1191,6 +1191,16 @@ namespace Wodsoft.UI
         {
             get { return (Cursor?)GetValue(CursorProperty); }
             set { SetValue(CursorProperty, value); }
+        }
+
+        protected override void OnQueryCursor(QueryCursorEventArgs e)
+        {
+            var cursor = Cursor;
+            if (cursor != null)
+            {
+                e.Cursor = cursor;
+                e.Handled = true;
+            }
         }
 
         #endregion
