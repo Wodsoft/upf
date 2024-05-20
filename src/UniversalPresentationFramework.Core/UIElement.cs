@@ -42,6 +42,8 @@ namespace Wodsoft.UI
                     return;
             }
 
+            if (Dispatcher is UIDispatcher uiDispatcher)
+                uiDispatcher.RemoveMeasure(this);
             _isMeasuring = true;
             var previousSize = _desiredSize;
             Size desiredSize;
@@ -69,6 +71,8 @@ namespace Wodsoft.UI
             }
         }
 
+        internal Size PreviousAvailableSize => _previousAvailableSize;
+
         private Rect _previousFinalRect;
         private bool _isArranging, _isRenderValid;
         public void Arrange(Rect finalRect)
@@ -95,8 +99,11 @@ namespace Wodsoft.UI
                 }
             }
 
+            var uiDispatcher = Dispatcher as UIDispatcher;
             if (!IsArrangeValid || !FloatUtil.AreClose(finalRect, _previousFinalRect))
             {
+                if (uiDispatcher != null)
+                    uiDispatcher.RemoveArrange(this);
                 _isArranging = true;
                 var oldRenderSize = RenderSize;
                 try
@@ -124,12 +131,14 @@ namespace Wodsoft.UI
                             _drawingContent = drawingContext.Close();
                             _isRenderValid = true;
                         }
-                        if (Dispatcher is UIDispatcher uiDispatcher)
+                        if (uiDispatcher != null)
                             uiDispatcher.UpdateRender();
                     }
                 }
             }
         }
+
+        internal Rect PreviousArrangeRect => _previousFinalRect;
 
         protected virtual Size MeasureCore(Size availableSize)
         {
@@ -146,6 +155,8 @@ namespace Wodsoft.UI
             if (!_isMeasuring)
             {
                 IsMeasureValid = false;
+                if (Dispatcher is UIDispatcher uiDispatcher)
+                    uiDispatcher.UpdateMeasure(this);
             }
         }
 
@@ -154,6 +165,8 @@ namespace Wodsoft.UI
             if (!_isArranging)
             {
                 IsArrangeValid = false;
+                if (Dispatcher is UIDispatcher uiDispatcher)
+                    uiDispatcher.UpdateArrange(this);
             }
         }
 
@@ -161,8 +174,8 @@ namespace Wodsoft.UI
         {
             InvalidateArrange();
             _isRenderValid = false;
-            if (Dispatcher is UIDispatcher uiDispatcher)
-                uiDispatcher.UpdateRender();
+            //if (Dispatcher is UIDispatcher uiDispatcher)
+            //    uiDispatcher.UpdateRender();
         }
 
         protected virtual void OnChildDesiredSizeChanged(UIElement child)
@@ -270,7 +283,7 @@ namespace Wodsoft.UI
 
         }
 
-        public sealed override void RenderContext(RenderContext renderContext)
+        public override void RenderContext(RenderContext renderContext)
         {
             if (_drawingContent != null)
                 renderContext.Render(_drawingContent);

@@ -26,8 +26,24 @@ namespace Wodsoft.UI.Threading
             if (_updateLayout)
             {
                 _updateLayout = false;
+                _updateArrangeElements.Clear();
+                _updateMeasureElements.Clear();
                 InvalidateLayout(RootElement);
                 UpdateLayoutCore();
+            }
+            while (_updateArrangeElements.Count != 0)
+            {
+                var element = _updateArrangeElements[_updateArrangeElements.Count - 1];
+                if (element.IsArrangeValid)
+                    _updateArrangeElements.RemoveAt(_updateArrangeElements.Count - 1);
+                element.Arrange(element.PreviousArrangeRect);
+            }
+            while (_updateMeasureElements.Count != 0)
+            {
+                var element = _updateMeasureElements[_updateMeasureElements.Count - 1];
+                if (element.IsMeasureValid)
+                    _updateMeasureElements.RemoveAt(_updateMeasureElements.Count - 1);
+                element.Measure(element.PreviousAvailableSize);
             }
             if (_updateRender || _continueFrames < 2)
             {
@@ -103,6 +119,7 @@ namespace Wodsoft.UI.Threading
         #region Layout
 
         private bool _updateLayout;
+        private List<UIElement> _updateArrangeElements = new List<UIElement>(), _updateMeasureElements = new List<UIElement>();
 
         protected abstract UIElement RootElement { get; }
 
@@ -127,6 +144,44 @@ namespace Wodsoft.UI.Threading
                 if (child != null)
                     InvalidateLayout(child);
             }
+        }
+
+        internal void UpdateArrange(UIElement element)
+        {
+            Visual visual = element;
+            while (true)
+            {
+                if (visual is UIElement ue && _updateArrangeElements.Contains(ue))
+                    return;
+                if (visual.VisualParent == null)
+                    break;
+                visual = visual.VisualParent;
+            }
+            _updateArrangeElements.Add(element);
+        }
+
+        internal void RemoveArrange(UIElement element)
+        {
+            _updateArrangeElements.Remove(element);
+        }
+
+        internal void UpdateMeasure(UIElement element)
+        {
+            Visual visual = element;
+            while (true)
+            {
+                if (visual is UIElement ue && _updateMeasureElements.Contains(ue))
+                    return;
+                if (visual.VisualParent == null)
+                    break;
+                visual = visual.VisualParent;
+            }
+            _updateMeasureElements.Add(element);
+        }
+
+        internal void RemoveMeasure(UIElement element)
+        {
+            _updateMeasureElements.Remove(element);
         }
 
         #endregion
