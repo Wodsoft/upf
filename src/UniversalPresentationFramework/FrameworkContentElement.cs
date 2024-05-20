@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
 using Wodsoft.UI.Media;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -86,6 +87,20 @@ namespace Wodsoft.UI
             set
             {
                 _resources = value;
+            }
+        }
+
+        #endregion
+
+        #region Dispatcher
+
+        public override Dispatcher Dispatcher
+        {
+            get
+            {
+                if (LogicalRoot == this)
+                    return base.Dispatcher;
+                return LogicalRoot.Dispatcher;
             }
         }
 
