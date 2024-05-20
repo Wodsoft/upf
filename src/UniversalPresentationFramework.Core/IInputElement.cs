@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Input;
 
-namespace Wodsoft.UI.Input
+namespace Wodsoft.UI
 {
     public interface IInputElement
     {
@@ -35,9 +36,7 @@ namespace Wodsoft.UI.Input
 
         #endregion Events    
 
-        #region Input
-
-        // Mouse          
+        #region Mouse
 
         /// <summary>
         ///     A property indicating if the mouse is over this element or its descendents.
@@ -145,7 +144,10 @@ namespace Wodsoft.UI.Input
         /// </summary>
         void ReleaseMouseCapture();
 
-        //// Stylus
+        #endregion
+
+        #region Stylus
+
         ///// <summary>
         /////     A property indicating if a stylus is over this element or its descendents.
         ///// </summary>
@@ -281,7 +283,9 @@ namespace Wodsoft.UI.Input
         ///// </summary>
         //void ReleaseStylusCapture();
 
-        //// Keyboard         
+        #endregion
+
+        #region Keyboard
 
         ///// <summary>
         /////     An event reporting a key was pressed.
@@ -314,10 +318,10 @@ namespace Wodsoft.UI.Input
         ///// </summary>
         //bool IsKeyboardFocused { get; }
 
-        ///// <summary>
-        /////     Focuses the keyboard on this element.
-        ///// </summary>
-        //bool Focus();
+        /// <summary>
+        ///     Focuses the keyboard on this element.
+        /// </summary>
+        bool Focus();
 
         ///// <summary>
         /////     An event announcing that the keyboard is focused on this element.
@@ -341,17 +345,19 @@ namespace Wodsoft.UI.Input
         ///// </summary>
         //event KeyboardFocusChangedEventHandler LostKeyboardFocus;
 
-        ///// <summary>
-        /////     A property indicating if the element is enabled or not.
-        ///// </summary>
-        //bool IsEnabled { get; }
+        /// <summary>
+        ///     A property indicating if the element is enabled or not.
+        /// </summary>
+        bool IsEnabled { get; }
 
-        ///// <summary>
-        /////     Gettor and Settor for Focusable Property
-        ///// </summary>
-        //bool Focusable { get; set; }
+        /// <summary>
+        ///     Gettor and Settor for Focusable Property
+        /// </summary>
+        bool Focusable { get; set; }
 
-        //// Text
+        #endregion
+
+        #region Text
 
         ///// <summary>
         /////     An event announcing some text input.
