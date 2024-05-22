@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Wodsoft.UI.Input;
 using Wodsoft.UI.Media;
 using Wodsoft.UI.Media.Animation;
@@ -19,6 +20,33 @@ namespace Wodsoft.UI
         static UIElement()
         {
             RegisterEvents(typeof(UIElement));
+        }
+
+        internal static void RegisterEvents(Type type)
+        {
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDownThunk), true);
+            EventManager.RegisterClassHandler(type, Mouse.MouseDownEvent, new MouseButtonEventHandler(OnMouseDownThunk), true);
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseUpEvent, new MouseButtonEventHandler(OnPreviewMouseUpThunk), true);
+            EventManager.RegisterClassHandler(type, Mouse.MouseUpEvent, new MouseButtonEventHandler(OnMouseUpThunk), true);
+            EventManager.RegisterClassHandler(type, PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(OnPreviewMouseLeftButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, MouseLeftButtonDownEvent, new MouseButtonEventHandler(OnMouseLeftButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, PreviewMouseLeftButtonUpEvent, new MouseButtonEventHandler(OnPreviewMouseLeftButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, MouseLeftButtonUpEvent, new MouseButtonEventHandler(OnMouseLeftButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, PreviewMouseRightButtonDownEvent, new MouseButtonEventHandler(OnPreviewMouseRightButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, MouseRightButtonDownEvent, new MouseButtonEventHandler(OnMouseRightButtonDownThunk), false);
+            EventManager.RegisterClassHandler(type, PreviewMouseRightButtonUpEvent, new MouseButtonEventHandler(OnPreviewMouseRightButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, MouseRightButtonUpEvent, new MouseButtonEventHandler(OnMouseRightButtonUpThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseMoveEvent, new MouseEventHandler(OnPreviewMouseMoveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseMoveEvent, new MouseEventHandler(OnMouseMoveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseWheelEvent, new MouseWheelEventHandler(OnPreviewMouseWheelThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseWheelEvent, new MouseWheelEventHandler(OnMouseWheelThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseEnterEvent, new MouseEventHandler(OnMouseEnterThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.MouseLeaveEvent, new MouseEventHandler(OnMouseLeaveThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.GotMouseCaptureEvent, new MouseEventHandler(OnGotMouseCaptureThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.LostMouseCaptureEvent, new MouseEventHandler(OnLostMouseCaptureThunk), false);
+            EventManager.RegisterClassHandler(type, Mouse.QueryCursorEvent, new QueryCursorEventHandler(OnQueryCursorThunk), false);
+            EventManager.RegisterClassHandler(type, GotFocusEvent, new QueryCursorEventHandler(OnGotFocusThunk), false);
+            EventManager.RegisterClassHandler(type, LostFocusEvent, new QueryCursorEventHandler(OnLostFocusThunk), false);
         }
 
         #endregion
@@ -648,7 +676,7 @@ namespace Wodsoft.UI
 
         #endregion
 
-        #region InputElement
+        #region Mouse
 
         public static readonly RoutedEvent PreviewMouseLeftButtonDownEvent = EventManager.RegisterRoutedEvent("PreviewMouseLeftButtonDown", RoutingStrategy.Direct, typeof(MouseButtonEventHandler), typeof(UIElement));
         public static readonly RoutedEvent MouseLeftButtonDownEvent = EventManager.RegisterRoutedEvent("MouseLeftButtonDown", RoutingStrategy.Direct, typeof(MouseButtonEventHandler), typeof(UIElement));
@@ -719,31 +747,6 @@ namespace Wodsoft.UI
         {
             if (Dispatcher is UIDispatcher uiDispatcher && uiDispatcher.MouseDevice.Captured == this)
                 uiDispatcher.MouseDevice.Capture(null);
-        }
-
-        internal static void RegisterEvents(Type type)
-        {
-            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDownThunk), true);
-            EventManager.RegisterClassHandler(type, Mouse.MouseDownEvent, new MouseButtonEventHandler(OnMouseDownThunk), true);
-            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseUpEvent, new MouseButtonEventHandler(OnPreviewMouseUpThunk), true);
-            EventManager.RegisterClassHandler(type, Mouse.MouseUpEvent, new MouseButtonEventHandler(OnMouseUpThunk), true);
-            EventManager.RegisterClassHandler(type, PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(OnPreviewMouseLeftButtonDownThunk), false);
-            EventManager.RegisterClassHandler(type, MouseLeftButtonDownEvent, new MouseButtonEventHandler(OnMouseLeftButtonDownThunk), false);
-            EventManager.RegisterClassHandler(type, PreviewMouseLeftButtonUpEvent, new MouseButtonEventHandler(OnPreviewMouseLeftButtonUpThunk), false);
-            EventManager.RegisterClassHandler(type, MouseLeftButtonUpEvent, new MouseButtonEventHandler(OnMouseLeftButtonUpThunk), false);
-            EventManager.RegisterClassHandler(type, PreviewMouseRightButtonDownEvent, new MouseButtonEventHandler(OnPreviewMouseRightButtonDownThunk), false);
-            EventManager.RegisterClassHandler(type, MouseRightButtonDownEvent, new MouseButtonEventHandler(OnMouseRightButtonDownThunk), false);
-            EventManager.RegisterClassHandler(type, PreviewMouseRightButtonUpEvent, new MouseButtonEventHandler(OnPreviewMouseRightButtonUpThunk), false);
-            EventManager.RegisterClassHandler(type, MouseRightButtonUpEvent, new MouseButtonEventHandler(OnMouseRightButtonUpThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseMoveEvent, new MouseEventHandler(OnPreviewMouseMoveThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.MouseMoveEvent, new MouseEventHandler(OnMouseMoveThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.PreviewMouseWheelEvent, new MouseWheelEventHandler(OnPreviewMouseWheelThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.MouseWheelEvent, new MouseWheelEventHandler(OnMouseWheelThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.MouseEnterEvent, new MouseEventHandler(OnMouseEnterThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.MouseLeaveEvent, new MouseEventHandler(OnMouseLeaveThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.GotMouseCaptureEvent, new MouseEventHandler(OnGotMouseCaptureThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.LostMouseCaptureEvent, new MouseEventHandler(OnLostMouseCaptureThunk), false);
-            EventManager.RegisterClassHandler(type, Mouse.QueryCursorEvent, new QueryCursorEventHandler(OnQueryCursorThunk), false);
         }
 
         private static void OnPreviewMouseDownThunk(object sender, MouseButtonEventArgs e)
@@ -1131,6 +1134,210 @@ namespace Wodsoft.UI
         protected virtual void OnLostMouseCapture(MouseEventArgs e) { }
 
         protected virtual void OnQueryCursor(QueryCursorEventArgs e) { }
+
+        #endregion
+
+        #region Common
+
+        public static readonly DependencyProperty IsEnabledProperty =
+                    DependencyProperty.Register(
+                                "IsEnabled",
+                                typeof(bool),
+                                typeof(UIElement),
+                                new UIPropertyMetadata(
+                                            true, // default value
+                                            new PropertyChangedCallback(OnIsEnabledChanged),
+                                            new CoerceValueCallback(CoerceIsEnabled)));
+        private static object CoerceIsEnabled(DependencyObject d, object? value)
+        {
+            UIElement uie = (UIElement)d;
+
+            // We must be false if our parent is false, but we can be
+            // either true or false if our parent is true.
+            //
+            // Another way of saying this is that we can only be true
+            // if our parent is true, but we can always be false.
+            if ((bool)value!)
+            {
+                // Our parent can constrain us.  We can be plugged into either
+                // a "visual" or "content" tree.  If we are plugged into a
+                // "content" tree, the visual tree is just considered a
+                // visual representation, and is normally composed of raw
+                // visuals, not UIElements, so we prefer the content tree.
+                //
+                // The content tree uses the "logical" links.  But not all
+                // "logical" links lead to a content tree.
+                //
+                DependencyObject? parent = LogicalTreeHelper.GetParent(uie) as ContentElement;
+                if (parent == null)
+                {
+                    parent = InputElement.GetContainingUIElement(LogicalTreeHelper.GetParent(uie));
+                }
+
+                if (parent == null || (bool)parent.GetValue(IsEnabledProperty)!)
+                {
+                    return uie.IsEnabledCore;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement uie = (UIElement)d;
+            if (!(bool)e.NewValue! && uie.IsFocused && uie.Dispatcher is UIDispatcher dispatcher)
+                dispatcher.SetFocus(null);
+            uie.IsEnabledChanged?.Invoke(d, e);
+            //// Raise the public changed event.
+            //uie.RaiseDependencyPropertyChanged(IsEnabledChangedKey, e);
+
+            //// Invalidate the children so that they will inherit the new value.
+            uie.InvalidateInheritPropertyOnChildren(e.Property);
+
+            //// The input manager needs to re-hittest because something changed
+            //// that is involved in the hit-testing we do, so a different result
+            //// could be returned.
+            //InputManager.SafeCurrentNotifyHitTestInvalidated();
+
+            ////Notify Automation in case it is interested.
+            //AutomationPeer peer = uie.GetAutomationPeer();
+            //if (peer != null)
+            //    peer.InvalidatePeer();
+
+        }
+        public bool IsEnabled
+        {
+            get => (bool)GetValue(IsEnabledProperty)!;
+            set => SetValue(IsEnabledProperty, value);
+        }
+        public event DependencyPropertyChangedEventHandler? IsEnabledChanged;
+
+        protected virtual bool IsEnabledCore => true;
+
+        #endregion
+
+        #region Focus
+
+
+        public static readonly DependencyProperty FocusableProperty =
+                DependencyProperty.Register(
+                        "Focusable",
+                        typeof(bool),
+                        typeof(UIElement),
+                        new UIPropertyMetadata(
+                                false, // default value
+                                new PropertyChangedCallback(OnFocusableChanged)));
+        private static void OnFocusableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement uie = (UIElement)d;
+
+            // Raise the public changed event.
+            uie.FocusableChanged?.Invoke(d, e);
+        }
+        public bool Focusable { get => (bool)GetValue(FocusableProperty)!; set => SetValue(FocusableProperty, value); }
+        public event DependencyPropertyChangedEventHandler? FocusableChanged;
+
+        public bool Focus()
+        {
+            if (Focusable && IsEnabled && Dispatcher is UIDispatcher dispatcher)
+            {
+                dispatcher.SetFocus(this);
+                return true;
+            }
+            return false;
+        }
+
+        internal static readonly DependencyPropertyKey IsFocusedPropertyKey =
+                    DependencyProperty.RegisterReadOnly(
+                                "IsFocused",
+                                typeof(bool),
+                                typeof(UIElement),
+                                new PropertyMetadata(
+                                            false, // default value
+                                            new PropertyChangedCallback(IsFocused_Changed)));
+        private static void IsFocused_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement uiElement = ((UIElement)d);
+            if ((bool)e.NewValue!)
+                uiElement.RaiseEvent(new RoutedEventArgs(GotFocusEvent, uiElement));
+            else
+                uiElement.RaiseEvent(new RoutedEventArgs(LostFocusEvent, uiElement));
+        }
+        public static readonly DependencyProperty IsFocusedProperty = IsFocusedPropertyKey.DependencyProperty;
+        public bool IsFocused => (bool)GetValue(IsFocusedProperty)!;
+
+        public static readonly RoutedEvent GotFocusEvent = FocusManager.GotFocusEvent.AddOwner(typeof(UIElement));
+        public static readonly RoutedEvent LostFocusEvent = FocusManager.LostFocusEvent.AddOwner(typeof(UIElement));
+
+        private static void OnLostFocusThunk(object sender, QueryCursorEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (sender is UIElement ue)
+                {
+                    ue.OnLostFocus(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnLostFocus(e);
+                }
+            }
+        }
+        private static void OnGotFocusThunk(object sender, QueryCursorEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (sender is UIElement ue)
+                {
+                    ue.OnGotFocus(e);
+                }
+                else if (sender is ContentElement ce)
+                {
+                    ce.OnGotFocus(e);
+                }
+            }
+        }
+
+        protected virtual void OnGotFocus(RoutedEventArgs e) { }
+        protected virtual void OnLostFocus(RoutedEventArgs e) { }
+
+        #endregion
+
+        #region Logical
+
+        protected override void OnLogicalRootChanged(LogicalObject oldRoot, LogicalObject newRoot)
+        {
+            //reset focused element
+            if (IsFocused && oldRoot.Dispatcher is UIDispatcher dispatcher && newRoot.Dispatcher is not UIDispatcher)
+                dispatcher.SetFocus(null);
+        }
+
+        #endregion
+
+        #region DependencyValue
+
+        protected override bool HandleInvalidateInheritProperty(DependencyProperty dp)
+        {
+            //if (dp == IsVisibleProperty)
+            //{
+            //    // For Read-Only force-inherited properties, use
+            //    // a private update method.
+            //    UpdateIsVisibleCache();
+            //}
+            //else
+            //{
+            // For Read/Write force-inherited properties, use
+            // the standard coersion pattern.
+            CoerceValue(dp);
+            //}
+            return true;
+        }
 
         #endregion
     }

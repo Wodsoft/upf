@@ -104,5 +104,22 @@ namespace Wodsoft.UI.Media
         }
 
         #endregion
+
+        #region Dependency Value
+
+        protected override void InvalidateInheritPropertyOnChildren(DependencyProperty dp)
+        {
+            int cChildren = VisualChildrenCount;
+            for (int iChild = 0; iChild < cChildren; iChild++)
+            {
+                Visual child = GetVisualChild(iChild);
+                if (!child.HandleInvalidateInheritProperty(dp))
+                    child.InvalidateInheritPropertyOnChildren(dp);
+            }
+        }
+
+        protected virtual bool HandleInvalidateInheritProperty(DependencyProperty dp) => false;
+
+        #endregion
     }
 }

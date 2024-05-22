@@ -191,5 +191,20 @@ namespace Wodsoft.UI.Threading
         protected internal abstract MouseDevice MouseDevice { get; }
 
         #endregion
+
+        #region Focus
+
+        private IInputElement? _focusElement;
+        internal void SetFocus(IInputElement? element)
+        {
+            var oldElement = _focusElement;
+            _focusElement = element;
+            if (oldElement != null && oldElement is DependencyObject)
+                ((DependencyObject)oldElement).SetValue(UIElement.IsFocusedPropertyKey, false);
+            if (element != null && element is DependencyObject)
+                ((DependencyObject)element).SetValue(UIElement.IsFocusedPropertyKey, true);
+        }
+
+        #endregion
     }
 }

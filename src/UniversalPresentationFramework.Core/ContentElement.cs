@@ -368,5 +368,145 @@ namespace Wodsoft.UI
         protected internal virtual void OnQueryCursor(QueryCursorEventArgs e) { }
 
         #endregion
+
+        #region Common
+
+        public static readonly DependencyProperty IsEnabledProperty = UIElement.IsEnabledProperty.AddOwner(typeof(ContentElement),
+                                new UIPropertyMetadata(
+                                            true, // default value
+                                            new PropertyChangedCallback(OnIsEnabledChanged),
+                                            new CoerceValueCallback(CoerceIsEnabled)));
+        private static object CoerceIsEnabled(DependencyObject d, object? value)
+        {
+            ContentElement ce = (ContentElement)d;
+
+            // We must be false if our parent is false, but we can be
+            // either true or false if our parent is true.
+            //
+            // Another way of saying this is that we can only be true
+            // if our parent is true, but we can always be false.
+            if ((bool)value!)
+            {
+                // Our parent can constrain us.  We can be plugged into either
+                // a "visual" or "content" tree.  If we are plugged into a
+                // "content" tree, the visual tree is just considered a
+                // visual representation, and is normally composed of raw
+                // visuals, not UIElements, so we prefer the content tree.
+                //
+                // The content tree uses the "logical" links.  But not all
+                // "logical" links lead to a content tree.
+                //
+                DependencyObject? parent = ce.LogicalParent as ContentElement;
+                if (parent == null)
+                {
+                    parent = InputElement.GetContainingUIElement(ce.LogicalParent);
+                }
+
+                if (parent == null || (bool)parent.GetValue(IsEnabledProperty)!)
+                {
+                    return ce.IsEnabledCore;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ContentElement ce = (ContentElement)d;
+            if (!(bool)e.NewValue! && ce.IsFocused && ce.Dispatcher is UIDispatcher dispatcher)
+                dispatcher.SetFocus(null);
+            ce.IsEnabledChanged?.Invoke(d, e);
+            //// Raise the public changed event.
+            //uie.RaiseDependencyPropertyChanged(IsEnabledChangedKey, e);
+
+            //// Invalidate the children so that they will inherit the new value.
+            ce.InvalidateInheritPropertyOnChildren(e.Property);
+
+            //// The input manager needs to re-hittest because something changed
+            //// that is involved in the hit-testing we do, so a different result
+            //// could be returned.
+            //InputManager.SafeCurrentNotifyHitTestInvalidated();
+
+            ////Notify Automation in case it is interested.
+            //AutomationPeer peer = uie.GetAutomationPeer();
+            //if (peer != null)
+            //    peer.InvalidatePeer();
+
+        }
+        public bool IsEnabled
+        {
+            get => (bool)GetValue(IsEnabledProperty)!;
+            set => SetValue(IsEnabledProperty, value);
+        }
+        public event DependencyPropertyChangedEventHandler? IsEnabledChanged;
+
+        protected virtual bool IsEnabledCore => true;
+
+        #endregion
+
+        #region Focus
+
+
+        public static readonly DependencyProperty FocusableProperty = UIElement.FocusableProperty.AddOwner(typeof(ContentElement),
+                        new UIPropertyMetadata(
+                                false, // default value
+                                new PropertyChangedCallback(OnFocusableChanged)));
+        private static void OnFocusableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ContentElement ce = (ContentElement)d;
+
+            // Raise the public changed event.
+            ce.FocusableChanged?.Invoke(d, e);
+        }
+        public bool Focusable { get => (bool)GetValue(FocusableProperty)!; set => SetValue(FocusableProperty, value); }
+        public event DependencyPropertyChangedEventHandler? FocusableChanged;
+
+        public bool Focus()
+        {
+            if (Focusable && IsEnabled && Dispatcher is UIDispatcher dispatcher)
+            {
+                dispatcher.SetFocus(this);
+                return true;
+            }
+            return false;
+        }
+
+        public static readonly DependencyProperty IsFocusedProperty =
+                    UIElement.IsFocusedProperty.AddOwner(
+                                typeof(ContentElement), new PropertyMetadata(false, IsFocused_Changed));
+        private static void IsFocused_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ContentElement ce = ((ContentElement)d);
+            if ((bool)e.NewValue!)
+                ce.OnGotFocus(new RoutedEventArgs(GotFocusEvent, ce));
+            else
+                ce.OnLostFocus(new RoutedEventArgs(LostFocusEvent, ce));
+        }
+        public bool IsFocused => (bool)GetValue(IsFocusedProperty)!;
+
+        public static readonly RoutedEvent GotFocusEvent = FocusManager.GotFocusEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent LostFocusEvent = FocusManager.LostFocusEvent.AddOwner(typeof(ContentElement));
+
+        protected internal virtual void OnGotFocus(RoutedEventArgs e) { }
+        protected internal virtual void OnLostFocus(RoutedEventArgs e) { }
+
+        #endregion
+
+        #region Logical
+
+        protected override void OnLogicalRootChanged(LogicalObject oldRoot, LogicalObject newRoot)
+        {
+            //reset focused element
+            if (IsFocused && oldRoot.Dispatcher is UIDispatcher dispatcher && newRoot.Dispatcher is not UIDispatcher)
+                dispatcher.SetFocus(null);
+        }
+
+        #endregion
     }
 }
