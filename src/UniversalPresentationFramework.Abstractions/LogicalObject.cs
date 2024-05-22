@@ -123,6 +123,9 @@ namespace Wodsoft.UI
             }
         }
 
+
+        protected virtual void InvalidateInheritPropertyOnChildren(DependencyProperty dp) { }
+
         #endregion
     }
 }

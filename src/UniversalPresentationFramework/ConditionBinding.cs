@@ -133,13 +133,15 @@ namespace Wodsoft.UI
         private readonly object? _value;
         private readonly ConditionLogic _logic;
         private TypeConverter? _converter;
-        private object? _convertedValue;
+        private object? _convertedValue, _expressionValue;
         private bool _isMatched;
         private bool _disposed;
 
         public ExpressionConditionBinding(BindingExpressionBase expression, object? value, ConditionLogic logic)
         {
             _expression = expression;
+            if (_expression.IsAttached)
+                _expressionValue = _expression.GetSourceValue();
             _value = value;
             _logic = logic;
             _expression.ValueChanged += ValueChanged;
@@ -147,8 +149,9 @@ namespace Wodsoft.UI
 
         public override event ConditionBindingEqualityChangedEventHandler? IsMatchedChanged;
 
-        private void ValueChanged(object? sender, EventArgs e)
+        private void ValueChanged(object? sender, ExpressionValueChangedEventArgs e)
         {
+            _expressionValue = e.Value;
             EnsureMatched();
         }
 
@@ -165,7 +168,7 @@ namespace Wodsoft.UI
 
         public override void EnsureMatched()
         {
-            var expressionValue = _expression.Value;
+            var expressionValue = _expressionValue;//_expression.Value;
             bool isMatched;
             if (expressionValue != null && _value != null)
             {

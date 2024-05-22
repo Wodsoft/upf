@@ -45,6 +45,22 @@ namespace Wodsoft.UI
             }
         }
 
+        public void CoerceValue(DependencyProperty dp)
+        {
+            var metadata = GetMetadata(dp);
+            if (metadata.CoerceValueCallback == null)
+                return;
+            ref readonly var effectiveValue = ref GetEffectiveValue(dp);
+            if (effectiveValue.Source == DependencyEffectiveSource.None)
+                return;
+            var originalValue = effectiveValue.BaseValue;
+            var coercedValue = metadata.CoerceValueCallback(this, originalValue);
+            if (object.Equals(coercedValue, originalValue))
+                effectiveValue.ClearCoercedValue();
+            else
+                effectiveValue.SetCoercedValue(coercedValue);
+        }
+
         public object? GetValue(DependencyProperty dp)
         {
             if (dp == null)
@@ -128,13 +144,14 @@ namespace Wodsoft.UI
         {
             DependencyEffectiveValue oldValue, newValue;
             _valueStores.TryGetValue(dp.GlobalIndex, out oldValue);
+            var metadata = GetMetadata(dp);
             if (value is Expression expression)
             {
                 newValue = new DependencyEffectiveValue(expression);
-                UpdateEffectiveValue(dp, GetMetadata(dp), ref oldValue, ref newValue);
+                UpdateEffectiveValue(dp, metadata, ref oldValue, ref newValue);
                 return;
             }
-            CoereceAndValidateValue(dp, ref value, true, out var metadata);
+            ValidateValue(dp, ref value, true);
 
             if (oldValue.Source == DependencyEffectiveSource.Expression && oldValue.Expression!.IsAttached && oldValue.Expression!.CanUpdateSource)
             {
@@ -157,11 +174,8 @@ namespace Wodsoft.UI
             return dp.GetMetadata(_type);
         }
 
-        internal bool CoereceAndValidateValue(DependencyProperty dp, ref object? value, bool throwException, out PropertyMetadata metadata)
+        internal bool ValidateValue(DependencyProperty dp, ref object? value, bool throwException)
         {
-            metadata = GetMetadata(dp);
-            if (metadata.CoerceValueCallback != null)
-                value = metadata.CoerceValueCallback(this, value);
             if (dp.ValidateValueCallback != null && !dp.ValidateValueCallback(value))
                 if (throwException)
                     throw new ArgumentException("Value validate failed.", nameof(value));
@@ -220,7 +234,37 @@ namespace Wodsoft.UI
                 UpdateEffectiveValue(dp, metadata, ref DependencyEffectiveValue.Default, ref newEffectiveValue);
             else
                 UpdateEffectiveValue(dp, metadata, ref oldEffectiveValue, ref newEffectiveValue);
+        }
 
+        internal bool UpdateExpressionValue(DependencyProperty dp, PropertyMetadata metadata, object? newValue)
+        {
+            ref var effectiveValue = ref CollectionsMarshal.GetValueRefOrNullRef(_valueStores, dp.GlobalIndex);
+            if (Unsafe.IsNullRef(ref effectiveValue))
+                return true;
+            var baseValue = newValue;
+            var oldValue = effectiveValue.Value;
+            if (metadata.CoerceValueCallback == null)
+            {
+                if (oldValue != newValue)
+                {
+                    effectiveValue.UpdateValue(newValue);
+                    PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, newValue));
+                }
+            }
+            else
+            {
+                newValue = metadata.CoerceValueCallback(this, newValue);
+                //unset means use previous value
+                if (newValue == DependencyProperty.UnsetValue)
+                    return true;
+                effectiveValue.SetCoercedValue(newValue);
+                if (oldValue != newValue)
+                {
+                    effectiveValue.SetCoercedValue(newValue);
+                    PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, newValue));
+                }
+            }
+            return true;
         }
 
         private void UpdateEffectiveValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue oldEffectiveValue, ref DependencyEffectiveValue newEffectiveValue)
@@ -236,10 +280,19 @@ namespace Wodsoft.UI
                     newEffectiveValue.Expression!.Attach(this, dp);
                     if (newEffectiveValue.Expression!.CanUpdateTarget)
                     {
-                        newEffectiveValue.Expression!.UpdateValue();
+                        var expressionValue = newEffectiveValue.Expression.GetSourceValue();
+                        if (expressionValue == Expression.NoValue)
+                            expressionValue = metadata.DefaultValue;
+                        if (dp.ValidateValueCallback != null && !dp.ValidateValueCallback(expressionValue))
+                            expressionValue = DependencyProperty.UnsetValue;
+                        newEffectiveValue.UpdateValue(expressionValue);
+                        //newEffectiveValue.Expression!.UpdateValue();
                     }
                 }
             }
+
+            if (metadata.CoerceValueCallback != null)
+                newEffectiveValue.SetCoercedValue(metadata.CoerceValueCallback(this, newEffectiveValue.Value));
 
             //Nothing happen, return
             if (newEffectiveValue.Source == DependencyEffectiveSource.None && oldEffectiveValue.Source == DependencyEffectiveSource.None)
@@ -286,7 +339,7 @@ namespace Wodsoft.UI
             {
                 if (oldEffectiveValue.Expression == newEffectiveValue.Expression)
                 {
-                    newEffectiveValue.Expression!.Value = newEffectiveValue.Value;
+                    //newEffectiveValue.Expression!.Value = newEffectiveValue.Value;
                     newEffectiveValue.Expression!.UpdateSource();
                 }
                 else
@@ -300,7 +353,7 @@ namespace Wodsoft.UI
                 {
                     //One way to source expression
                     //Set value to expression and return
-                    newEffectiveValue.Expression!.Value = newEffectiveValue.Value;
+                    //newEffectiveValue.Expression!.Value = newEffectiveValue.Value;
                     newEffectiveValue.Expression!.UpdateSource();
                 }
             }

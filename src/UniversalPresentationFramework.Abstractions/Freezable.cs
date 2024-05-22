@@ -96,10 +96,10 @@ namespace Wodsoft.UI
                 }
                 else
                 {
-                    if (entry.Value.Source == DependencyEffectiveSource.Local)
+                    if (entry.Value.Source == DependencyEffectiveSource.Local || entry.Value.Source == DependencyEffectiveSource.Expression)
                         sourceValue = entry.Value.Value;
-                    else if (entry.Value.Source == DependencyEffectiveSource.Expression)
-                        sourceValue = entry.Value.Expression!.Value;
+                    //else if (entry.Value.Source == DependencyEffectiveSource.Expression)
+                    //    sourceValue = entry.Value.Expression!.Value;
                     else
                         continue;
                 }

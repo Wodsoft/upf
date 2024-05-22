@@ -17,7 +17,7 @@ namespace Wodsoft.UI
 
         public static readonly object NoValue = new object();
 
-        public event EventHandler? ValueChanged;
+        public event EventHandler<ExpressionValueChangedEventArgs>? ValueChanged;
 
         /// <summary>
         /// Get a expression is attached or not.
@@ -34,10 +34,10 @@ namespace Wodsoft.UI
         /// </summary>
         public abstract bool CanUpdateTarget { get; }
 
-        /// <summary>
-        /// Current expression value.
-        /// </summary>
-        public object? Value { get; internal set; }
+        ///// <summary>
+        ///// Current expression value.
+        ///// </summary>
+        //public object? Value { get; internal set; }
 
         public DependencyObject? AttachedObject => _object;
 
@@ -45,7 +45,7 @@ namespace Wodsoft.UI
 
         protected abstract void SetSourceValue(object? value);
 
-        protected abstract object? GetSourceValue();
+        protected internal abstract object? GetSourceValue();
 
         /// <summary>
         /// Update source.
@@ -57,7 +57,7 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Expression is not attaching.");
             if (!CanUpdateSource)
                 throw new InvalidOperationException("Expression can't update source.");
-            SetSourceValue(Value);
+            SetSourceValue(_object!.GetValue(_property!));
         }
 
         /// <summary>
@@ -70,11 +70,11 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Expression is not attaching.");
             if (!CanUpdateTarget)
                 throw new InvalidOperationException("Expression can't update target.");
-            var oldValue = Value;
+            //var oldValue = Value;
             TryUpdateExpressionValue(GetSourceValue());
-            var newValue = Value;
-            if (oldValue != newValue)
-                _object!.PropertyChanged(new DependencyPropertyChangedEventArgs(_property!, oldValue, newValue));
+            //var newValue = Value;
+            //if (oldValue != newValue)
+            //    _object!.PropertyChanged(new DependencyPropertyChangedEventArgs(_property!, oldValue, newValue));
         }
 
         public virtual void Attach(DependencyObject d, DependencyProperty dp)
@@ -111,7 +111,7 @@ namespace Wodsoft.UI
                 _isAttached = false;
                 _object = null;
                 _property = null;
-                Value = DependencyProperty.UnsetValue;
+                //Value = DependencyProperty.UnsetValue;
             }
         }
 
@@ -125,30 +125,43 @@ namespace Wodsoft.UI
         {
             if (!_isAttached)
                 throw new InvalidOperationException("Expression is not attaching.");
-            bool result;
-            var oldValue = Value;
+            var metadata = _object!.GetMetadata(_property!);
             if (value == NoValue)
+                value = metadata.DefaultValue;
+            if (_object.UpdateExpressionValue(_property!, metadata, value))
             {
-                Value = _object!.GetMetadata(_property!).DefaultValue;
-                result = false;
+                ValueChanged?.Invoke(this, new ExpressionValueChangedEventArgs(value));
+                return true;
             }
-            else
-            {
-                if (_object!.CoereceAndValidateValue(_property!, ref value, false, out var metadata))
-                {
-                    Value = value;
-                    result = true;
-                }
-                else
-                {
-                    Value = metadata.DefaultValue;
-                    result = false;
-                }
-            }
-            var newValue = Value;
-            if (!Equals(oldValue, newValue))
-                ValueChanged?.Invoke(this, EventArgs.Empty);
-            return result;
+            return false;
+            //bool result;
+            //var oldValue = Value;
+            //var metadata = _object!.GetMetadata(_property!);
+            //if (value == NoValue)
+            //{
+            //    Value = metadata.DefaultValue;
+            //    result = false;
+            //}
+            //else
+            //{
+            //    if (_object!.ValidateValue(_property!, ref value, false))
+            //    {
+            //        Value = value;
+            //        result = true;
+            //    }
+            //    else
+            //    {
+            //        Value = _object.GetMetadata(_property!).DefaultValue;
+            //        result = false;
+            //    }
+            //}
+            //var newValue = Value;
+            //if (!Equals(oldValue, newValue))
+            //{
+            //    _object.UpdateEffectiveValue(_property!, newValue);
+            //    ValueChanged?.Invoke(this, EventArgs.Empty);
+            //}
+            //return result;
         }
 
         internal void UpdateValue()

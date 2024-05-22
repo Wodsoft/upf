@@ -10,8 +10,8 @@ namespace Wodsoft.UI
     {
         private DependencyEffectiveSource _source;
         private Expression? _expression;
-        private object? _value;
-        private bool _hasValue;
+        private object? _value, _coercedValue;
+        private bool _hasValue, _isCoerced;
         private IDependencyModifiedValue? _modifiedValue;
 
         public DependencyEffectiveValue(Expression expression) : this(expression, DependencyEffectiveSource.Expression)
@@ -52,12 +52,29 @@ namespace Wodsoft.UI
             {
                 if (_source == DependencyEffectiveSource.None)
                     return DependencyProperty.UnsetValue;
+                else if (_isCoerced)
+                    return _coercedValue;
                 else if (_modifiedValue != null)
                     return _modifiedValue.GetValue(ref this);
-                else if (!_hasValue && _expression != null && _expression!.Value != Expression.NoValue)
-                    return _expression.Value;
-                else
-                    return _value;
+                //else if (!_hasValue && _expression != null && _expression!.Value != Expression.NoValue)
+                //    return _expression.Value;
+                //else
+                return _value;
+            }
+        }
+
+        public object? BaseValue
+        {
+            get
+            {
+                if (_source == DependencyEffectiveSource.None)
+                    return DependencyProperty.UnsetValue;
+                else if (_modifiedValue != null)
+                    return _modifiedValue.GetValue(ref this);
+                //else if (!_hasValue && _expression != null && _expression!.Value != Expression.NoValue)
+                //    return _expression.Value;
+                //else
+                return _value;
             }
         }
 
@@ -78,6 +95,20 @@ namespace Wodsoft.UI
         {
             _hasValue = true;
             _value = value;
+        }
+
+        public bool IsCoerced => _isCoerced;
+
+        internal void SetCoercedValue(object? value)
+        {
+            _isCoerced = true;
+            _coercedValue = value;
+        }
+
+        internal void ClearCoercedValue()
+        {
+            _isCoerced = false;
+            _coercedValue = null;
         }
 
         internal static DependencyEffectiveValue Default;

@@ -214,7 +214,7 @@ namespace Wodsoft.UI.Data
                 _propertyBinding!.SetValue(value);
         }
 
-        protected override object? GetSourceValue()
+        protected internal override object? GetSourceValue()
         {
             if (_hasError)
                 return Target!.GetMetadata(TargetProperty).DefaultValue;

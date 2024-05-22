@@ -22,7 +22,7 @@ namespace Wodsoft.UI
 
         public override bool CanUpdateTarget => true;
 
-        protected override object? GetSourceValue()
+        protected internal override object? GetSourceValue()
         {
             if (_logicalObject == null)
                 return Expression.NoValue;
