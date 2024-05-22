@@ -522,7 +522,7 @@ namespace Wodsoft.UI
                 foreach (var eventSetter in oldStyle._eventSetters)
                     element.RemoveHandler(eventSetter.Event!, eventSetter.Handler!);
                 foreach (var trigger in oldStyle._mergedTriggers)
-                    trigger.ConnectTrigger(oldStyle, element, null);
+                    trigger.DisconnectTrigger(oldStyle, element, null);
             }
             if (newStyle != null)
             {
