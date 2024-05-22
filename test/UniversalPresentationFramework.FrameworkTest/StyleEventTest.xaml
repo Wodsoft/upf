@@ -1,6 +1,6 @@
 ﻿<local:EventRoot xmlns="http://schemas.wodsoft.com/upf/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.FrameworkTest">
 	<FrameworkElement.Style>
 		<Style TargetType="{x:Type local:EventObject}">
 			<EventSetter Event="Click" Handler="Clicked"/>

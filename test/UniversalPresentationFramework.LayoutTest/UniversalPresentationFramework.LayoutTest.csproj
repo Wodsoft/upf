@@ -46,4 +46,8 @@
 	  </None>
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="../*.cs"/>
+	</ItemGroup>
+
 </Project>

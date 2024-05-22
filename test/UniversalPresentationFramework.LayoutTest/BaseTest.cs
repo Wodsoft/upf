@@ -13,6 +13,7 @@ namespace Wodsoft.UI.Test
         {
             FrameworkProvider.ResourceProvider = new Providers.EmbeddedResourceProvider();
             FrameworkProvider.ThemeProvider = new TestThemeProvider();
+            FrameworkProvider.ParameterProvider = new TestParameterProvider();
         }
 
         protected T LoadWpfXaml<T>(string xaml)

@@ -1,5 +1,5 @@
 ﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
-	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.FrameworkTest">
 	<local:MyObject Name="source" TextA="old value"/>
 	<local:MyObject Name="target" TextB="{Binding TextA, ElementName=source}"/>
 </Grid>

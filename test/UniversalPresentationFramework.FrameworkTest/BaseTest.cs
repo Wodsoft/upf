@@ -14,6 +14,9 @@ namespace Wodsoft.UI.Test
         {
             _clockProvider = new TestClockProvider();
             FrameworkCoreProvider.ClockProvider = _clockProvider;
+            FrameworkProvider.ResourceProvider = new Providers.EmbeddedResourceProvider();
+            FrameworkProvider.ThemeProvider = new TestThemeProvider();
+            FrameworkProvider.ParameterProvider = new TestParameterProvider();
         }
 
         protected void ApplyTick(TimeSpan tick)

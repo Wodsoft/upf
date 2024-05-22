@@ -1,6 +1,6 @@
 ﻿<Grid xmlns="http://schemas.wodsoft.com/upf/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.FrameworkTest">
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.FrameworkTest">
 	<Grid.Resources>
 		<Storyboard x:Key="story1" RepeatBehavior="Forever">
 			<SingleAnimation Storyboard.TargetName="target" Storyboard.TargetProperty="Width" To="200" Duration="0:0:1"/>

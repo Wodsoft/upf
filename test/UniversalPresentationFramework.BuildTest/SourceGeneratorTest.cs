@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using UniversalPresentationFramework.SourceGenerators;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
-namespace UniversalPersentationFramework.BuildTest
+namespace UniversalPresentationFramework.BuildTest
 {
     public class SourceGeneratorTest
     {

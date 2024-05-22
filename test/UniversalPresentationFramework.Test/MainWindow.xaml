@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Wodsoft.UI.Test.MainWindow"
         xmlns="http://schemas.wodsoft.com/upf/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	    xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPersentationFramework.Test"
+	    xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.Test"
 		Width="640" Height="480" Title="Hello Window">
 	<Grid>
 		<Grid.ColumnDefinitions>
