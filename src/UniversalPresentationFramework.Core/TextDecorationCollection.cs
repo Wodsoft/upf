@@ -531,5 +531,21 @@ namespace Wodsoft.UI
         }
 
         #endregion
+
+        private static TextDecorationCollection? _Empty;
+        public static TextDecorationCollection Empty
+        {
+            get
+            {
+                if (_Empty == null)
+                {
+                    TextDecorationCollection collection = new TextDecorationCollection();
+                    collection.Freeze();
+                    _Empty = collection;
+                }
+
+                return _Empty;
+            }
+        }
     }
 }
