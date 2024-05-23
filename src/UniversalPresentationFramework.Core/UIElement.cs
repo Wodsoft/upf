@@ -45,8 +45,8 @@ namespace Wodsoft.UI
             EventManager.RegisterClassHandler(type, Mouse.GotMouseCaptureEvent, new MouseEventHandler(OnGotMouseCaptureThunk), false);
             EventManager.RegisterClassHandler(type, Mouse.LostMouseCaptureEvent, new MouseEventHandler(OnLostMouseCaptureThunk), false);
             EventManager.RegisterClassHandler(type, Mouse.QueryCursorEvent, new QueryCursorEventHandler(OnQueryCursorThunk), false);
-            EventManager.RegisterClassHandler(type, GotFocusEvent, new QueryCursorEventHandler(OnGotFocusThunk), false);
-            EventManager.RegisterClassHandler(type, LostFocusEvent, new QueryCursorEventHandler(OnLostFocusThunk), false);
+            EventManager.RegisterClassHandler(type, GotFocusEvent, new RoutedEventHandler(OnGotFocusThunk), false);
+            EventManager.RegisterClassHandler(type, LostFocusEvent, new RoutedEventHandler(OnLostFocusThunk), false);
         }
 
         #endregion
@@ -1275,7 +1275,7 @@ namespace Wodsoft.UI
         public static readonly RoutedEvent GotFocusEvent = FocusManager.GotFocusEvent.AddOwner(typeof(UIElement));
         public static readonly RoutedEvent LostFocusEvent = FocusManager.LostFocusEvent.AddOwner(typeof(UIElement));
 
-        private static void OnLostFocusThunk(object sender, QueryCursorEventArgs e)
+        private static void OnLostFocusThunk(object sender, RoutedEventArgs e)
         {
             if (!e.Handled)
             {
@@ -1289,7 +1289,7 @@ namespace Wodsoft.UI
                 }
             }
         }
-        private static void OnGotFocusThunk(object sender, QueryCursorEventArgs e)
+        private static void OnGotFocusThunk(object sender, RoutedEventArgs e)
         {
             if (!e.Handled)
             {

@@ -17,6 +17,12 @@ namespace Wodsoft.UI
         static ContentElement()
         {
             UIElement.RegisterEvents(typeof(ContentElement));
+
+            UIElement.IsFocusedPropertyKey.OverrideMetadata(
+                typeof(ContentElement),
+                new PropertyMetadata(
+                    false, // default value
+                    new PropertyChangedCallback(IsFocused_Changed)));
         }
 
         #endregion
@@ -478,8 +484,7 @@ namespace Wodsoft.UI
         }
 
         public static readonly DependencyProperty IsFocusedProperty =
-                    UIElement.IsFocusedProperty.AddOwner(
-                                typeof(ContentElement), new PropertyMetadata(false, IsFocused_Changed));
+                    UIElement.IsFocusedProperty.AddOwner(typeof(ContentElement));
         private static void IsFocused_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ContentElement ce = ((ContentElement)d);
