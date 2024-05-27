@@ -26,7 +26,7 @@ namespace Wodsoft.UI.Controls
         #region Properties
 
         private ItemCollection? _items;
-        public ItemCollection Items
+        public virtual ItemCollection Items
         {
             get
             {

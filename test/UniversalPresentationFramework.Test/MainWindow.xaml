@@ -17,11 +17,15 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Rectangle Grid.Column="0" Width="100" Fill="Red"/>
-		<Rectangle Grid.Column="2" Width="50" Height="100" Fill="Blue"/>
+		<Rectangle Grid.Column="2" Width="50" Height="100" Fill="Blue" Cursor="No"/>
 		<Rectangle Grid.Column="1" Grid.Row="1" Width="50" Height="100" Fill="Yellow" HorizontalAlignment="Right"/>
 		<Rectangle Grid.Column="2" Grid.Row="2" Height="50" Fill="Red"/>
 		<Rectangle Grid.Column="0" Grid.Row="3" Fill="Blue"/>
-		<Rectangle Grid.Column="3" Grid.Row="3" Height="50" Fill="Yellow" VerticalAlignment="Bottom"/>
+		<Rectangle Name="test" Grid.Column="3" Grid.Row="3" Fill="Yellow"/>
+		<TextBox Grid.Column="3" Grid.Row="3" Margin="20" AcceptsReturn="true">
+			<TextBox.Text xml:space="preserve">Hello UPF.
+New Line.</TextBox.Text>
+		</TextBox>
 		<Rectangle Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2" Fill="Green" Margin="50"/>
 		<Rectangle Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2" Fill="Green" Height="50" Width="100" VerticalAlignment="Top"/>
 	</Grid>

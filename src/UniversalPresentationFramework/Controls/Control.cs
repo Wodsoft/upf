@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xaml;
 using System.Xaml.Markup;
+using Wodsoft.UI.Documents;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls
@@ -122,16 +123,70 @@ namespace Wodsoft.UI.Controls
             set { SetValue(BackgroundProperty, value); }
         }
 
-        //public static readonly DependencyProperty ForegroundProperty =
-        //        TextElement.ForegroundProperty.AddOwner(
-        //                typeof(Control),
-        //                new FrameworkPropertyMetadata(SystemColors.ControlTextBrush,
-        //                    FrameworkPropertyMetadataOptions.Inherits));
-        //public Brush? Foreground
-        //{
-        //    get { return (Brush?)GetValue(ForegroundProperty); }
-        //    set { SetValue(ForegroundProperty, value); }
-        //}
+        public static readonly DependencyProperty ForegroundProperty =
+                TextElement.ForegroundProperty.AddOwner(
+                        typeof(Control),
+                        new FrameworkPropertyMetadata(SystemColors.ControlTextBrush,
+                            FrameworkPropertyMetadataOptions.Inherits));
+        public Brush? Foreground
+        {
+            get { return (Brush?)GetValue(ForegroundProperty); }
+            set { SetValue(ForegroundProperty, value); }
+        }
+
+        public static readonly DependencyProperty FontFamilyProperty =
+                TextElement.FontFamilyProperty.AddOwner(
+                        typeof(Control),
+                        new FrameworkPropertyMetadata(SystemFonts.MessageFontFamily,
+                            FrameworkPropertyMetadataOptions.Inherits));
+        public FontFamily? FontFamily
+        {
+            get { return (FontFamily?)GetValue(FontFamilyProperty); }
+            set { SetValue(FontFamilyProperty, value); }
+        }
+
+        public static readonly DependencyProperty FontSizeProperty =
+                TextElement.FontSizeProperty.AddOwner(
+                        typeof(Control),
+                        new FrameworkPropertyMetadata(SystemFonts.MessageFontSize,
+                            FrameworkPropertyMetadataOptions.Inherits));
+        public float FontSize
+        {
+            get { return (float)GetValue(FontSizeProperty)!; }
+            set { SetValue(FontSizeProperty, value); }
+        }
+
+        public static readonly DependencyProperty FontStretchProperty
+            = TextElement.FontStretchProperty.AddOwner(typeof(Control),
+                    new FrameworkPropertyMetadata(TextElement.FontStretchProperty.DefaultMetadata.DefaultValue,
+                        FrameworkPropertyMetadataOptions.Inherits));
+        public FontStretch FontStretch
+        {
+            get { return (FontStretch)GetValue(FontStretchProperty)!; }
+            set { SetValue(FontStretchProperty, value); }
+        }
+
+        public static readonly DependencyProperty FontStyleProperty =
+                TextElement.FontStyleProperty.AddOwner(
+                        typeof(Control),
+                        new FrameworkPropertyMetadata(SystemFonts.MessageFontStyle,
+                            FrameworkPropertyMetadataOptions.Inherits));
+        public FontStyle FontStyle
+        {
+            get { return (FontStyle)GetValue(FontStyleProperty)!; }
+            set { SetValue(FontStyleProperty, value); }
+        }
+
+        public static readonly DependencyProperty FontWeightProperty =
+                TextElement.FontWeightProperty.AddOwner(
+                        typeof(Control),
+                        new FrameworkPropertyMetadata(SystemFonts.MessageFontWeight,
+                            FrameworkPropertyMetadataOptions.Inherits));
+        public FontWeight FontWeight
+        {
+            get { return (FontWeight)GetValue(FontWeightProperty)!; }
+            set { SetValue(FontWeightProperty, value); }
+        }
 
         public static readonly DependencyProperty HorizontalContentAlignmentProperty =
                     DependencyProperty.Register(
@@ -170,5 +225,18 @@ namespace Wodsoft.UI.Controls
         }
 
         #endregion
+
+        protected override bool HitTestCore(in Point point)
+        {
+            if (Background != null)
+            {
+                var renderSize = RenderSize;
+                if (renderSize != Size.Empty)
+                {
+                    return point.X >= 0 && point.X <= renderSize.Width && point.Y >= 0 && point.Y <= renderSize.Height;
+                }
+            }
+            return base.HitTestCore(point);
+        }
     }
 }

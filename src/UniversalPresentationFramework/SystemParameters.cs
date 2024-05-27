@@ -134,6 +134,26 @@ namespace Wodsoft.UI
         //public static (\w+) (\w+)\r\n +{\r\n +get\r\n +{\r\n +throw new NotImplementedException\(\);\r\n +}\r\n +}
         //public static $1 $2 => FrameworkProvider.GetParameterProvider().$2;
 
+
+        #region Accessibility Parameters
+
+        /// <summary>
+        ///     Maps to SPI_GETFOCUSBORDERWIDTH
+        /// </summary>
+        public static float FocusBorderWidth => FrameworkProvider.GetParameterProvider().FocusBorderWidth;
+
+        /// <summary>
+        ///     Maps to SPI_GETFOCUSBORDERHEIGHT
+        /// </summary>
+        public static float FocusBorderHeight => FrameworkProvider.GetParameterProvider().FocusBorderHeight;
+
+        /// <summary>
+        ///     Maps to SPI_GETHIGHCONTRAST -> HCF_HIGHCONTRASTON
+        /// </summary>
+        public static bool HighContrast => FrameworkProvider.GetParameterProvider().HighContrast;
+
+        #endregion
+
         #region Accessibility Keys
 
         /// <summary>
