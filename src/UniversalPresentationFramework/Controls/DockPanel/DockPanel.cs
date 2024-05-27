@@ -9,9 +9,9 @@ public partial class DockPanel : Panel
 {
     private static void DockChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
     {
-        if ((sender as Visual)?.GetParent() is Grid grid)
+        if (sender is Visual v && VisualTreeHelper.GetParent(v) is DockPanel dockPanel)
         {
-            grid.InvalidateMeasure();
+            dockPanel.InvalidateMeasure();
         }
     }
 

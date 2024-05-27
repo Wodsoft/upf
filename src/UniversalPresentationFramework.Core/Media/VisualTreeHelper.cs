@@ -8,17 +8,17 @@ namespace Wodsoft.UI.Media
 {
     public static class VisualTreeHelper
     {
-        public static Visual GetChild(this Visual visual, int childIndex)
+        public static Visual GetChild(Visual visual, int childIndex)
         {
             return visual.GetVisualChild(childIndex);
         }
 
-        public static int GetChildrenCount(this Visual visual)
+        public static int GetChildrenCount(Visual visual)
         {
             return visual.VisualChildrenCount;
         }
 
-        public static Visual? GetParent(this Visual visual)
+        public static Visual? GetParent(Visual visual)
         {
             return visual.VisualParent;
         }

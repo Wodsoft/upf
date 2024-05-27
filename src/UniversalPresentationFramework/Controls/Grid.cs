@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media;
@@ -149,7 +150,7 @@ namespace Wodsoft.UI.Controls
 
         private static void OnCellAttachedPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if ((d as Visual)?.GetParent() is Grid grid)
+            if (d is Visual v && VisualTreeHelper.GetParent(v) is Grid grid)
             {
                 grid.InvalidateMeasure();
             }
