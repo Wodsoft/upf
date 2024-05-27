@@ -278,6 +278,26 @@ namespace Wodsoft.UI
 
         #region Render
 
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            if (_context != null)
+            {
+                availableSize.Width = _context.ClientWidth / _context.DpiX;
+                availableSize.Height = _context.ClientHeight / _context.DpiY;
+            }
+            return base.MeasureOverride(availableSize);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            if (_context != null)
+            {
+                finalSize.Width = _context.ClientWidth / _context.DpiX;
+                finalSize.Height = _context.ClientHeight / _context.DpiY;
+            }
+            return base.ArrangeOverride(finalSize);
+        }
+
         private Size _visualSize;
         public override Size GetVisualSize()
         {
