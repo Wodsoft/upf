@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Page Remove="DockPanelTest.xaml" />
 	  <Page Remove="ItemsControlTest.xaml" />
 	</ItemGroup>
 
@@ -44,10 +45,13 @@
 	    <SubType>Designer</SubType>
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
+	  <None Update="DockPanelTest.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </None>
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="../*.cs"/>
+		<Compile Include="../*.cs" />
 	</ItemGroup>
 
 </Project>

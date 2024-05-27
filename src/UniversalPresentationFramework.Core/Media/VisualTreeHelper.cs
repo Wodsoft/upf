@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Media
 {
-    public class VisualTreeHelper
+    public static class VisualTreeHelper
     {
         public static Visual GetChild(Visual visual, int childIndex)
         {
