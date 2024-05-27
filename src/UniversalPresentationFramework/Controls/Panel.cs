@@ -27,13 +27,7 @@ namespace Wodsoft.UI.Controls
                     EnsureGenerator();
                 else
                 {
-                    if (_children == null)
-                    {
-                        if (IsItemsHost)
-                            _children = new UIElementCollection(this, null);
-                        else
-                            _children = new UIElementCollection(this, this);
-                    }
+                    _children ??= new UIElementCollection(this, IsItemsHost ? null : this);
                 }
                 return _children!;
             }
@@ -86,6 +80,7 @@ namespace Wodsoft.UI.Controls
                 panel.DisconnectToGenerator();
             }
         }
+
         public bool IsItemsHost
         {
             get { return (bool)GetValue(IsItemsHostProperty)!; }

@@ -472,7 +472,7 @@ namespace Wodsoft.UI.Controls
         /// Returns an enumerator that can iterate through the collection.
         /// </summary>
         /// <returns>Enumerator that enumerates the collection in order.</returns>
-        public virtual IEnumerator GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return _visualChildren.GetEnumerator();
         }
@@ -501,7 +501,7 @@ namespace Wodsoft.UI.Controls
             }
         }
 
-        IEnumerator<UIElement> IEnumerable<UIElement>.GetEnumerator()
+        public virtual IEnumerator<UIElement> GetEnumerator()
         {
             return _visualChildren.Cast<UIElement>().GetEnumerator();
         }

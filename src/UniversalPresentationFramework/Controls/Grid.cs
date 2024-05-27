@@ -149,14 +149,9 @@ namespace Wodsoft.UI.Controls
 
         private static void OnCellAttachedPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            Visual? child = d as Visual;
-            if (child != null)
+            if ((d as Visual)?.GetParent() is Grid grid)
             {
-                Grid? grid = VisualTreeHelper.GetParent(child) as Grid;
-                if (grid != null)
-                {
-                    grid.InvalidateMeasure();
-                }
+                grid.InvalidateMeasure();
             }
         }
 
