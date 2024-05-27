@@ -65,6 +65,7 @@ namespace Wodsoft.UI
 
         protected override void OnLogicalRootChanged(LogicalObject oldRoot, LogicalObject newRoot)
         {
+            base.OnLogicalRootChanged(oldRoot, newRoot);
             _hasRetryBind = false;
             Initialize();
         }
