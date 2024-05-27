@@ -1247,7 +1247,7 @@ namespace Wodsoft.UI
         {
             if (Focusable && IsEnabled && Dispatcher is UIDispatcher dispatcher)
             {
-                dispatcher.SetFocus(this);
+                dispatcher.KeyboardDevice.Focus(this);
                 return true;
             }
             return false;

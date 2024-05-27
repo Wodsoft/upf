@@ -16,5 +16,9 @@ namespace Wodsoft.UI.Providers
         void SetCursor(ICursorContext cursorContext);
 
         void SetCursor(CursorType cursorType);
+
+        MouseDevice MouseDevice { get; }
+
+        KeyboardDevice KeyboardDevice { get; }
     }
 }

@@ -10,6 +10,8 @@ namespace Wodsoft.UI.Input
 {
     public abstract class MouseDevice : InputDevice
     {
+        private Cursor? _overrideCursor;
+
         #region Properties 
 
         /// <summary>
@@ -67,6 +69,24 @@ namespace Wodsoft.UI.Input
             }
         }
 
+        public override IInputElement? Target => _mouseOver;
+
+        public IInputElement? DirectlyOver => _mouseOver;
+
+        public IInputElement? Captured => _capturedElement;
+
+        protected CaptureMode CaptureMode => _captureMode;
+
+        public Cursor? OverrideCursor
+        {
+            get => _overrideCursor;
+            set
+            {
+                _overrideCursor = value;
+                UpdateCursor();
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -74,6 +94,10 @@ namespace Wodsoft.UI.Input
         protected abstract MouseButtonState GetButtonState(MouseButton mouseButton);
 
         public abstract Point GetPosition(IInputElement relativeTo);
+
+        protected abstract Point GetPosition(IInputElement relativeTo, Int32Point mousePoint);
+
+        internal Point GetEventPosition(IInputElement relativeTo) => GetPosition(relativeTo, _lastPoint);
 
         protected abstract IInputElement? GetMouseOver(in Int32Point point);
 
@@ -124,6 +148,15 @@ namespace Wodsoft.UI.Input
             inputElement.RaiseEvent(e);
         }
 
+        public bool SetCursor(Cursor cursor)
+        {
+            if (_overrideCursor != null)
+                cursor = _overrideCursor;
+            else if (cursor == null)
+                cursor = Cursors.None;
+            return UpdateCursor(cursor);
+        }
+
         #endregion
 
         #region Input Handle
@@ -133,11 +166,7 @@ namespace Wodsoft.UI.Input
         private CaptureMode _captureMode;
         private List<IInputElement> _mouseOverTree = new List<IInputElement>();
 
-        public IInputElement? Captured => _capturedElement;
-
         protected Int32Point MousePoint => _lastPoint;
-
-        public IInputElement? Target => _mouseOver;
 
         internal void HandleInput(in MouseInput input)
         {
@@ -269,18 +298,23 @@ namespace Wodsoft.UI.Input
 
         public void UpdateCursor()
         {
-            if (_mouseOver != null)
+            if (_overrideCursor == null)
             {
-                var e = new QueryCursorEventArgs(this, Environment.TickCount);
-                e.RoutedEvent = Mouse.QueryCursorEvent;
-                _mouseOver.RaiseEvent(e);
-                if (e.Cursor == null)
-                    e.Cursor = Cursors.Arrow;
-                UpdateCursor(e.Cursor);
+                if (_mouseOver != null)
+                {
+                    var e = new QueryCursorEventArgs(this, Environment.TickCount);
+                    e.RoutedEvent = Mouse.QueryCursorEvent;
+                    _mouseOver.RaiseEvent(e);
+                    if (e.Cursor == null)
+                        e.Cursor = Cursors.Arrow;
+                    UpdateCursor(e.Cursor);
+                }
             }
+            else
+                UpdateCursor(_overrideCursor);
         }
 
-        protected abstract void UpdateCursor(Cursor cursor);
+        protected abstract bool UpdateCursor(Cursor cursor);
 
         private void MouseOverChange(IInputElement? oldMouseOver, IInputElement? newMouseOver, int messageTime)
         {

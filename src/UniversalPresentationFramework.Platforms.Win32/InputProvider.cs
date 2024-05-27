@@ -101,5 +101,13 @@ namespace Wodsoft.UI.Platforms.Win32
             new PCWSTR((char*) 32512 + 150), // ScrollSECursor
             new PCWSTR((char*) 32512 + 151) // ArrowCDCursor
        };
+
+        public Win32MouseDevice MouseDevice { get; } = new Win32MouseDevice();
+
+        public Win32KeyboardDevice KeyboardDevice => new Win32KeyboardDevice();
+
+        MouseDevice IInputProvider.MouseDevice => MouseDevice;
+
+        KeyboardDevice IInputProvider.KeyboardDevice => KeyboardDevice;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,14 +15,17 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly WindowContext _windowContext;
         private FrameworkElement? _mouseOver;
 
-        public Win32Dispatcher(WindowContext windowContext, Thread thread)
+        public Win32Dispatcher(WindowContext windowContext, InputProvider inputProvider, Thread thread)
         {
             _windowContext = windowContext;
             Thread = thread;
-            MouseDevice = new Win32MouseDevice(windowContext);
+            MouseDevice = inputProvider.MouseDevice;
+            KeyboardDevice = inputProvider.KeyboardDevice;
         }
 
         public override Thread Thread { get; }
+
+        internal WindowContext WindowContext => _windowContext;
 
         protected override FrameworkElement RootElement => _windowContext.Window;
 
@@ -35,7 +39,7 @@ namespace Wodsoft.UI.Platforms.Win32
             _windowContext.Render();
         }
 
-        protected override void RunInputCore(bool hasMouseInput)
+        protected override void RunInputCore(bool hasMouseInput, bool hasKeyboardInput)
         {
             if (hasMouseInput)
             {
@@ -54,10 +58,12 @@ namespace Wodsoft.UI.Platforms.Win32
 
         protected override void UpdateLayoutCore()
         {
-            RootElement.Arrange(new Rect(0, 0, RootElement.Width, RootElement.Height));
+            RootElement.Arrange(new Rect(0, 0, _windowContext.ClientWidth / _windowContext.DpiX, _windowContext.ClientHeight / _windowContext.DpiY));
         }
 
         protected override MouseDevice MouseDevice { get; }
+
+        protected override KeyboardDevice KeyboardDevice { get; }
 
         protected override bool IsActived => _windowContext.State != WindowState.Minimized;
     }

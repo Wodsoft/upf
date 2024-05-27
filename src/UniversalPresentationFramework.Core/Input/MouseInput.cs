@@ -8,6 +8,7 @@ namespace Wodsoft.UI.Input
 {
     internal record struct MouseInput
     {
+        public PresentationSource Source;
         public int MessageTime;
         public MouseActions Actions;
         public MouseButton? Button;

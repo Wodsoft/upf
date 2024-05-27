@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Wodsoft.UI.Input;
 using Wodsoft.UI.Media;
 
@@ -66,7 +67,7 @@ namespace Wodsoft.UI.Threading
 
         private List<MouseInput> _mouseInputs = new List<MouseInput>();
         private List<MouseInput> _backMouseInputs = new List<MouseInput>();
-        public void PushMouseInput(int messageTime, MouseActions actions, MouseButton? button, int x, int y, int wheel)
+        public void PushMouseInput(PresentationSource presentationSource, int messageTime, MouseActions actions, MouseButton? button, int x, int y, int wheel)
         {
             var inputs = _mouseInputs;
             lock (inputs)
@@ -82,11 +83,28 @@ namespace Wodsoft.UI.Threading
                 }
                 inputs.Add(new MouseInput
                 {
+                    Source = presentationSource,
                     MessageTime = messageTime,
                     Actions = actions,
                     Button = button,
                     Point = new Int32Point(x, y),
                     Wheel = wheel
+                });
+            }
+        }
+
+        private List<KeyboardInput> _keyboardInputs = new List<KeyboardInput>();
+        private List<KeyboardInput> _backKeyboardInputs = new List<KeyboardInput>();
+        public void PushKeyboardInput(int messageTime, Key key, KeyStates keyStates)
+        {
+            var inputs = _keyboardInputs;
+            lock (inputs)
+            {
+                inputs.Add(new KeyboardInput
+                {
+                    MessageTime = messageTime,
+                    Key = key,
+                    KeyStates = keyStates
                 });
             }
         }
@@ -106,10 +124,23 @@ namespace Wodsoft.UI.Threading
                 }
                 _backMouseInputs.Clear();
             }
-            RunInputCore(hasMouseInput);
+            _backKeyboardInputs = Interlocked.Exchange(ref _keyboardInputs, _backKeyboardInputs);
+            bool hasKeyboardInput = _backKeyboardInputs.Count != 0;
+            if (hasKeyboardInput)
+            {
+                var count = _backKeyboardInputs.Count;
+                var inputs = CollectionsMarshal.AsSpan(_backKeyboardInputs);
+                for (int i = 0; i < count; i++)
+                {
+                    ref var input = ref inputs[i];
+                    KeyboardDevice.HandleInput(input);
+                }
+                _backKeyboardInputs.Clear();
+            }
+            RunInputCore(hasMouseInput, hasKeyboardInput);
         }
 
-        protected virtual void RunInputCore(bool hasMouseInput)
+        protected virtual void RunInputCore(bool hasMouseInput, bool hasKeyboardInput)
         {
 
         }
@@ -189,6 +220,8 @@ namespace Wodsoft.UI.Threading
         #region Device
 
         protected internal abstract MouseDevice MouseDevice { get; }
+
+        protected internal abstract KeyboardDevice KeyboardDevice { get; }
 
         #endregion
 

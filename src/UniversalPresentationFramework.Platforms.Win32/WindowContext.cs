@@ -9,6 +9,7 @@ using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.Graphics.OpenGL;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Windows.Win32.UI.WindowsAndMessaging;
+using Wodsoft.UI.Input;
 using Wodsoft.UI.Renderers;
 using Wodsoft.UI.Threading;
 
@@ -23,8 +24,8 @@ namespace Wodsoft.UI.Platforms.Win32
         private bool _disposed, _topMost, _inputProcessing, _isActivated, _isDestoryed;
         private string _title = string.Empty;
         private Thread _windowThread, _dispatcherThread;
-        private int _x, _y, _width, _height, _clientWidth, _clientHeight, _clientX, _clientY;
-        private float _dpiX, _dpiY;
+        private int _x, _y, _originalWidth, _originalHeight, _clientWidth, _clientHeight, _clientX, _clientY;
+        private float _dpiX, _dpiY, _width, _height;
         private WindowState _state;
         private WindowStyle _style;
         private readonly Window _window;
@@ -32,19 +33,21 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly Win32RendererContextType _contextType;
         private readonly Action _themeChanged;
         private readonly Win32Dispatcher _dispatcher;
+        private readonly Win32PresentationSource _source;
+        private readonly InputProvider _inputProvider;
         private SkiaRendererContext? _rendererContext;
         private Exception? _exception;
         private bool _mouseLeave;
 
-        public WindowContext(Window window, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
+        public WindowContext(Window window, InputProvider inputProvider, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
         {
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
             Title = window.Title;
             X = (int)window.Left;
             Y = (int)window.Top;
-            Width = (int)window.Width;
-            Height = (int)window.Height;
+            Width = window.Width;
+            Height = window.Height;
             State = window.WindowState;
             Style = window.WindowStyle;
             StartupLocation = window.WindowStartupLocation;
@@ -55,23 +58,15 @@ namespace Wodsoft.UI.Platforms.Win32
             _windowThread.Name = "Window HWND Loop";
             _dispatcherThread = new Thread(ProcessDispatcher);
             _dispatcherThread.Name = "Window Dispatcher";
-            _dispatcher = new Win32Dispatcher(this, _dispatcherThread);
+            _dispatcher = new Win32Dispatcher(this, inputProvider, _dispatcherThread);
+            _inputProvider = inputProvider;
             _window = window;
             _rendererProvider = rendererProvider;
             _contextType = contextType;
             _themeChanged = themeChanged;
+            _source = new Win32PresentationSource(this);
             //_thread.SetApartmentState(ApartmentState.STA);
         }
-
-        public bool IsClosing { get; private set; }
-
-        public Dispatcher Dispatcher => _dispatcher;
-
-        internal Window Window => _window;
-
-        internal HWND Hwnd => _hwnd;
-
-        internal FreeLibrarySafeHandle Instance => _instance;
 
         #region Window Properties
 
@@ -117,7 +112,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public float DpiY => _dpiY;
 
-        public int Width
+        public float Width
         {
             get => _width;
             set
@@ -128,7 +123,7 @@ namespace Wodsoft.UI.Platforms.Win32
             }
         }
 
-        public int Height
+        public float Height
         {
             get => _height;
             set
@@ -174,6 +169,25 @@ namespace Wodsoft.UI.Platforms.Win32
         public bool IsActivated => _isActivated;
 
         internal Exception? Exception => _exception;
+                
+        public bool IsClosing { get; private set; }
+
+        public bool IsDisposed => _disposed;
+
+        public Win32Dispatcher Dispatcher => _dispatcher;
+        Dispatcher IWindowContext.Dispatcher => _dispatcher;
+
+        internal Window Window => _window;
+
+        internal HWND Hwnd => _hwnd;
+
+        internal FreeLibrarySafeHandle Instance => _instance;
+
+        internal Win32PresentationSource Source => _source;
+
+        public int OriginalWidth => _originalWidth;
+
+        public int OriginalHeight => _originalHeight;
 
         #endregion
 
@@ -323,7 +337,7 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             if (PInvoke.RegisterClassEx(GetWindowClass()) == 0)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
-            int x = -1, y = -1, width = _width, height = _height;
+            int x = -1, y = -1, width = (int)_width, height = (int)_height;
             System.Drawing.Point point;
             var startupLocation = _window.WindowStartupLocation;
             switch (startupLocation)
@@ -384,6 +398,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             if (!PInvoke.UpdateWindow(_hwnd))
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
+            _source.Start();
             MSG msg;
             while (true)
             {
@@ -395,6 +410,7 @@ namespace Wodsoft.UI.Platforms.Win32
                     PInvoke.DispatchMessage(msg);
                 }
             }
+            _source.Stop();
         }
 
         private bool _locationChanged, _sizeChanged, _isActivateChanged, _stateChanged;
@@ -548,12 +564,16 @@ namespace Wodsoft.UI.Platforms.Win32
                                 _locationChanged = true;
                             }
                             PInvoke.GetClientRect(hwnd, out var clientRect);
-                            _clientX = clientRect.X;
-                            _clientY = clientRect.Y;
+                            var clientPoint = new System.Drawing.Point();
+                            PInvoke.ClientToScreen(hwnd, ref clientPoint);
+                            _clientX = clientPoint.X;
+                            _clientY = clientPoint.Y;
                             _clientWidth = (int)(lParam.Value & 0xffff);
                             _clientHeight = (int)(lParam.Value >> 16);
-                            _width = (int)(_clientWidth / _dpiX);
-                            _height = (int)(_clientHeight / DpiY);
+                            _originalWidth = rect.Width;
+                            _originalHeight = rect.Height;
+                            _width = (int)(rect.Width / _dpiX);
+                            _height = (int)(rect.Height / DpiY);
                             _sizeChanged = true;
                             _window.Width = _width;
                             _window.Height = _height;
@@ -565,6 +585,10 @@ namespace Wodsoft.UI.Platforms.Win32
                 case PInvoke.WM_NCACTIVATE:
                     {
                         _isActivated = wParam == 1;
+                        if (_isActivated)
+                            _inputProvider.MouseDevice.CurrentContext = this;
+                        else
+                            _inputProvider.MouseDevice.CurrentContext = null;
                         _isActivateChanged = true;
                         break;
                     }
@@ -573,12 +597,13 @@ namespace Wodsoft.UI.Platforms.Win32
                         _themeChanged();
                         break;
                     }
+                #region Mouse
                 case PInvoke.WM_MOUSEMOVE:
                     {
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Move, null, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Move, null, x, y, 0);
                         if (_mouseLeave)
                         {
                             _mouseLeave = false;
@@ -600,14 +625,14 @@ namespace Wodsoft.UI.Platforms.Win32
                         int y = lParam.Value.ToInt32() >> 16;
                         int wheel = unchecked((int)wParam.Value.ToUInt32()) >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Wheel, null, x, y, wheel);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Wheel, null, x, y, wheel);
                         break;
                     }
                 case PInvoke.WM_MOUSELEAVE:
                     {
                         _mouseLeave = true;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Leave, null, 0, 0, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Leave, null, 0, 0, 0);
                         break;
                     }
                 case PInvoke.WM_LBUTTONDBLCLK:
@@ -616,7 +641,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.Left, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Press, Input.MouseButton.Left, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_LBUTTONUP:
@@ -624,7 +649,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.Left, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Release, Input.MouseButton.Left, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_RBUTTONDBLCLK:
@@ -633,7 +658,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.Right, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Press, Input.MouseButton.Right, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_RBUTTONUP:
@@ -641,7 +666,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.Right, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Release, Input.MouseButton.Right, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_MBUTTONDBLCLK:
@@ -650,7 +675,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.Middle, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Press, Input.MouseButton.Middle, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_MBUTTONUP:
@@ -658,7 +683,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.Middle, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Release, Input.MouseButton.Middle, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_XBUTTONDBLCLK:
@@ -667,7 +692,7 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Press, Input.MouseButton.XButton1, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Press, Input.MouseButton.XButton1, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_XBUTTONUP:
@@ -675,15 +700,40 @@ namespace Wodsoft.UI.Platforms.Win32
                         int x = lParam.Value.ToInt32() & 0xffff;
                         int y = lParam.Value.ToInt32() >> 16;
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.Release, Input.MouseButton.XButton1, x, y, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.Release, Input.MouseButton.XButton1, x, y, 0);
                         break;
                     }
                 case PInvoke.WM_CAPTURECHANGED:
                     {
                         var time = PInvoke.GetMessageTime();
-                        _dispatcher.PushMouseInput(time, Input.MouseActions.CancelCapture, null, 0, 0, 0);
+                        _dispatcher.PushMouseInput(_source, time, Input.MouseActions.CancelCapture, null, 0, 0, 0);
                         break;
                     }
+                #endregion
+                #region Keyboard
+                case PInvoke.WM_KEYDOWN:
+                    if ((wParam & 0xff) == 1)
+                    {
+                        var key = KeyInterop.KeyFromVirtualKey((int)lParam);
+                        if (key != Input.Key.None)
+                        {
+                            var time = PInvoke.GetMessageTime();
+                            _dispatcher.PushKeyboardInput(time, key, KeyStates.Down);
+                        }
+                    }
+                    break;
+                case PInvoke.WM_KEYUP:
+                    if ((wParam & 0xff) == 1)
+                    {
+                        var key = KeyInterop.KeyFromVirtualKey((int)lParam);
+                        if (key != Input.Key.None)
+                        {
+                            var time = PInvoke.GetMessageTime();
+                            _dispatcher.PushKeyboardInput(time, key, KeyStates.None);
+                        }
+                    }
+                    break;
+                #endregion
                 case _InsertMessage:
                     while (_insertMessages.TryPop(out var action))
                         action();

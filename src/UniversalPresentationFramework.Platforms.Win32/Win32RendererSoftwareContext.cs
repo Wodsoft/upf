@@ -56,7 +56,7 @@ namespace Wodsoft.UI.Platforms.Win32
             var width = _width;
             var height = _height;
             var hdc = PInvoke.GetDC(_windowContext.Hwnd);
-            PInvoke.StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, (_buffer + _HeaderSize).ToPointer(), in Unsafe.AsRef<BITMAPINFO>(_buffer.ToPointer()), 0, ROP_CODE.SRCCOPY);
+            PInvoke.StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, (_buffer + _HeaderSize).ToPointer(), (BITMAPINFO*)_buffer.ToPointer(), 0, ROP_CODE.SRCCOPY);
             PInvoke.ReleaseDC(_windowContext.Hwnd, hdc);
         }
 

@@ -17,6 +17,8 @@ namespace Wodsoft.UI.Input
     /// </remarks>
     public static class Mouse
     {
+        #region Event
+
         /// <summary>
         ///     PreviewMouseMove
         /// </summary>
@@ -392,66 +394,68 @@ namespace Wodsoft.UI.Input
             UIElement.RemoveHandler(element, QueryCursorEvent, handler);
         }
 
-        ///// <summary>
-        /////     Returns the element that the mouse is over.
-        ///// </summary>
-        ///// <remarks>
-        /////     This will be true if the element has captured the mouse.
-        ///// </remarks>
-        //public static IInputElement DirectlyOver
-        //{
-        //    get
-        //    {
-        //        return Mouse.PrimaryDevice.DirectlyOver;
-        //    }
-        //}
+        #endregion
+
+        /// <summary>
+        ///     Returns the element that the mouse is over.
+        /// </summary>
+        /// <remarks>
+        ///     This will be true if the element has captured the 
+        /// </remarks>
+        public static IInputElement? DirectlyOver
+        {
+            get
+            {
+                return PrimaryDevice.DirectlyOver;
+            }
+        }
+
+        /// <summary>
+        ///     Returns the element that has captured the 
+        /// </summary>
+        public static IInputElement? Captured
+        {
+            get
+            {
+                return PrimaryDevice.Captured;
+            }
+        }
 
         ///// <summary>
-        /////     Returns the element that has captured the mouse.
-        ///// </summary>
-        //public static IInputElement Captured
-        //{
-        //    get
-        //    {
-        //        return Mouse.PrimaryDevice.Captured;
-        //    }
-        //}
-
-        ///// <summary>
-        /////     Returns the element that has captured the mouse.
+        /////     Returns the element that has captured the 
         ///// </summary>
         //internal static CaptureMode CapturedMode
         //{
         //    get
         //    {
-        //        return Mouse.PrimaryDevice.CapturedMode;
+        //        return PrimaryDevice.CapturedMode;
         //    }
         //}
 
-        ///// <summary>
-        /////     Captures the mouse to a particular element.
-        ///// </summary>
-        ///// <param name="element">
-        /////     The element to capture the mouse to.
-        ///// </param>
-        //public static bool Capture(IInputElement element)
-        //{
-        //    return Mouse.PrimaryDevice.Capture(element);
-        //}
+        /// <summary>
+        ///     Captures the mouse to a particular element.
+        /// </summary>
+        /// <param name="element">
+        ///     The element to capture the mouse to.
+        /// </param>
+        public static bool Capture(IInputElement element)
+        {
+            return PrimaryDevice.Capture(element);
+        }
 
-        ///// <summary>
-        /////     Captures the mouse to a particular element.
-        ///// </summary>
-        ///// <param name="element">
-        /////     The element to capture the mouse to.
-        ///// </param>
-        ///// <param name="captureMode">
-        /////     The kind of capture to acquire.
-        ///// </param>
-        //public static bool Capture(IInputElement element, CaptureMode captureMode)
-        //{
-        //    return Mouse.PrimaryDevice.Capture(element, captureMode);
-        //}
+        /// <summary>
+        ///     Captures the mouse to a particular element.
+        /// </summary>
+        /// <param name="element">
+        ///     The element to capture the mouse to.
+        /// </param>
+        /// <param name="captureMode">
+        ///     The kind of capture to acquire.
+        /// </param>
+        public static bool Capture(IInputElement element, CaptureMode captureMode)
+        {
+            return PrimaryDevice.Capture(element, captureMode);
+        }
 
         ///// <summary>
         /////     Retrieves the history of intermediate Points up to 64 previous coordinates of the mouse or pen.
@@ -465,7 +469,7 @@ namespace Wodsoft.UI.Input
         //public static int GetIntermediatePoints(IInputElement relativeTo, Point[] points)
         //{
         //    // Security Mitigation: do not give out input state if the device is not active.
-        //    if (Mouse.PrimaryDevice.IsActive)
+        //    if (PrimaryDevice.IsActive)
         //    {
         //        if (relativeTo != null)
         //        {
@@ -483,32 +487,32 @@ namespace Wodsoft.UI.Input
         //    return -1;
         //}
 
-        ///// <summary>
-        ///// The override cursor
-        ///// </summary>
-        //public static Cursor OverrideCursor
-        //{
-        //    get
-        //    {
-        //        return Mouse.PrimaryDevice.OverrideCursor;
-        //    }
+        /// <summary>
+        /// The override cursor
+        /// </summary>
+        public static Cursor? OverrideCursor
+        {
+            get
+            {
+                return PrimaryDevice.OverrideCursor;
+            }
 
-        //    set
-        //    {
-        //        // forwarding to the MouseDevice, will be validated there.	
-        //        Mouse.PrimaryDevice.OverrideCursor = value;
-        //    }
-        //}
+            set
+            {
+                // forwarding to the MouseDevice, will be validated there.	
+                PrimaryDevice.OverrideCursor = value;
+            }
+        }
 
-        ///// <summary>
-        /////     Sets the mouse cursor
-        ///// </summary>
-        ///// <param name="cursor">The cursor to be set</param>
-        ///// <returns>True on success (always the case for Win32)</returns>
-        //public static bool SetCursor(Cursor cursor)
-        //{
-        //    return Mouse.PrimaryDevice.SetCursor(cursor);
-        //}
+        /// <summary>
+        ///     Sets the mouse cursor
+        /// </summary>
+        /// <param name="cursor">The cursor to be set</param>
+        /// <returns>True on success (always the case for Win32)</returns>
+        public static bool SetCursor(Cursor cursor)
+        {
+            return PrimaryDevice.SetCursor(cursor);
+        }
 
         /// <summary>
         ///     The state of the left button.
@@ -517,7 +521,7 @@ namespace Wodsoft.UI.Input
         {
             get
             {
-                return Mouse.PrimaryDevice.LeftButton;
+                return PrimaryDevice.LeftButton;
             }
         }
 
@@ -528,7 +532,7 @@ namespace Wodsoft.UI.Input
         {
             get
             {
-                return Mouse.PrimaryDevice.RightButton;
+                return PrimaryDevice.RightButton;
             }
         }
 
@@ -539,7 +543,7 @@ namespace Wodsoft.UI.Input
         {
             get
             {
-                return Mouse.PrimaryDevice.MiddleButton;
+                return PrimaryDevice.MiddleButton;
             }
         }
 
@@ -550,7 +554,7 @@ namespace Wodsoft.UI.Input
         {
             get
             {
-                return Mouse.PrimaryDevice.XButton1;
+                return PrimaryDevice.XButton1;
             }
         }
 
@@ -561,34 +565,34 @@ namespace Wodsoft.UI.Input
         {
             get
             {
-                return Mouse.PrimaryDevice.XButton2;
+                return PrimaryDevice.XButton2;
             }
         }
 
-        ///// <summary>
-        /////     Calculates the position of the mouse relative to
-        /////     a particular element.
-        ///// </summary>
-        //public static Point GetPosition(IInputElement relativeTo)
-        //{
-        //    return Mouse.PrimaryDevice.GetPosition(relativeTo);
-        //}
+        /// <summary>
+        ///     Calculates the position of the mouse relative to
+        ///     a particular element.
+        /// </summary>
+        public static Point GetPosition(IInputElement relativeTo)
+        {
+            return PrimaryDevice.GetPosition(relativeTo);
+        }
 
         ///// <summary>
         /////     Forces the mouse to resynchronize.
         ///// </summary>
         //public static void Synchronize()
         //{
-        //    Mouse.PrimaryDevice.Synchronize();
+        //    PrimaryDevice.Synchronize();
         //}
 
-        ///// <summary>
-        /////     Forces the mouse cursor to be updated.
-        ///// </summary>
-        //public static void UpdateCursor()
-        //{
-        //    Mouse.PrimaryDevice.UpdateCursor();
-        //}
+        /// <summary>
+        ///     Forces the mouse cursor to be updated.
+        /// </summary>
+        public static void UpdateCursor()
+        {
+            PrimaryDevice.UpdateCursor();
+        }
 
         /// <summary>
         ///     The number of units the mouse wheel should be rotated to scroll one line.
@@ -611,16 +615,6 @@ namespace Wodsoft.UI.Input
         /// <summary>
         ///     The primary mouse device.
         /// </summary>
-        public static MouseDevice PrimaryDevice
-        {
-            get
-            {
-                throw new NotImplementedException();
-                //MouseDevice mouseDevice;
-                ////there is a link demand on the Current property
-                //mouseDevice = InputManager.UnsecureCurrent.PrimaryMouseDevice;
-                //return mouseDevice;
-            }
-        }
+        public static MouseDevice PrimaryDevice => FrameworkCoreProvider.GetInputProvider().MouseDevice;
     }
 }

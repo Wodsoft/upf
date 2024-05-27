@@ -76,7 +76,7 @@ namespace Wodsoft.UI.Input
         /// </summary>
         public Point GetPosition(IInputElement relativeTo)
         {
-            return this.MouseDevice.GetPosition(relativeTo);
+            return this.MouseDevice.GetEventPosition(relativeTo);
         }
 
         /// <summary>

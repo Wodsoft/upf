@@ -39,5 +39,44 @@ namespace Wodsoft.UI.Input
 
             return container;
         }
+
+        internal static Visual? GetRootVisual(DependencyObject d)
+        {
+            Visual? rootVisual = GetContainingVisual(d);
+            Visual? parentVisual;
+            while (rootVisual != null && ((parentVisual = VisualTreeHelper.GetParent(rootVisual)) != null))
+            {
+                rootVisual = parentVisual;
+            }
+            return rootVisual;
+        }
+
+        internal static Visual GetRootVisual(Visual visual)
+        {
+            Visual rootVisual = visual;
+            Visual? parentVisual;
+            while ((parentVisual = VisualTreeHelper.GetParent(rootVisual)) != null)
+            {
+                rootVisual = parentVisual;
+            }
+            return rootVisual;
+        }
+
+        internal static Visual? GetContainingVisual(DependencyObject o)
+        {
+            Visual? v = o as Visual;
+            if (v != null)
+                return v;
+            var logicalObject = o as LogicalObject;
+            while (logicalObject != null)
+            {
+                if (logicalObject.LogicalParent == null)
+                    return null;
+                logicalObject = logicalObject.LogicalParent;
+                if (logicalObject is Visual visual)
+                    return visual;
+            }
+            return null;
+        }
     }
 }

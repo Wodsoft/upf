@@ -53,9 +53,14 @@ GL_*
 glGetError
 GetSysColor
 TrackMouseEvent
-HoverDefault
 LoadCursorFromFile
 LoadCursor
 SetCursor
 DestroyCursor
 IDC_*
+VIRTUAL_KEY
+GetAsyncKeyState
+GetKeyState
+GetCursorPos
+ClientToScreen
+SetFocus

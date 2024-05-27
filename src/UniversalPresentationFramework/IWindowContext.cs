@@ -24,13 +24,17 @@ namespace Wodsoft.UI
 
         int Y { get; set; }
 
-        int Width { get; set; }
+        float Width { get; set; }
 
-        int Height { get; set; }
+        float Height { get; set; }
 
         int ClientWidth { get; }
 
         int ClientHeight { get; }
+
+        float DpiX { get; }
+
+        float DpiY { get; }
 
         WindowState State { get; set; }
 
