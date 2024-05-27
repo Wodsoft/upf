@@ -84,9 +84,9 @@ public partial class DockPanel
     public static readonly DependencyProperty HorizontalSpacingProperty
         = DependencyProperty.Register(
             nameof(HorizontalSpacing), 
-            typeof(double), 
+            typeof(float), 
             typeof(DockPanel), 
-            new PropertyMetadata(0d, OnPropertyChanged));
+            new PropertyMetadata(0f, OnPropertyChanged));
 
     /// <summary>
     /// Gets or sets the horizontal distance between the child objects.
@@ -104,9 +104,9 @@ public partial class DockPanel
     public static readonly DependencyProperty VerticalSpacingProperty
         = DependencyProperty.Register(
             nameof(VerticalSpacing), 
-            typeof(double), 
+            typeof(float), 
             typeof(DockPanel), 
-            new PropertyMetadata(default(double), OnPropertyChanged));
+            new PropertyMetadata(0f, OnPropertyChanged));
 
     /// <summary>
     /// Gets or sets the vertical distance between the child objects.

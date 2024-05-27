@@ -1,0 +1,48 @@
+﻿<DockPanel
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    av:DesignHeight="500"
+    av:DesignWidth="800"
+    mc:Ignorable="av">
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Left"
+        Fill="Red" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Right"
+        Fill="Blue" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Top"
+        Fill="Green" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Top"
+        Fill="Yellow" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Bottom"
+        Fill="Red" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Left"
+        Fill="Blue" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Bottom"
+        Fill="Yellow" />
+    <Rectangle
+        MinWidth="10"
+        MinHeight="10"
+        DockPanel.Dock="Top"
+        Fill="Green" />
+</DockPanel>
