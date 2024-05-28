@@ -347,36 +347,36 @@ namespace Wodsoft.UI.Media.Animation
 
         #region GetSegmentLength Methods
 
-        internal static Double GetSegmentLengthBoolean(Boolean from, Boolean to)
+        internal static float GetSegmentLengthBoolean(Boolean from, Boolean to)
         {
             if (from != to)
             {
-                return 1.0;
+                return 1.0f;
             }
             else
             {
-                return 0.0;
+                return 0.0f;
             }
         }
 
-        internal static Double GetSegmentLengthByte(Byte from, Byte to)
+        internal static float GetSegmentLengthByte(Byte from, Byte to)
         {
             return Math.Abs((Int32)to - (Int32)from);
         }
 
-        internal static Double GetSegmentLengthChar(Char from, Char to)
+        internal static float GetSegmentLengthChar(Char from, Char to)
         {
             if (from != to)
             {
-                return 1.0;
+                return 1.0f;
             }
             else
             {
-                return 0.0;
+                return 0.0f;
             }
         }
 
-        internal static Double GetSegmentLengthColor(Color from, Color to)
+        internal static float GetSegmentLengthColor(Color from, Color to)
         {
             return Math.Abs(to.ScA - from.ScA)
                  + Math.Abs(to.ScR - from.ScR)
@@ -384,49 +384,49 @@ namespace Wodsoft.UI.Media.Animation
                  + Math.Abs(to.ScB - from.ScB);
         }
 
-        internal static Double GetSegmentLengthDecimal(Decimal from, Decimal to)
+        internal static float GetSegmentLengthDecimal(Decimal from, Decimal to)
         {
             // We may lose precision here, but it's not likely going to be a big deal
             // for the purposes of this method.  The relative lengths of Decimal
             // segments will still be adequately represented.
-            return (Double)Math.Abs(to - from);
+            return (float)Math.Abs(to - from);
         }
 
-        internal static Double GetSegmentLengthDouble(Double from, Double to)
+        internal static float GetSegmentLengthDouble(float from, float to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static Double GetSegmentLengthInt16(Int16 from, Int16 to)
+        internal static float GetSegmentLengthInt16(Int16 from, Int16 to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static Double GetSegmentLengthInt32(Int32 from, Int32 to)
+        internal static float GetSegmentLengthInt32(Int32 from, Int32 to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static Double GetSegmentLengthInt64(Int64 from, Int64 to)
+        internal static float GetSegmentLengthInt64(Int64 from, Int64 to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static Double GetSegmentLengthMatrix(Matrix3x2 from, Matrix3x2 to)
+        internal static float GetSegmentLengthMatrix(Matrix3x2 from, Matrix3x2 to)
         {
             if (from != to)
             {
-                return 1.0;
+                return 1.0f;
             }
             else
             {
-                return 0.0;
+                return 0.0f;
             }
         }
 
-        internal static Double GetSegmentLengthObject(Object from, Object to)
+        internal static float GetSegmentLengthObject(Object from, Object to)
         {
-            return 1.0;
+            return 1.0f;
         }
 
         internal static float GetSegmentLengthPoint(Point from, Point to)
@@ -434,32 +434,32 @@ namespace Wodsoft.UI.Media.Animation
             return Math.Abs((to - from).Length());
         }
 
-        //internal static Double GetSegmentLengthPoint3D(Point3D from, Point3D to)
+        //internal static float GetSegmentLengthPoint3D(Point3D from, Point3D to)
         //{
         //    return Math.Abs((to - from).Length);
         //}
 
-        //internal static Double GetSegmentLengthQuaternion(Quaternion from, Quaternion to)
+        //internal static float GetSegmentLengthQuaternion(Quaternion from, Quaternion to)
         //{
         //    from.Invert();
 
         //    return (to * from).Angle;
         //}
 
-        internal static Double GetSegmentLengthRect(Rect from, Rect to)
+        internal static float GetSegmentLengthRect(Rect from, Rect to)
         {
             // This seems to me to be the most logical way to define the
             // distance between two rects.  Lots of sqrt, but since paced
             // rectangle animations are such a rare thing, we may as well do
             // them right since the user obviously knows what they want.
-            Double a = GetSegmentLengthPoint(from.Location, to.Location);
-            Double b = GetSegmentLengthSize(from.Size, to.Size);
+            float a = GetSegmentLengthPoint(from.Location, to.Location);
+            float b = GetSegmentLengthSize(from.Size, to.Size);
 
             // Return c.
-            return Math.Sqrt((a * a) + (b * b));
+            return MathF.Sqrt((a * a) + (b * b));
         }
 
-        //internal static Double GetSegmentLengthRotation3D(Rotation3D from, Rotation3D to)
+        //internal static float GetSegmentLengthRotation3D(Rotation3D from, Rotation3D to)
         //{
         //    return GetSegmentLengthQuaternion(from.InternalQuaternion, to.InternalQuaternion);
         //}
@@ -474,15 +474,15 @@ namespace Wodsoft.UI.Media.Animation
             return Math.Abs(((Vector2)to - (Vector2)from).Length());
         }
 
-        internal static Double GetSegmentLengthString(String from, String to)
+        internal static float GetSegmentLengthString(String from, String to)
         {
             if (from != to)
             {
-                return 1.0;
+                return 1.0f;
             }
             else
             {
-                return 0.0;
+                return 0.0f;
             }
         }
 
@@ -834,9 +834,9 @@ namespace Wodsoft.UI.Media.Animation
 
         #region Helpers
 
-        private static Boolean IsInvalidDouble(Double value)
+        private static Boolean IsInvalidDouble(double value)
         {
-            return Double.IsInfinity(value)
+            return double.IsInfinity(value)
                 || double.IsNaN(value);
         }
 

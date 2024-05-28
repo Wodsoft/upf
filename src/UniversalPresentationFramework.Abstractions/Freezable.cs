@@ -28,6 +28,8 @@ namespace Wodsoft.UI
             _isFrozen = true;
         }
 
+        public static bool Freeze(Freezable freezable, bool isChecking) => freezable.FreezeCore(isChecking);
+
         protected virtual bool FreezeCore(bool isChecking) => true;
 
         protected override void SetValueCore(DependencyProperty dp, object? value)
