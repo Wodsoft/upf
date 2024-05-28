@@ -4,6 +4,8 @@ using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI.Input
 {
@@ -28,6 +30,17 @@ namespace Wodsoft.UI.Input
             if (element == null)
                 throw new ArgumentNullException("element");
             return (bool)element.GetValue(AcceptsReturnProperty)!;
+        }
+
+        #endregion
+
+        #region Methods
+
+        internal static void UpdateFocusedElement(DependencyObject focusTarget)
+        {
+            if (focusTarget.Dispatcher is not UIDispatcher dispatcher)
+                return;
+            dispatcher.SetFocus((IInputElement)focusTarget);
         }
 
         #endregion

@@ -23,6 +23,10 @@ namespace Wodsoft.UI
                 new PropertyMetadata(
                     false, // default value
                     new PropertyChangedCallback(IsFocused_Changed)));
+            UIElement.IsKeyboardFocusedPropertyKey.OverrideMetadata(
+                typeof(ContentElement),
+                new PropertyMetadata(false,
+                    new PropertyChangedCallback(IsKeyboardFocused_Changed)));
         }
 
         #endregion
@@ -274,7 +278,7 @@ namespace Wodsoft.UI
 
         #endregion
 
-        #region InputElement
+        #region Mouse
 
         public static readonly RoutedEvent PreviewMouseLeftButtonDownEvent = EventManager.RegisterRoutedEvent("PreviewMouseLeftButtonDown", RoutingStrategy.Direct, typeof(MouseButtonEventHandler), typeof(ContentElement));
         public static readonly RoutedEvent MouseLeftButtonDownEvent = EventManager.RegisterRoutedEvent("MouseLeftButtonDown", RoutingStrategy.Direct, typeof(MouseButtonEventHandler), typeof(ContentElement));
@@ -372,6 +376,47 @@ namespace Wodsoft.UI
         protected internal virtual void OnLostMouseCapture(MouseEventArgs e) { }
 
         protected internal virtual void OnQueryCursor(QueryCursorEventArgs e) { }
+
+        #endregion
+
+        #region Keyboard
+
+        private static void IsKeyboardFocused_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ContentElement ce = (ContentElement)d;
+            ce.OnIsKeyboardFocusedChanged(e);
+            ce.IsKeyboardFocusedChanged?.Invoke(d, e);
+        }
+        public event DependencyPropertyChangedEventHandler? IsKeyboardFocusedChanged;
+        public bool IsKeyboardFocused => Keyboard.FocusedElement == this;
+
+        public static readonly RoutedEvent PreviewKeyDownEvent = Keyboard.PreviewKeyDownEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent KeyDownEvent = Keyboard.KeyDownEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent PreviewKeyUpEvent = Keyboard.PreviewKeyUpEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent KeyUpEvent = Keyboard.KeyUpEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent PreviewGotKeyboardFocusEvent = Keyboard.PreviewGotKeyboardFocusEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent GotKeyboardFocusEvent = Keyboard.GotKeyboardFocusEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent PreviewLostKeyboardFocusEvent = Keyboard.PreviewLostKeyboardFocusEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent LostKeyboardFocusEvent = Keyboard.LostKeyboardFocusEvent.AddOwner(typeof(ContentElement));
+
+        public event KeyEventHandler PreviewKeyDown { add { AddHandler(Keyboard.PreviewKeyDownEvent, value, false); } remove { RemoveHandler(Keyboard.PreviewKeyDownEvent, value); } }
+        public event KeyEventHandler KeyDown { add { AddHandler(Keyboard.KeyDownEvent, value, false); } remove { RemoveHandler(Keyboard.KeyDownEvent, value); } }
+        public event KeyEventHandler PreviewKeyUp { add { AddHandler(Keyboard.PreviewKeyUpEvent, value, false); } remove { RemoveHandler(Keyboard.PreviewKeyUpEvent, value); } }
+        public event KeyEventHandler KeyUp { add { AddHandler(Keyboard.KeyUpEvent, value, false); } remove { RemoveHandler(Keyboard.KeyUpEvent, value); } }
+        public event KeyboardFocusChangedEventHandler PreviewGotKeyboardFocus { add { AddHandler(Keyboard.PreviewGotKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.PreviewGotKeyboardFocusEvent, value); } }
+        public event KeyboardFocusChangedEventHandler GotKeyboardFocus { add { AddHandler(Keyboard.GotKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.GotKeyboardFocusEvent, value); } }
+        public event KeyboardFocusChangedEventHandler PreviewLostKeyboardFocus { add { AddHandler(Keyboard.PreviewLostKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.PreviewLostKeyboardFocusEvent, value); } }
+        public event KeyboardFocusChangedEventHandler LostKeyboardFocus { add { AddHandler(Keyboard.LostKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.LostKeyboardFocusEvent, value); } }
+                
+        protected internal virtual void OnPreviewKeyDown(KeyEventArgs e) { }
+        protected internal virtual void OnKeyDown(KeyEventArgs e) { }
+        protected internal virtual void OnPreviewKeyUp(KeyEventArgs e) { }
+        protected internal virtual void OnKeyUp(KeyEventArgs e) { }
+        protected internal virtual void OnPreviewGotKeyboardFocus(KeyboardFocusChangedEventArgs e) { }
+        protected internal virtual void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e) { }
+        protected internal virtual void OnPreviewLostKeyboardFocus(KeyboardFocusChangedEventArgs e) { }
+        protected internal virtual void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e) { }
+        protected virtual void OnIsKeyboardFocusedChanged(DependencyPropertyChangedEventArgs e) { }
 
         #endregion
 
@@ -497,6 +542,9 @@ namespace Wodsoft.UI
 
         public static readonly RoutedEvent GotFocusEvent = FocusManager.GotFocusEvent.AddOwner(typeof(ContentElement));
         public static readonly RoutedEvent LostFocusEvent = FocusManager.LostFocusEvent.AddOwner(typeof(ContentElement));
+
+        public event RoutedEventHandler GotFocus { add { AddHandler(GotFocusEvent, value); } remove { RemoveHandler(GotFocusEvent, value); } }
+        public event RoutedEventHandler LostFocus { add { AddHandler(LostFocusEvent, value); } remove { RemoveHandler(LostFocusEvent, value); } }
 
         protected internal virtual void OnGotFocus(RoutedEventArgs e) { }
         protected internal virtual void OnLostFocus(RoutedEventArgs e) { }

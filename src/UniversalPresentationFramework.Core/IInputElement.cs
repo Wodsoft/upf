@@ -287,63 +287,63 @@ namespace Wodsoft.UI
 
         #region Keyboard
 
-        ///// <summary>
-        /////     An event reporting a key was pressed.
-        ///// </summary>
-        //event KeyEventHandler PreviewKeyDown;
+        /// <summary>
+        ///     An event reporting a key was pressed.
+        /// </summary>
+        event KeyEventHandler PreviewKeyDown;
 
-        ///// <summary>
-        /////     An event reporting a key was pressed.
-        ///// </summary>
-        //event KeyEventHandler KeyDown;
+        /// <summary>
+        ///     An event reporting a key was pressed.
+        /// </summary>
+        event KeyEventHandler KeyDown;
 
-        ///// <summary>
-        /////     An event reporting a key was released.
-        ///// </summary>
-        //event KeyEventHandler PreviewKeyUp;
+        /// <summary>
+        ///     An event reporting a key was released.
+        /// </summary>
+        event KeyEventHandler PreviewKeyUp;
 
-        ///// <summary>
-        /////     An event reporting a key was released.
-        ///// </summary>
-        //event KeyEventHandler KeyUp;
+        /// <summary>
+        ///     An event reporting a key was released.
+        /// </summary>
+        event KeyEventHandler KeyUp;
 
         ///// <summary>
         /////     A property indicating if a Focus is over this element or its descendents.
         ///// </summary>
         //bool IsKeyboardFocusWithin { get; }
 
-        ///// <summary>
-        /////     A property indicating if the keyboard is focused on this
-        /////     element or not.
-        ///// </summary>
-        //bool IsKeyboardFocused { get; }
+        /// <summary>
+        ///     A property indicating if the keyboard is focused on this
+        ///     element or not.
+        /// </summary>
+        bool IsKeyboardFocused { get; }
 
         /// <summary>
         ///     Focuses the keyboard on this element.
         /// </summary>
         bool Focus();
 
-        ///// <summary>
-        /////     An event announcing that the keyboard is focused on this element.
-        ///// </summary>
-        //event KeyboardFocusChangedEventHandler PreviewGotKeyboardFocus;
+        /// <summary>
+        ///     An event announcing that the keyboard is focused on this element.
+        /// </summary>
+        event KeyboardFocusChangedEventHandler PreviewGotKeyboardFocus;
 
-        ///// <summary>
-        /////     An event announcing that the keyboard is focused on this element.
-        ///// </summary>
-        //event KeyboardFocusChangedEventHandler GotKeyboardFocus;
+        /// <summary>
+        ///     An event announcing that the keyboard is focused on this element.
+        /// </summary>
+        event KeyboardFocusChangedEventHandler GotKeyboardFocus;
 
-        ///// <summary>
-        /////     An event announcing that the keyboard is no longer focused
-        /////     on this element.
-        ///// </summary>
-        //event KeyboardFocusChangedEventHandler PreviewLostKeyboardFocus;
+        /// <summary>
+        ///     An event announcing that the keyboard is no longer focused
+        ///     on this element.
+        /// </summary>
+        event KeyboardFocusChangedEventHandler PreviewLostKeyboardFocus;
 
-        ///// <summary>
-        /////     An event announcing that the keyboard is no longer focused
-        /////     on this element.
-        ///// </summary>
-        //event KeyboardFocusChangedEventHandler LostKeyboardFocus;
+        /// <summary>
+        ///     An event announcing that the keyboard is no longer focused
+        ///     on this element.
+        /// </summary>
+        event KeyboardFocusChangedEventHandler LostKeyboardFocus;
 
         /// <summary>
         ///     A property indicating if the element is enabled or not.

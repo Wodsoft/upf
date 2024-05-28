@@ -25,7 +25,7 @@ namespace Wodsoft.UI.Input
 
         public void ClearFocus()
         {
-
+            Focus(null);
         }
 
         public IInputElement? Focus(IInputElement? element)
@@ -44,28 +44,44 @@ namespace Wodsoft.UI.Input
                 return _focusedElement;
             if (element == _focusedElement)
                 return element;
-
-            if (_focusedElement != null)
+            var oldElement = _focusedElement;
+            if (oldElement != null)
             {
-                KeyboardFocusChangedEventArgs previewLostFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, _focusedElement, element);
+                KeyboardFocusChangedEventArgs previewLostFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, oldElement, element);
                 previewLostFocus.RoutedEvent = Keyboard.PreviewLostKeyboardFocusEvent;
-                previewLostFocus.Source = _focusedElement;
-                _focusedElement.RaiseEvent(previewLostFocus);
+                previewLostFocus.Source = oldElement;
+                oldElement.RaiseEvent(previewLostFocus);
                 if (previewLostFocus.Handled)
-                    return _focusedElement;
+                    return oldElement;
             }
             if (element != null)
             {
-                KeyboardFocusChangedEventArgs previewGotFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, _focusedElement, element);
+                KeyboardFocusChangedEventArgs previewGotFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, oldElement, element);
                 previewGotFocus.RoutedEvent = Keyboard.PreviewGotKeyboardFocusEvent;
                 previewGotFocus.Source = element;
                 element.RaiseEvent(previewGotFocus);
                 if (previewGotFocus.Handled)
-                    return _focusedElement;
+                    return oldElement;
             }
-            if (ChangeFocus(_focusedElement, element))
+            if (ChangeFocus(oldElement, element))
             {
                 _focusedElement = element;
+                if (oldElement != null)
+                {
+                    ((DependencyObject)oldElement).SetValue(UIElement.IsKeyboardFocusedPropertyKey, false);
+                    KeyboardFocusChangedEventArgs lostFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, oldElement, element);
+                    lostFocus.RoutedEvent = Keyboard.LostKeyboardFocusEvent;
+                    lostFocus.Source = oldElement;
+                    oldElement.RaiseEvent(lostFocus);
+                }
+                if (element != null)
+                {
+                    ((DependencyObject)element).SetValue(UIElement.IsKeyboardFocusedPropertyKey, true);
+                    KeyboardFocusChangedEventArgs gotFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, oldElement, element);
+                    gotFocus.RoutedEvent = Keyboard.GotKeyboardFocusEvent;
+                    gotFocus.Source = element;
+                    element.RaiseEvent(gotFocus);
+                }
             }
             return element;
         }
@@ -86,7 +102,35 @@ namespace Wodsoft.UI.Input
 
         internal void HandleInput(in KeyboardInput input)
         {
-
+            var element = _focusedElement;
+            if (element == null)
+                return;
+            var e = new KeyEventArgs(this, input.MessageTime, input.Key, input.KeyStates);
+            switch (input.KeyStates)
+            {
+                case KeyStates.None:
+                    e.RoutedEvent = Keyboard.PreviewKeyUpEvent;
+                    break;
+                case KeyStates.Down:
+                    e.RoutedEvent = Keyboard.PreviewKeyDownEvent;
+                    break;
+                default:
+                    return;
+            }
+            element.RaiseEvent(e);
+            if (!e.Handled)
+            {
+                switch (input.KeyStates)
+                {
+                    case KeyStates.None:
+                        e.RoutedEvent = Keyboard.KeyUpEvent;
+                        break;
+                    case KeyStates.Down:
+                        e.RoutedEvent = Keyboard.KeyDownEvent;
+                        break;
+                }
+                element.RaiseEvent(e);
+            }
         }
 
         #endregion

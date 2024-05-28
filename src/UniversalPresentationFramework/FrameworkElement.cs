@@ -20,6 +20,16 @@ namespace Wodsoft.UI
     [RuntimeNameProperty("Name")]
     public class FrameworkElement : UIElement, ISupportInitialize
     {
+        #region Constructor
+
+        static FrameworkElement()
+        {
+            EventManager.RegisterClassHandler(typeof(FrameworkElement), Keyboard.GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
+            EventManager.RegisterClassHandler(typeof(FrameworkElement), Keyboard.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
+        }
+
+        #endregion
+
         #region Initialize
 
         public bool IsInitPending { get; private set; }
@@ -1202,6 +1212,39 @@ namespace Wodsoft.UI
                 e.Cursor = cursor;
                 e.Handled = true;
             }
+        }
+
+        #endregion
+
+        #region Keyboard
+
+        private static void OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            // This static class handler will get hit each time anybody gets hit with a tunnel that someone is getting focused.
+            // We're only interested when the element is getting focused is processing the event.
+            // NB: This will not do the right thing if the element rejects focus or does not want to be scrolled into view.
+            if (sender == e.OriginalSource)
+            {
+                FrameworkElement fe = (FrameworkElement)sender;
+                KeyboardNavigation.UpdateFocusedElement(fe);
+                //KeyboardNavigation keyNav = KeyboardNavigation.Current;
+                //KeyboardNavigation.ShowFocusVisual();
+                //keyNav.NotifyFocusChanged(fe, e);
+                //keyNav.UpdateActiveElement(fe);
+            }
+        }
+
+        private static void OnLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            //if (sender == e.OriginalSource)
+            //{
+            //    KeyboardNavigation.Current.HideFocusVisual();
+
+            //    if (e.NewFocus == null)
+            //    {
+            //        KeyboardNavigation.Current.NotifyFocusChanged(sender, e);
+            //    }
+            //}
         }
 
         #endregion
