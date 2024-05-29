@@ -712,9 +712,9 @@ namespace Wodsoft.UI.Platforms.Win32
                 #endregion
                 #region Keyboard
                 case PInvoke.WM_KEYDOWN:
-                    if ((wParam & 0xff) == 1)
+                    if ((lParam & 0xff) == 1)
                     {
-                        var key = KeyInterop.KeyFromVirtualKey((int)lParam);
+                        var key = KeyInterop.KeyFromVirtualKey((int)wParam.Value);
                         if (key != Input.Key.None)
                         {
                             var time = PInvoke.GetMessageTime();
@@ -723,9 +723,9 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                     break;
                 case PInvoke.WM_KEYUP:
-                    if ((wParam & 0xff) == 1)
+                    if ((lParam & 0xff) == 1)
                     {
-                        var key = KeyInterop.KeyFromVirtualKey((int)lParam);
+                        var key = KeyInterop.KeyFromVirtualKey((int)wParam.Value);
                         if (key != Input.Key.None)
                         {
                             var time = PInvoke.GetMessageTime();
