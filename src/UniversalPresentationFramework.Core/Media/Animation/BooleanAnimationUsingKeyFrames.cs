@@ -81,15 +81,14 @@ namespace Wodsoft.UI.Media.Animation
             return canFreeze;
         }
 
-        ///// <summary>
-        ///// Implementation of <see cref="System.Windows.Freezable.OnChanged">Freezable.OnChanged</see>.
-        ///// </summary>
-        //protected override void OnChanged()
-        //{
-        //    _areKeyTimesValid = false;
-
-        //    base.OnChanged();
-        //}
+        /// <summary>
+        /// Implementation of <see cref="System.Windows.Freezable.OnChanged">Freezable.OnChanged</see>.
+        /// </summary>
+        protected override void OnChanged()
+        {
+            _areKeyTimesValid = false;
+            base.OnChanged();
+        }
 
 
         /// <summary>
@@ -199,6 +198,7 @@ namespace Wodsoft.UI.Media.Animation
                 throw new ArgumentNullException("child");
             }
             AddChild(child);
+            WritePostscript();
         }
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace Wodsoft.UI.Media.Animation
                                             / segmentDuration.TotalMilliseconds;
                 }
 
-                currentIterationValue = GetResolvedKeyFrame(currentResolvedKeyFrameIndex).InterpolateValue(fromValue, currentSegmentProgress);
+                currentIterationValue = GetResolvedKeyFrame(currentResolvedKeyFrameIndex).InterpolateValue(fromValue, (float)currentSegmentProgress);
             }
 
 
@@ -460,8 +460,8 @@ namespace Wodsoft.UI.Media.Animation
                     else
                     {
                         _keyFrames = new BooleanKeyFrameCollection();
-
                         OnFreezablePropertyChanged(null, _keyFrames);
+                        WritePostscript();
                     }
                 }
 
@@ -478,6 +478,7 @@ namespace Wodsoft.UI.Media.Animation
                 {
                     OnFreezablePropertyChanged(_keyFrames, value);
                     _keyFrames = value;
+                    WritePostscript();
                 }
             }
         }
