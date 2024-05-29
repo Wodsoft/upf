@@ -64,3 +64,4 @@ GetKeyState
 GetCursorPos
 ClientToScreen
 SetFocus
+GetFocus
