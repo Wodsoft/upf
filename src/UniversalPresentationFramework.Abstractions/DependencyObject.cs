@@ -245,7 +245,7 @@ namespace Wodsoft.UI
             var oldValue = effectiveValue.Value;
             if (metadata.CoerceValueCallback == null)
             {
-                if (oldValue != newValue)
+                if (!Equals(oldValue, newValue))
                 {
                     effectiveValue.UpdateValue(newValue);
                     PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, newValue));
@@ -258,7 +258,7 @@ namespace Wodsoft.UI
                 if (newValue == DependencyProperty.UnsetValue)
                     return true;
                 effectiveValue.SetCoercedValue(newValue);
-                if (oldValue != newValue)
+                if (!Equals(oldValue, newValue))
                 {
                     effectiveValue.SetCoercedValue(newValue);
                     PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, newValue));
@@ -329,7 +329,7 @@ namespace Wodsoft.UI
             {
                 var oldValue = GetEffectiveValue(dp, ref oldEffectiveValue, metadata);
                 var newValue = GetEffectiveValue(dp, ref newEffectiveValue, metadata);
-                if (oldValue != newValue)
+                if (!Equals(oldValue, newValue))
                     PropertyChanged(new DependencyPropertyChangedEventArgs(dp, metadata, oldValue, newValue));
             }
 
