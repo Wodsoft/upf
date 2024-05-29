@@ -23,6 +23,8 @@ namespace Wodsoft.UI.Controls.Primitives
 
         int Length { get; }
 
+        ReadOnlySpan<float> Widths { get; }
+
         void Wrap(TextTrimming trimming, float width, bool overflow, out ITextHostRun? left, out ITextHostRun? right);
 
         void Draw(DrawingContext drawingContext, in Point origin);

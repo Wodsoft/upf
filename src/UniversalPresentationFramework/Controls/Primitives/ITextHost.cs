@@ -9,6 +9,8 @@ namespace Wodsoft.UI.Controls.Primitives
 {
     public interface ITextHost : IInputElement
     {
+        char GetChar(int position);
+
         IReadOnlyList<ITextHostLine> Lines { get; }
 
         bool AcceptsReturn { get; }
@@ -17,13 +19,13 @@ namespace Wodsoft.UI.Controls.Primitives
 
         int SelectionLength { get; }
 
+        int TextLength { get; }
+
         void Select(int position, int length);
 
         bool IsSelectable { get; }
 
         bool IsReadOnly { get; }
-
-        bool IsFocused { get; }
 
         event EventHandler TextChanged;
 

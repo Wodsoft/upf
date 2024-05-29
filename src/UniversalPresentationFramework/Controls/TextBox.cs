@@ -276,6 +276,15 @@ namespace Wodsoft.UI.Controls
 
         bool ITextHost.IsSelectable => true;
 
+        char ITextHost.GetChar(int position)
+        {
+            if (_text.Length == 0 || position < 0 || position >= _text.Length)
+                return default;
+            return _text[position];
+        }
+
+        int ITextHost.TextLength => _text.Length;
+
         #endregion
     }
 }

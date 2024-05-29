@@ -13,6 +13,15 @@ namespace Wodsoft.UI.Controls
 {
     public class Control : FrameworkElement
     {
+        #region Constructor
+
+        static Control()
+        {
+            FocusableProperty.OverrideMetadata(typeof(Control), new FrameworkPropertyMetadata(true));
+        }
+
+        #endregion
+
         #region Template
 
         private ControlTemplate? _template;

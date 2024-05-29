@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Wodsoft.UI.Documents;
 using Wodsoft.UI.Input;
 using Wodsoft.UI.Media;
+using Wodsoft.UI.Media.Animation;
 
 namespace Wodsoft.UI.Controls.Primitives
 {
@@ -13,6 +14,8 @@ namespace Wodsoft.UI.Controls.Primitives
     {
         private ITextHost? _textHost;
         private float _offsetX, _offsetY;
+        private Storyboard? _caretStoryboard;
+        private bool _caretVisible;
 
         #region Properties
 
@@ -81,6 +84,13 @@ namespace Wodsoft.UI.Controls.Primitives
             set { SetValue(CaretBrushProperty, value); }
         }
 
+        private static readonly DependencyProperty _CaretVisibleProperty = DependencyProperty.Register("CaretVisible", typeof(bool), typeof(TextHolder), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender, OnCaretVisibleChanged));
+        private static void OnCaretVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((TextHolder)d)._caretVisible = (bool)e.NewValue!;
+        }
+
+
         #endregion
 
         #region Layout
@@ -97,6 +107,10 @@ namespace Wodsoft.UI.Controls.Primitives
                 _textHost = textHost;
                 _textHost.SelectionChanged += TextHost_SelectionChanged;
                 _textHost.TextChanged += TextHost_TextChanged;
+                _textHost.GotKeyboardFocus += TextHost_GotKeyboardFocus;
+                _textHost.LostKeyboardFocus += TextHost_LostKeyboardFocus;
+                _textHost.KeyDown += TextHost_KeyDown;
+
             }
             var padding = Padding;
             var textWrapping = TextWrapping;
@@ -164,6 +178,8 @@ namespace Wodsoft.UI.Controls.Primitives
             float x = 0f, y = 0f, baseline = 0f, lineHeight = 0f;
             var canDraw = (ITextHostRun run) => (x >= left && x < right) || (x + run.Width >= left && x + run.Width < right);
             _textPositions.Clear();
+            var caretVisible = _caretVisible && _textHost.SelectionLength == 0;
+            var selectionStart = _textHost.SelectionStart;
             if (flowDirection == FlowDirection.LeftToRight)
             {
                 List<(ITextHostRun Run, float X)> lineRuns = new List<(ITextHostRun, float)>();
@@ -174,8 +190,39 @@ namespace Wodsoft.UI.Controls.Primitives
                     {
                         foreach (var item in lineRuns)
                         {
-                            item.Run.Draw(drawingContext, new Point(item.X + padding.Left, y + baseline + padding.Top));
+                            var x = padding.Left + item.X;
+                            item.Run.Draw(drawingContext, new Point(x, y + baseline + padding.Top));
                             _textPositions.Add(new TextPosition(item.Run, item.X, y, lineHeight));
+                            if (caretVisible && ((selectionStart > item.Run.Position && selectionStart <= item.Run.Position + item.Run.Length) || (selectionStart == item.Run.Position && item.X == 0)))
+                            {
+                                var caretBrush = CaretBrush;
+                                if (caretBrush == null)
+                                {
+                                    var background = ((FrameworkElement)LogicalRoot).TemplatedParent!.GetValue(Panel.BackgroundProperty);
+                                    Color backgroundColor;
+                                    if (background != null && background != DependencyProperty.UnsetValue &&
+                                        background is SolidColorBrush)
+                                    {
+                                        backgroundColor = ((SolidColorBrush)background).Color;
+                                    }
+                                    else
+                                    {
+                                        backgroundColor = SystemColors.WindowColor;
+                                    }
+                                    byte r = (byte)~(backgroundColor.R);
+                                    byte g = (byte)~(backgroundColor.G);
+                                    byte b = (byte)~(backgroundColor.B);
+                                    caretBrush = new SolidColorBrush(Color.FromRgb(r, g, b));
+                                }
+                                if (selectionStart != item.Run.Position)
+                                {
+                                    if (selectionStart == item.Run.Position + item.Run.Length)
+                                        x += item.Run.Width;
+                                    else
+                                        x += item.Run.Widths.Slice(0, selectionStart - item.Run.Position).Sum();
+                                }
+                                drawingContext.DrawLine(new Pen(caretBrush, 1), new Point(x + 1, y + padding.Top), new Point(x + 1, y + padding.Top + item.Run.Height));
+                            }
                         }
                     }
                     lineRuns.Clear();
@@ -312,6 +359,7 @@ namespace Wodsoft.UI.Controls.Primitives
                 if (position != _textHost.SelectionStart)
                     _textHost.Select(position, 0);
                 _mousePositionStart = position;
+                _textHost.Focus();
             }
         }
 
@@ -362,6 +410,71 @@ namespace Wodsoft.UI.Controls.Primitives
                 lastLine = text.Y;
             }
             return _textPositions[i - 1].Run.Position + _textPositions[i - 1].Run.Length;
+        }
+
+        #endregion
+
+        #region Keyboard Input
+
+        private void TextHost_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (_caretStoryboard == null)
+            {
+                _caretStoryboard = new Storyboard();
+                _caretStoryboard.RepeatBehavior = RepeatBehavior.Forever;
+
+                BooleanAnimationUsingKeyFrames blinkAnimation = new BooleanAnimationUsingKeyFrames();
+                blinkAnimation.BeginTime = null;
+                blinkAnimation.KeyFrames.Add(new DiscreteBooleanKeyFrame(true, KeyTime.FromPercent(0.0f)));
+                blinkAnimation.KeyFrames.Add(new DiscreteBooleanKeyFrame(false, KeyTime.FromPercent(0.5f)));
+                blinkAnimation.Duration = TimeSpan.FromSeconds(1);
+                Storyboard.SetTarget(blinkAnimation, this);
+                Storyboard.SetTargetProperty(blinkAnimation, new PropertyPath("CaretVisible"));
+                _caretStoryboard.Children.Add(blinkAnimation);
+                _caretStoryboard.Begin();
+
+                //ApplyAnimationClock(_CaretVisibleProperty, _caretClock, HandoffBehavior.SnapshotAndReplace);
+            }
+        }
+        private void TextHost_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (_caretStoryboard != null)
+                _caretStoryboard.SkipToFill();
+        }
+
+        private static readonly char[] _NewLineChars = ['\r', '\n'];
+        private void TextHost_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Left)
+            {
+                if (_textHost!.SelectionStart == 0)
+                    return;
+                //var selection = _textHost.SelectionStart - 1;
+                //while (selection != 0 && _NewLineChars.Contains(_textHost.GetChar(selection)))
+                //    selection--;
+                _textHost!.Select(_textHost.SelectionStart - 1, 0);
+                if (_caretStoryboard != null)
+                    _caretStoryboard.Seek(TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+            }
+            else if (e.Key == Key.Right)
+            {
+                if (_textHost!.SelectionStart >= _textHost.TextLength)
+                    return;
+                //var selection = _textHost.SelectionStart +1;
+                //while (selection < _textHost.TextLength && _NewLineChars.Contains(_textHost.GetChar(selection)))
+                //    selection++;
+                _textHost!.Select(_textHost.SelectionStart + 1, 0);
+                if (_caretStoryboard != null)
+                    _caretStoryboard.Seek(TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+            }
+            else if (e.Key == Key.Up)
+            {
+
+            }
+            else if (e.Key == Key.Down)
+            {
+
+            }
         }
 
         #endregion

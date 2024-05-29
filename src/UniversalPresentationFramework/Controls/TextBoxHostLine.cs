@@ -42,6 +42,8 @@ namespace Wodsoft.UI.Controls
 
         public int Length => _length;
 
+        public ReadOnlySpan<float> Widths => _widths.Span;
+
         public void Draw(DrawingContext drawingContext, in Point origin)
         {
             if (!_isMeasured || _typeface == null)
