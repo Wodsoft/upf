@@ -238,6 +238,24 @@ namespace Wodsoft.UI
 
         #region PropertyChange
 
+        /// <summary>
+        /// Extenders of Freezable must call this method at the end of an API which
+        /// changed the state of the object (e.g., at the end of a property setter) to
+        /// raise the Changed event.  Multiple state changes within a method or
+        /// property may be "batched" into a single call to WritePostscript().
+        /// </summary>
+        protected void WritePostscript()
+        {
+            OnChanged();
+        }
+
+        /// <summary>
+        /// This method is called when a modification happens to the Freezable object.
+        /// </summary>
+        protected virtual void OnChanged()
+        {
+        }
+
         protected void OnFreezablePropertyChanged(DependencyObject? oldValue, DependencyObject? newValue)
         {
             OnFreezablePropertyChanged(oldValue, newValue, null);
