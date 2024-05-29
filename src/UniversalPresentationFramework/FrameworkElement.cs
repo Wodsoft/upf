@@ -26,6 +26,7 @@ namespace Wodsoft.UI
         {
             EventManager.RegisterClassHandler(typeof(FrameworkElement), Keyboard.GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
             EventManager.RegisterClassHandler(typeof(FrameworkElement), Keyboard.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
+            OpacityProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(1f, FrameworkPropertyMetadataOptions.AffectsRender));
         }
 
         #endregion

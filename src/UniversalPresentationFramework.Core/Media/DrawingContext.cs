@@ -353,16 +353,16 @@ namespace Wodsoft.UI.Media
         //public abstract void PushOpacityMask(
         //    Brush opacityMask);
 
-        ///// <summary>
-        /////     PushOpacity - 
-        /////     Push an opacity which will blend the composite of all drawing primitives added 
-        /////     until the corresponding Pop call.
-        ///// </summary>
-        ///// <param name="opacity">
-        /////     The opacity with which to blend - 0 is transparent, 1 is opaque.
-        ///// </param>
-        //public abstract void PushOpacity(
-        //    float opacity);
+        /// <summary>
+        ///     PushOpacity - 
+        ///     Push an opacity which will blend the composite of all drawing primitives added 
+        ///     until the corresponding Pop call.
+        /// </summary>
+        /// <param name="opacity">
+        ///     The opacity with which to blend - 0 is transparent, 1 is opaque.
+        /// </param>
+        public abstract void PushOpacity(
+            float opacity);
 
         ///// <summary>
         /////     PushOpacity - 

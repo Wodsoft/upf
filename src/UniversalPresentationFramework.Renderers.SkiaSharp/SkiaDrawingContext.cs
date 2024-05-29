@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Media;
@@ -13,12 +14,14 @@ namespace Wodsoft.UI.Renderers
     {
         private readonly SKPictureRecorder _recorder;
         private readonly SKCanvas _canvas;
+        private readonly List<OpacityState> _opacityStates;
         private bool _disposed, _closed, _hasContent;
 
         internal SkiaDrawingContext(int width, int height)
         {
             _recorder = new SKPictureRecorder();
             _canvas = _recorder.BeginRecording(new SKRect(0, 0, width, height));
+            _opacityStates = new List<OpacityState>();
         }
 
         private void CheckClosed()
@@ -26,6 +29,26 @@ namespace Wodsoft.UI.Renderers
             if (_closed)
                 throw new InvalidOperationException("Could not use a closed drawing context.");
             _hasContent = true;
+        }
+
+        private void ApplyPaint(SKPaint skPaint)
+        {
+            if (_opacityStates.Count != 0)
+            {
+                float opacity = 1f;
+                var states = CollectionsMarshal.AsSpan(_opacityStates);
+                for (int i = 0; i < states.Length; i++)
+                {
+                    ref var state = ref states[i];
+                    opacity *= state.Opacity;
+                    skPaint.ColorFilter = SKColorFilter.CreateColorMatrix([
+                        1, 0, 0, 0, 0,//R
+                    0, 1, 0, 0, 0,//G
+                    0, 0, 1, 0, 0,//B
+                    0, 0, 0, opacity, 0//A
+                    ]);
+                }
+            }
         }
 
         public override IDrawingContent? Close()
@@ -58,6 +81,7 @@ namespace Wodsoft.UI.Renderers
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
+            ApplyPaint(paint);
             _canvas.DrawRoundRect(new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), radiusX, radiusY, paint);
         }
 
@@ -65,6 +89,7 @@ namespace Wodsoft.UI.Renderers
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
+            ApplyPaint(paint);
             _canvas.DrawRect(new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), paint);
         }
 
@@ -72,6 +97,7 @@ namespace Wodsoft.UI.Renderers
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(null, pen);
+            ApplyPaint(paint);
             _canvas.DrawLine(point0.X, point0.Y, point1.X, point1.Y, paint);
         }
 
@@ -79,6 +105,7 @@ namespace Wodsoft.UI.Renderers
         {
             CheckClosed();
             SKPaint paint = SkiaHelper.GetPaint(brush, pen);
+            ApplyPaint(paint);
             _canvas.DrawOval(center.X, center.Y, radiusX, radiusY, paint);
         }
 
@@ -89,30 +116,38 @@ namespace Wodsoft.UI.Renderers
             if (imageSource.Context is not ISkiaImageContext context)
                 throw new NotSupportedException("Only support skia image context.");
             CheckClosed();
+            SKPaint? paint;
+            if (_opacityStates.Count == 0)
+                paint = null;
+            else
+            {
+                paint = new SKPaint();
+                ApplyPaint(paint);
+            }
             switch (context.Rotation)
             {
                 case Media.Imaging.Rotation.Rotate0:
-                    _canvas.DrawImage(context.Image, new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom));
+                    _canvas.DrawImage(context.Image, new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), paint);
                     break;
                 case Media.Imaging.Rotation.Rotate90:
                     _canvas.Save();
                     _canvas.Translate(rectangle.X + rectangle.Height, rectangle.Y);
                     _canvas.RotateDegrees(90);
-                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height));
+                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height), paint);
                     _canvas.Restore();
                     break;
                 case Media.Imaging.Rotation.Rotate180:
                     _canvas.Save();
                     _canvas.Translate(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height);
                     _canvas.RotateDegrees(180);
-                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height));
+                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height), paint);
                     _canvas.Restore();
                     break;
                 case Media.Imaging.Rotation.Rotate270:
                     _canvas.Save();
                     _canvas.Translate(rectangle.X, rectangle.Y + rectangle.Width);
                     _canvas.RotateDegrees(270);
-                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height));
+                    _canvas.DrawImage(context.Image, new SKRect(0, 0, rectangle.Width, rectangle.Height), paint);
                     _canvas.Restore();
                     break;
             }
@@ -136,8 +171,23 @@ namespace Wodsoft.UI.Renderers
             }
         }
 
+        public override void PushOpacity(float opacity)
+        {
+            CheckClosed();
+            _opacityStates.Add(new OpacityState(_canvas.SaveCount, opacity));
+        }
+
         public override void Pop()
         {
+            if (_opacityStates.Count != 0)
+            {
+                ref var state = ref CollectionsMarshal.AsSpan(_opacityStates)[_opacityStates.Count - 1];
+                if (state.SaveCount == _canvas.SaveCount)
+                {
+                    _opacityStates.RemoveAt(_opacityStates.Count - 1);
+                    return;
+                }
+            }
             _canvas.Restore();
         }
 
@@ -157,6 +207,7 @@ namespace Wodsoft.UI.Renderers
                 if (data == null)
                     return;
                 SKPaint paint = SkiaHelper.GetPaint(brush, pen);
+                ApplyPaint(paint);
                 if (data is SkiaGeometryData skData)
                 {
                     _canvas.DrawPath(skData.Path, paint);
@@ -174,8 +225,22 @@ namespace Wodsoft.UI.Renderers
             if (glyphTypeface is not SkiaGlyphTypeface skiaGlyphTypeface)
                 throw new NotSupportedException("Only support SkiaGlyphTypeface.");
             var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
-            _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y, SkiaHelper.GetPaint(foreground, null));
+            var paint = SkiaHelper.GetPaint(foreground, null);
+            ApplyPaint(paint);
+            _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y, paint);
             _hasContent = true;
+        }
+
+        private struct OpacityState
+        {
+            public int SaveCount;
+            public float Opacity;
+
+            public OpacityState(int saveCount, float opacity)
+            {
+                SaveCount = saveCount;
+                Opacity = opacity;
+            }
         }
     }
 }

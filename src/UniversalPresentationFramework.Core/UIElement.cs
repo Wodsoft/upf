@@ -362,6 +362,15 @@ namespace Wodsoft.UI
             set { SetValue(VisibilityProperty, value); }
         }
 
+
+        public static readonly DependencyProperty OpacityProperty =
+                    DependencyProperty.Register(
+                                "Opacity",
+                                typeof(float),
+                                typeof(UIElement),
+                                new UIPropertyMetadata(1.0f));
+        public float Opacity { get { return (float)GetValue(OpacityProperty)!; } set { SetValue(OpacityProperty, value); } }
+
         #endregion
 
         #region Event
