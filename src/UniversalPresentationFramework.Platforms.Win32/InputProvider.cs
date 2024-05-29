@@ -104,7 +104,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public Win32MouseDevice MouseDevice { get; } = new Win32MouseDevice();
 
-        public Win32KeyboardDevice KeyboardDevice => new Win32KeyboardDevice();
+        public Win32KeyboardDevice KeyboardDevice { get; } = new Win32KeyboardDevice();
 
         MouseDevice IInputProvider.MouseDevice => MouseDevice;
 
