@@ -14,7 +14,7 @@ namespace Wodsoft.UI.Threading
         public DispatcherOperation(Dispatcher dispatcher, DispatcherPriority priority)
         {
             Dispatcher = dispatcher;
-            Priority = priority;
+            _priority = priority;
         }
 
         public Dispatcher Dispatcher { get; }
