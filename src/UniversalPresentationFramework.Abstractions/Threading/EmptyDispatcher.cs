@@ -10,6 +10,8 @@ namespace Wodsoft.UI.Threading
     {
         public override Thread Thread => Thread.CurrentThread;
 
+        protected override bool CanFromThread => false;
+
         public override bool CheckAccess()
         {
             return true;
