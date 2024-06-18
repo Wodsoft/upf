@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Input;
+using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
@@ -370,5 +371,11 @@ namespace Wodsoft.UI
         //event TextCompositionEventHandler TextInput;
 
         #endregion Input
+
+        #region Dispatcher
+
+        Dispatcher Dispatcher { get; }
+
+        #endregion
     }
 }
