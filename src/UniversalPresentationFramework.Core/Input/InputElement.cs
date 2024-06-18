@@ -7,17 +7,17 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Input
 {
-    internal class InputElement
+    public static class InputElement
     {
-        internal static DependencyObject? GetContainingUIElement(DependencyObject? o)
+        public static UIElement? GetContainingUIElement(DependencyObject? o)
         {
-            DependencyObject? container = null;
+            UIElement? container = null;
 
             if (o != null)
             {
-                if (o is UIElement)
+                if (o is UIElement uiElement)
                 {
-                    container = o;
+                    container = uiElement;
                 }
                 else if (o is ContentElement contentElement)
                 {
@@ -40,7 +40,7 @@ namespace Wodsoft.UI.Input
             return container;
         }
 
-        internal static Visual? GetRootVisual(DependencyObject d)
+        public static Visual? GetRootVisual(DependencyObject d)
         {
             Visual? rootVisual = GetContainingVisual(d);
             Visual? parentVisual;
@@ -51,7 +51,7 @@ namespace Wodsoft.UI.Input
             return rootVisual;
         }
 
-        internal static Visual GetRootVisual(Visual visual)
+        public static Visual GetRootVisual(Visual visual)
         {
             Visual rootVisual = visual;
             Visual? parentVisual;
@@ -62,7 +62,7 @@ namespace Wodsoft.UI.Input
             return rootVisual;
         }
 
-        internal static Visual? GetContainingVisual(DependencyObject o)
+        public static Visual? GetContainingVisual(DependencyObject o)
         {
             Visual? v = o as Visual;
             if (v != null)

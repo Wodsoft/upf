@@ -8,11 +8,14 @@ using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.Graphics.OpenGL;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
+using Windows.Win32.UI.TextServices;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wodsoft.UI.Input;
+using Wodsoft.UI.Providers;
 using Wodsoft.UI.Renderers;
 using Wodsoft.UI.Threading;
 
+#pragma warning disable CA1416 // 验证平台兼容性
 namespace Wodsoft.UI.Platforms.Win32
 {
     public class WindowContext : IWindowContext, IDisposable
@@ -32,14 +35,15 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly SkiaRendererProvider _rendererProvider;
         private readonly Win32RendererContextType _contextType;
         private readonly Action _themeChanged;
-        private readonly Win32Dispatcher _dispatcher;
+        private Win32Dispatcher _dispatcher;
         private readonly Win32PresentationSource _source;
-        private readonly InputProvider _inputProvider;
+        private readonly Win32InputProvider _inputProvider;
         private SkiaRendererContext? _rendererContext;
         private Exception? _exception;
         private bool _mouseLeave;
+        private IInputElement? _lastFocusedElement;
 
-        public WindowContext(Window window, InputProvider inputProvider, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
+        public WindowContext(Window window, Win32InputProvider inputProvider, SkiaRendererProvider rendererProvider, Win32RendererContextType contextType, Action themeChanged)
         {
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
@@ -55,9 +59,10 @@ namespace Wodsoft.UI.Platforms.Win32
             _instance = PInvoke.GetModuleHandle((string?)null);
             _className = "upfwindow_" + Guid.NewGuid().ToString().Replace("-", "");
             _windowThread = new Thread(ProcessWindow);
-            _windowThread.Name = "Window HWND Loop";
-            _dispatcherThread = new Thread(ProcessDispatcher);
-            _dispatcherThread.Name = "Window Dispatcher";
+            _windowThread.SetApartmentState(ApartmentState.STA);
+            _windowThread.Name = $"Window HWND Loop ({window.GetType().Name})";
+            _dispatcherThread = new Thread(ProcessDispatcher);            
+            _dispatcherThread.Name = $"Window Dispatcher ({window.GetType().Name})";
             _dispatcher = new Win32Dispatcher(this, inputProvider, _dispatcherThread);
             _inputProvider = inputProvider;
             _window = window;
@@ -169,7 +174,7 @@ namespace Wodsoft.UI.Platforms.Win32
         public bool IsActivated => _isActivated;
 
         internal Exception? Exception => _exception;
-                
+
         public bool IsClosing { get; private set; }
 
         public bool IsDisposed => _disposed;
@@ -188,6 +193,8 @@ namespace Wodsoft.UI.Platforms.Win32
         public int OriginalWidth => _originalWidth;
 
         public int OriginalHeight => _originalHeight;
+
+        internal Thread WindowThread => _windowThread;
 
         #endregion
 
@@ -307,7 +314,6 @@ namespace Wodsoft.UI.Platforms.Win32
                     else
                         elapsedTime = TimeSpan.FromMicroseconds((startTick - endTick) / 10);
                     _dispatcher.RunFrame(elapsedTime);
-
                     PInvoke.QueryUnbiasedInterruptTime(out endTick);
                     waitTime = TimeSpan.FromMicroseconds(frameTime - (endTick - startTick) / 10);
                     if (waitTime.TotalMilliseconds > 0)
@@ -393,8 +399,9 @@ namespace Wodsoft.UI.Platforms.Win32
                 HWND.Null, null, _instance, null);
             if (windowPtr == IntPtr.Zero)
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
-            _hwnd = new HWND(windowPtr);
-            if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL))
+            _hwnd = windowPtr;
+            _dispatcher.InputMethodInternal.Initialize();
+            if (!PInvoke.ShowWindow(_hwnd, SHOW_WINDOW_CMD.SW_NORMAL))
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             if (!PInvoke.UpdateWindow(_hwnd))
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
@@ -404,7 +411,7 @@ namespace Wodsoft.UI.Platforms.Win32
             {
                 if (_disposed || _hwnd.IsNull)
                     break;
-                if (PInvoke.GetMessage(out msg, _hwnd, 0, 0))
+                if (PInvoke.GetMessage(out msg, HWND.Null, 0, 0))
                 {
                     PInvoke.TranslateMessage(msg);
                     PInvoke.DispatchMessage(msg);
@@ -511,16 +518,17 @@ namespace Wodsoft.UI.Platforms.Win32
                             _dispatcherThread.Start();
                         }
                         _dispatcher.UpdateRender();
-                        break;
+                        return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
                     }
                 case PInvoke.WM_MOVING:
                     {
                         ref RECT rect = ref Unsafe.AsRef<RECT>((void*)lParam.Value);
                         _x = rect.X;
                         _y = rect.Y;
-                        PInvoke.GetClientRect(hwnd, out var clientRect);
-                        _clientX = clientRect.X;
-                        _clientY = clientRect.Y;
+                        var point = new System.Drawing.Point();
+                        PInvoke.ClientToScreen(hwnd, ref point);
+                        _clientX = point.X;
+                        _clientY = point.Y;
                         _locationChanged = true;
                         break;
                     }
@@ -586,15 +594,35 @@ namespace Wodsoft.UI.Platforms.Win32
                     {
                         _isActivated = wParam == 1;
                         if (_isActivated)
+                        {
                             _inputProvider.MouseDevice.CurrentContext = this;
+                            _inputProvider.KeyboardDevice.CurrentContext = this;
+                            var lastFocusedElement = _lastFocusedElement;
+                            if (lastFocusedElement != null)
+                            {
+                                _lastFocusedElement = null;
+                                _dispatcher.InvokeAsync(() => _inputProvider.KeyboardDevice.Focus(lastFocusedElement), DispatcherPriority.Input);
+                            }
+                        }
                         else
+                        {
                             _inputProvider.MouseDevice.CurrentContext = null;
+                            _inputProvider.KeyboardDevice.CurrentContext = null;
+                            _lastFocusedElement = _dispatcher.FocusedElement;
+                            if (_lastFocusedElement != null)
+                                _dispatcher.InvokeAsync(() => _inputProvider.KeyboardDevice.Focus(null), DispatcherPriority.Input);
+                        }
                         _isActivateChanged = true;
                         break;
                     }
                 case PInvoke.WM_THEMECHANGED:
                     {
                         _themeChanged();
+                        break;
+                    }
+                case PInvoke.WM_SETFOCUS:
+                    {
+                        _dispatcher.InputMethodInternal.Focus();
                         break;
                     }
                 #region Mouse
@@ -711,25 +739,37 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                 #endregion
                 #region Keyboard
-                case PInvoke.WM_KEYDOWN:
-                    if ((lParam & 0xff) == 1)
+                case PInvoke.WM_CHAR:
+                case PInvoke.WM_DEADCHAR:
+                case PInvoke.WM_SYSCHAR:
+                case PInvoke.WM_SYSDEADCHAR:
                     {
-                        var key = KeyInterop.KeyFromVirtualKey((int)wParam.Value);
-                        if (key != Input.Key.None)
-                        {
-                            var time = PInvoke.GetMessageTime();
-                            _dispatcher.PushKeyboardInput(time, key, KeyStates.Down);
-                        }
+                        var time = PInvoke.GetMessageTime();
+                        _dispatcher.PushKeyboardInput(time, (char)wParam);
                     }
                     break;
+                case PInvoke.WM_KEYDOWN:
                 case PInvoke.WM_KEYUP:
+                case PInvoke.WM_SYSKEYDOWN:
+                case PInvoke.WM_SYSKEYUP:
                     if ((lParam & 0xff) == 1)
                     {
                         var key = KeyInterop.KeyFromVirtualKey((int)wParam.Value);
                         if (key != Input.Key.None)
                         {
                             var time = PInvoke.GetMessageTime();
-                            _dispatcher.PushKeyboardInput(time, key, KeyStates.None);
+                            KeyStates states;
+                            switch (msg)
+                            {
+                                case PInvoke.WM_KEYDOWN:
+                                case PInvoke.WM_SYSKEYDOWN:
+                                    states = KeyStates.Down;
+                                    break;
+                                default:
+                                    states = KeyStates.None;
+                                    break;
+                            }
+                            _dispatcher.PushKeyboardInput(time, key, states);
                         }
                     }
                     break;
@@ -738,6 +778,8 @@ namespace Wodsoft.UI.Platforms.Win32
                     while (_insertMessages.TryPop(out var action))
                         action();
                     break;
+                    //default:
+                    //    return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
             }
             return PInvoke.DefWindowProc(hwnd, msg, wParam, lParam);
         }
@@ -766,7 +808,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         private WINDOW_STYLE GetStyle()
         {
-            var style = WINDOW_STYLE.WS_VISIBLE | WINDOW_STYLE.WS_OVERLAPPEDWINDOW;
+            var style = WINDOW_STYLE.WS_VISIBLE | WINDOW_STYLE.WS_OVERLAPPEDWINDOW | WINDOW_STYLE.WS_TABSTOP;
             if (Style != WindowStyle.None)
                 style |= WINDOW_STYLE.WS_BORDER | WINDOW_STYLE.WS_CAPTION;
             return style;
@@ -779,6 +821,12 @@ namespace Wodsoft.UI.Platforms.Win32
         {
             _insertMessages.Push(callback);
             PInvoke.SendMessage(_hwnd, _InsertMessage, default, default);
+        }
+
+        internal void ProcessInWindowThreadAsync(Action callback)
+        {
+            _insertMessages.Push(callback);
+            PInvoke.PostMessage(_hwnd, _InsertMessage, default, default);
         }
 
         #endregion

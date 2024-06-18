@@ -11,5 +11,7 @@ namespace Wodsoft.UI.Input
         public int MessageTime;
         public Key Key;
         public KeyStates KeyStates;
+        public char CharCode;
+        public bool IsCharCode;
     }
 }

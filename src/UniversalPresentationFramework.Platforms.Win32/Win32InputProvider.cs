@@ -14,7 +14,7 @@ using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI.Platforms.Win32
 {
-    public class InputProvider : IInputProvider
+    public class Win32InputProvider : IInputProvider
     {
         private readonly static HCURSOR[] _Cursors = new HCURSOR[(int)CursorType.Custom];
 
@@ -105,6 +105,8 @@ namespace Wodsoft.UI.Platforms.Win32
         public Win32MouseDevice MouseDevice { get; } = new Win32MouseDevice();
 
         public Win32KeyboardDevice KeyboardDevice { get; } = new Win32KeyboardDevice();
+
+        //public Win32InputMethod InputMethod { get; } = new Win32InputMethod();
 
         MouseDevice IInputProvider.MouseDevice => MouseDevice;
 

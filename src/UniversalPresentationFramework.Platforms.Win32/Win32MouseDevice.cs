@@ -208,10 +208,10 @@ namespace Wodsoft.UI.Platforms.Win32
             {
                 if (cursor.Context is not Win32CursorContext context)
                     throw new InvalidOperationException("Invalid cursor context.");
-                windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(context));
+                windowContext.ProcessInWindowThread(() => Win32InputProvider.SetCursor(context));
             }
             else
-                windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(cursor.CursorType));
+                windowContext.ProcessInWindowThread(() => Win32InputProvider.SetCursor(cursor.CursorType));
             return true;
         }
     }

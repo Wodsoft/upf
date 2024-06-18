@@ -14,7 +14,7 @@ namespace Wodsoft.UI.Platforms.Win32
         private readonly ThemeProvider _themeProvider;
         private readonly LifecycleProvider _lifecycleProvider;
         private readonly Win32RendererContextType _rendererContextType;
-        private readonly InputProvider _inputProvider;
+        private readonly Win32InputProvider _inputProvider;
 
         public Win32Platform()
         {
@@ -42,7 +42,7 @@ namespace Wodsoft.UI.Platforms.Win32
             }
             _windowProvider = new WindowProvider(this);
             _themeProvider = new ThemeProvider();
-            _inputProvider = new InputProvider();
+            _inputProvider = new Win32InputProvider();
             _lifecycleProvider = new LifecycleProvider(_windowProvider);
         }
 
@@ -56,7 +56,7 @@ namespace Wodsoft.UI.Platforms.Win32
 
         public Win32RendererContextType RendererContextType => _rendererContextType;
 
-        public InputProvider InputProvider => _inputProvider;
+        public Win32InputProvider InputProvider => _inputProvider;
 
         public void Dispose()
         {

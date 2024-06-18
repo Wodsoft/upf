@@ -73,24 +73,29 @@ namespace Wodsoft.UI.Platforms.Win32
             if (oldElement == null)
                 oldDispatch = null;
             else
-                oldDispatch = ((DependencyObject)oldElement).Dispatcher;
+                oldDispatch = oldElement.Dispatcher;
             if (newElement == null)
                 newDispatcher = null;
             else
-                newDispatcher = ((DependencyObject)newElement).Dispatcher;
+                newDispatcher = newElement.Dispatcher;
             if (oldDispatch != newDispatcher)
             {
                 if (newDispatcher == null)
-                    return PInvoke.SetFocus(default) != default;
+                {
+                    if (oldDispatch is Win32Dispatcher win32Dispatcher)
+                        win32Dispatcher.WindowContext.ProcessInWindowThreadAsync(() => PInvoke.SetFocus(Windows.Win32.Foundation.HWND.Null));
+                    return true;
+                }
                 else
                 {
                     if (newDispatcher is not Win32Dispatcher win32Dispatcher)
                         return false;
                     bool success = false;
+                    win32Dispatcher.FocusedElement = newElement;
                     win32Dispatcher.WindowContext.ProcessInWindowThread(() =>
                     {
                         PInvoke.SetFocus(win32Dispatcher.WindowContext.Hwnd);
-                        success =  PInvoke.GetFocus() == win32Dispatcher.WindowContext.Hwnd;
+                        success = PInvoke.GetFocus() == win32Dispatcher.WindowContext.Hwnd;
                     });
                     return success;
                 }

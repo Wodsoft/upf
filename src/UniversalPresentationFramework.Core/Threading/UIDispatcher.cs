@@ -108,6 +108,19 @@ namespace Wodsoft.UI.Threading
                 });
             }
         }
+        public void PushKeyboardInput(int messageTime, char charCode)
+        {
+            var inputs = _keyboardInputs;
+            lock (inputs)
+            {
+                inputs.Add(new KeyboardInput
+                {
+                    MessageTime = messageTime,
+                    CharCode = charCode,
+                    IsCharCode = true
+                });
+            }
+        }
 
         protected void RunInput()
         {
@@ -133,7 +146,10 @@ namespace Wodsoft.UI.Threading
                 for (int i = 0; i < count; i++)
                 {
                     ref var input = ref inputs[i];
-                    KeyboardDevice.HandleInput(input);
+                    if (input.IsCharCode)
+                        InputMethod.OnTextComposition(new string(input.CharCode, 1), 1, TextCompositionStage.Completed);
+                    else
+                        KeyboardDevice.HandleInput(input);
                 }
                 _backKeyboardInputs.Clear();
             }
@@ -237,6 +253,12 @@ namespace Wodsoft.UI.Threading
             if (element != null && element is DependencyObject)
                 ((DependencyObject)element).SetValue(UIElement.IsFocusedPropertyKey, true);
         }
+
+        #endregion
+
+        #region InputMethod
+
+        protected internal abstract InputMethod InputMethod { get; }
 
         #endregion
     }

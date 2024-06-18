@@ -30,20 +30,24 @@ namespace Wodsoft.UI.Input
 
         public IInputElement? Focus(IInputElement? element)
         {
-            if (element == null)
+            //if (element == null)
+            //{
+            //    if (ActiveSource == null)
+            //        return _focusedElement;
+            //    element = ActiveSource.RootVisual as IInputElement;
+            //    if (element == null)
+            //        return _focusedElement;
+            //}
+            //else 
+            if (element != null)
             {
-                if (ActiveSource == null)
+                if (element is not DependencyObject)
                     return _focusedElement;
-                element = ActiveSource.RootVisual as IInputElement;
-                if (element == null)
+                if (!element.Focusable)
                     return _focusedElement;
+                if (element == _focusedElement)
+                    return element;
             }
-            else if (element is not DependencyObject)
-                return _focusedElement;
-            if (!element.Focusable)
-                return _focusedElement;
-            if (element == _focusedElement)
-                return element;
             var oldElement = _focusedElement;
             if (oldElement != null)
             {
@@ -63,6 +67,16 @@ namespace Wodsoft.UI.Input
                 if (previewGotFocus.Handled)
                     return oldElement;
             }
+            //if (oldElement != null && element == null)
+            //{
+            //    if (oldElement.Dispatcher is UIDispatcher dispatcher)
+            //        dispatcher.InputMethod.Disable(oldElement);
+            //}
+            //else if (element != null)
+            //{
+            //    if (element.Dispatcher is UIDispatcher dispatcher)
+            //        dispatcher.InputMethod.Enable(element);
+            //}
             if (ChangeFocus(oldElement, element))
             {
                 _focusedElement = element;
@@ -76,11 +90,16 @@ namespace Wodsoft.UI.Input
                 }
                 if (element != null)
                 {
-                    ((DependencyObject)element).SetValue(UIElement.IsKeyboardFocusedPropertyKey, true);
+                    var newElement = (DependencyObject)element;
+                    newElement.SetValue(UIElement.IsKeyboardFocusedPropertyKey, true);
                     KeyboardFocusChangedEventArgs gotFocus = new KeyboardFocusChangedEventArgs(this, Environment.TickCount, oldElement, element);
                     gotFocus.RoutedEvent = Keyboard.GotKeyboardFocusEvent;
                     gotFocus.Source = element;
                     element.RaiseEvent(gotFocus);
+                    if (newElement.Dispatcher is UIDispatcher dispatcher)
+                    {
+                        dispatcher.InputMethod.GotKeyboardFocus(newElement);
+                    }
                 }
             }
             return element;
@@ -105,31 +124,38 @@ namespace Wodsoft.UI.Input
             var element = _focusedElement;
             if (element == null)
                 return;
-            var e = new KeyEventArgs(this, input.MessageTime, input.Key, input.KeyStates);
-            switch (input.KeyStates)
+            if (input.IsCharCode)
             {
-                case KeyStates.None:
-                    e.RoutedEvent = Keyboard.PreviewKeyUpEvent;
-                    break;
-                case KeyStates.Down:
-                    e.RoutedEvent = Keyboard.PreviewKeyDownEvent;
-                    break;
-                default:
-                    return;
+                
             }
-            element.RaiseEvent(e);
-            if (!e.Handled)
+            else
             {
+                var e = new KeyEventArgs(this, input.MessageTime, input.Key, input.KeyStates);
                 switch (input.KeyStates)
                 {
                     case KeyStates.None:
-                        e.RoutedEvent = Keyboard.KeyUpEvent;
+                        e.RoutedEvent = Keyboard.PreviewKeyUpEvent;
                         break;
                     case KeyStates.Down:
-                        e.RoutedEvent = Keyboard.KeyDownEvent;
+                        e.RoutedEvent = Keyboard.PreviewKeyDownEvent;
                         break;
+                    default:
+                        return;
                 }
                 element.RaiseEvent(e);
+                if (!e.Handled)
+                {
+                    switch (input.KeyStates)
+                    {
+                        case KeyStates.None:
+                            e.RoutedEvent = Keyboard.KeyUpEvent;
+                            break;
+                        case KeyStates.Down:
+                            e.RoutedEvent = Keyboard.KeyDownEvent;
+                            break;
+                    }
+                    element.RaiseEvent(e);
+                }
             }
         }
 

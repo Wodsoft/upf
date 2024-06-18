@@ -56,7 +56,7 @@ namespace Wodsoft.UI.Input
         /// hide it and make it hard to find.  But internally we'd like an easy way to find
         /// it.  So we have this internal, but it must remain internal.
         /// </remarks>
-        internal Key RealKey
+        public Key RealKey
         {
             get { return _realKey; }
         }

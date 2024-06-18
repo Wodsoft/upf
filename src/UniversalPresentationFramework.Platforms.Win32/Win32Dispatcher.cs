@@ -13,14 +13,17 @@ namespace Wodsoft.UI.Platforms.Win32
     public sealed class Win32Dispatcher : FrameworkDispatcher
     {
         private readonly WindowContext _windowContext;
+        private readonly Win32InputMethod _inputMethod;
         private FrameworkElement? _mouseOver;
 
-        public Win32Dispatcher(WindowContext windowContext, InputProvider inputProvider, Thread thread)
+        public Win32Dispatcher(WindowContext windowContext, Win32InputProvider inputProvider, Thread thread)
         {
             _windowContext = windowContext;
             Thread = thread;
             MouseDevice = inputProvider.MouseDevice;
             KeyboardDevice = inputProvider.KeyboardDevice;
+            //_inputMethod = inputProvider.InputMethod;
+            _inputMethod = new Win32InputMethod(windowContext);
         }
 
         public override Thread Thread { get; }
@@ -28,6 +31,8 @@ namespace Wodsoft.UI.Platforms.Win32
         internal WindowContext WindowContext => _windowContext;
 
         protected override FrameworkElement RootElement => _windowContext.Window;
+
+        internal IInputElement? FocusedElement { get; set; }
 
         protected override void OnSendOperationQueued()
         {
@@ -46,7 +51,7 @@ namespace Wodsoft.UI.Platforms.Win32
                 if (MouseDevice.Target == null && _mouseOver != null)
                 {
                     _mouseOver = null;
-                    _windowContext.ProcessInWindowThread(() => InputProvider.SetCursor(CursorType.Arrow));
+                    _windowContext.ProcessInWindowThread(() => Win32InputProvider.SetCursor(CursorType.Arrow));
                 }
                 else if (MouseDevice.Target is FrameworkElement fe && _mouseOver != fe)
                 {
@@ -65,6 +70,10 @@ namespace Wodsoft.UI.Platforms.Win32
 
         protected override KeyboardDevice KeyboardDevice { get; }
 
+        protected override InputMethod InputMethod => _inputMethod;
+
         protected override bool IsActived => _windowContext.State != WindowState.Minimized;
+
+        internal Win32InputMethod InputMethodInternal => _inputMethod;
     }
 }
