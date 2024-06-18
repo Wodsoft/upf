@@ -78,6 +78,7 @@ namespace Wodsoft.UI
         {
             base.OnLogicalRootChanged(oldRoot, newRoot);
             _hasRetryBind = false;
+            _dispatcherCache = null;
             Initialize();
         }
 
@@ -562,7 +563,9 @@ namespace Wodsoft.UI
                             trigger.DisconnectTrigger(_lastTemplate!, this, _templatedContent.FindScope());
                         }
                     }
+                    _templatedContent._dispatcherCache = null;
                     _templatedContent._templatedParent = null;
+                    _templatedContent.OnTemplateParentChanged(null);
                     _templatedContent.TemplatedParentChanged?.Invoke(_templatedContent, EventArgs.Empty);
                     //RemoveLogicalChild(_templatedContent);
                     RemoveVisualChild(_templatedContent);
@@ -581,8 +584,10 @@ namespace Wodsoft.UI
                                 trigger.ConnectTrigger(template, this, _templatedContent.FindScope());
                             }
                         }
+                        _templatedContent._dispatcherCache = null;
                         _templatedContent._templatedParent = this;
                         _templatedContent._hasRetryBind = false;
+                        _templatedContent.OnTemplateParentChanged(this);
                         _templatedContent.TemplatedParentChanged?.Invoke(_templatedContent, EventArgs.Empty);
                         //AddLogicalChild(_templatedContent);
                         AddVisualChild(_templatedContent);
@@ -618,6 +623,22 @@ namespace Wodsoft.UI
         protected void OnTemplateChanged()
         {
             _templateGenerated = false;
+        }
+
+        private void OnTemplateParentChanged(FrameworkElement? templateParent)
+        {
+            if (templateParent == null)
+            {
+                _dispatcherCache = null;
+                if (LogicalChildren != null)
+                {
+                    foreach(var logicalChild in LogicalChildren)
+                    {
+                        if (logicalChild is FrameworkElement fe)
+                            fe.OnTemplateParentChanged(null);
+                    }
+                }
+            }
         }
 
         #endregion
@@ -1099,17 +1120,24 @@ namespace Wodsoft.UI
 
         #region Dispatcher
 
+        private Dispatcher? _dispatcherCache;
         public override Dispatcher Dispatcher
         {
             get
             {
-                if (LogicalRoot == this)
+                if (_dispatcherCache == null)
                 {
-                    if (TemplatedParent != null)
-                        return TemplatedParent.Dispatcher;
-                    return base.Dispatcher;
+                    if (LogicalRoot == this)
+                    {
+                        if (TemplatedParent == null)
+                            _dispatcherCache = base.Dispatcher;
+                        else
+                            _dispatcherCache = TemplatedParent.Dispatcher;
+                    }
+                    else
+                        _dispatcherCache = LogicalRoot.Dispatcher;
                 }
-                return LogicalRoot.Dispatcher;
+                return _dispatcherCache;
             }
         }
 
