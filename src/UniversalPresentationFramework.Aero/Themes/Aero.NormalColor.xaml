@@ -42,7 +42,7 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}">
-						<TextHolder CanContentScroll="true"
+						<TextViewer CanContentScroll="true"
 									HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
 									VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
 									TextAlignment="{TemplateBinding TextAlignment}"

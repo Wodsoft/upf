@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wodsoft.UI.Controls.Primitives;
 using Wodsoft.UI.Data;
 using Wodsoft.UI.Documents;
+using Wodsoft.UI.Input;
 
 namespace Wodsoft.UI.Controls
 {
     public class TextBox : TextBoxBase, ITextHost
     {
         private string _text = string.Empty;
+        private int _selectionStart, _selectionLength, _compositionStart, _compositionLength;
+        private bool _isComposition, _isEditing;
 
         static TextBox()
         {
@@ -77,7 +81,7 @@ namespace Wodsoft.UI.Controls
                         new FrameworkPropertyMetadata( // Property metadata
                                 string.Empty, // default value
                                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | // Flags
-                                    FrameworkPropertyMetadataOptions.Journal,
+                                    FrameworkPropertyMetadataOptions.Journal | FrameworkPropertyMetadataOptions.AffectsRender,
                                 new PropertyChangedCallback(OnTextPropertyChanged),    // property changed callback
                                 new CoerceValueCallback(CoerceText),
                                 true));
@@ -144,8 +148,6 @@ namespace Wodsoft.UI.Controls
 
         #region Selection
 
-        private int _selectionStart, _selectionLength;
-
         public ReadOnlySpan<char> SelectedText
         {
             get => _text.AsSpan().Slice(_selectionStart, _selectionLength);
@@ -189,15 +191,18 @@ namespace Wodsoft.UI.Controls
             {
                 _selectionStart = start;
                 _selectionLength = length;
-                _selectionChangedDelegate?.Invoke(this, EventArgs.Empty);
+                RaiseEvent(new RoutedEventArgs(SelectionChangedEvent));
             }
         }
 
         #endregion
 
+        #region DependencyValue
+
+        #endregion
+
         #region Text Host
 
-        private EventHandler? _textChangedDelegate, _selectionChangedDelegate;
         private List<ITextHostLine> _lines = new List<ITextHostLine>();
         IReadOnlyList<ITextHostLine> ITextHost.Lines
         {
@@ -205,7 +210,12 @@ namespace Wodsoft.UI.Controls
             {
                 if (_lines.Count == 0)
                 {
-                    var text = Text.AsSpan();
+                    if (_text.Length == 0)
+                    {
+                        _lines.Add(new TextBoxHostLine(this, 0, 0));
+                        return _lines;
+                    }
+                    var text = _text.AsSpan();
                     int newLine;
                     int start = 0;
                     _lines = new List<ITextHostLine>();
@@ -215,8 +225,7 @@ namespace Wodsoft.UI.Controls
                         start += newLine + 1;
                         text = text.Slice(newLine + 1);
                     }
-                    if (text.Length != 0)
-                        _lines.Add(new TextBoxHostLine(this, start, text.Length));
+                    _lines.Add(new TextBoxHostLine(this, start, text.Length));
                 }
                 return _lines;
             }
@@ -225,54 +234,33 @@ namespace Wodsoft.UI.Controls
         private void OnTextChanged(in string oldValue, in string newValue)
         {
             _lines.Clear();
-            var selectionStart = _selectionStart;
-            var selectionLength = _selectionLength;
-            if (selectionStart + selectionLength > newValue.Length)
-                selectionLength = _text.Length - selectionStart;
-            if (selectionStart > _text.Length)
-                selectionStart = _text.Length;
-            if (selectionLength < 0)
-                selectionLength = 0;
-            bool selectionChanged = selectionStart != _selectionStart || selectionLength != _selectionLength;
-            if (selectionChanged)
+            if (!_isEditing)
             {
-                _selectionStart = selectionStart;
-                _selectionLength = selectionLength;
+                var selectionStart = _selectionStart;
+                var selectionLength = _selectionLength;
+                if (selectionStart + selectionLength > newValue.Length)
+                    selectionLength = _text.Length - selectionStart;
+                if (selectionStart > _text.Length)
+                    selectionStart = _text.Length;
+                if (selectionLength < 0)
+                    selectionLength = 0;
+                bool selectionChanged = selectionStart != _selectionStart || selectionLength != _selectionLength;
+                if (selectionChanged)
+                {
+                    _selectionStart = selectionStart;
+                    _selectionLength = selectionLength;
+                }
+                _compositionLength = 0;
             }
-            _textChangedDelegate?.Invoke(this, EventArgs.Empty);
+            TextChangedEventArgs e = new TextChangedEventArgs(TextChangedEvent, UndoAction.None);
+            RaiseEvent(e);
         }
 
         internal ReadOnlySpan<char> GetText() => _text.AsSpan();
 
-        event EventHandler ITextHost.TextChanged
-        {
-            add
-            {
-                if (_textChangedDelegate == null)
-                    _textChangedDelegate = value;
-                else
-                    _textChangedDelegate = (EventHandler)Delegate.Combine(_textChangedDelegate, value);
-            }
-            remove
-            {
-                _textChangedDelegate = (EventHandler?)Delegate.Remove(_textChangedDelegate, value);
-            }
-        }
+        internal int CompositionLength => _compositionLength;
 
-        event EventHandler ITextHost.SelectionChanged
-        {
-            add
-            {
-                if (_selectionChangedDelegate == null)
-                    _selectionChangedDelegate = value;
-                else
-                    _selectionChangedDelegate = (EventHandler)Delegate.Combine(_selectionChangedDelegate, value);
-            }
-            remove
-            {
-                _selectionChangedDelegate = (EventHandler?)Delegate.Remove(_selectionChangedDelegate, value);
-            }
-        }
+        internal int ComposttionStart => _compositionStart;
 
         bool ITextHost.IsSelectable => true;
 
@@ -286,5 +274,170 @@ namespace Wodsoft.UI.Controls
         int ITextHost.TextLength => _text.Length;
 
         #endregion
+
+        protected override void OnTextInput(TextCompositionEventArgs e)
+        {
+            string text;
+            if (e.TextComposition.Stage == TextCompositionStage.Started)
+            {
+                _isComposition = true;
+                text = ReplaceSelection(e.Text);
+                _selectionStart += e.Text.Length;
+                _selectionLength = 0;
+                _compositionStart = e.TextComposition.CaretPosition;
+                _compositionLength = e.Text.Length;
+                _isEditing = true;
+                Text = text;
+                _isEditing = false;
+            }
+            else if (_isComposition || (e.Text.Length == 1 && char.IsLetter(e.Text, 0)))
+            {
+                if (_compositionLength == _text.Length)
+                    text = e.Text;
+                else if (_compositionLength == _selectionStart + _compositionLength - _compositionStart)
+                    text = e.Text + _text.Substring(_compositionLength);
+                else if (_selectionStart + _compositionLength - _compositionStart == _text.Length)
+                    text = _text.Substring(0, _text.Length - _compositionLength) + e.Text;
+                else
+                    text = _text.Substring(0, _selectionStart - _compositionStart) + e.Text + _text.Substring(_selectionStart + _compositionLength - _compositionStart);
+                _selectionStart = _selectionStart - _compositionStart + e.TextComposition.CaretPosition;
+                _compositionLength = e.Text.Length;
+                _compositionStart = e.TextComposition.CaretPosition;
+            }
+            else
+                return;
+            _isEditing = true;
+            Text = text;
+            _isEditing = false;
+            if (e.TextComposition.Stage == TextCompositionStage.Completed)
+            {
+                _isComposition = false;
+                _compositionStart = _compositionLength = 0;
+            }
+        }
+
+        private string ReplaceSelection(string? replaceText)
+        {
+            string text;
+            if (_selectionLength == _text.Length)
+                return replaceText ?? string.Empty;
+            else if (_selectionStart == 0)
+            {
+                if (replaceText == null)
+                    return _text.Substring(_selectionLength);
+                else
+                    text = replaceText + _text.Substring(_selectionLength);
+            }
+            else if (_selectionStart + _selectionLength == _text.Length)
+            {
+                if (replaceText == null)
+                    return _text.Substring(0, _selectionStart);
+                else
+                    text = _text.Substring(0, _selectionStart) + replaceText;
+            }
+            else
+            {
+                if (replaceText == null)
+                    text = _text.Remove(_selectionStart, _selectionLength);
+                else
+                    text = _text.Substring(0, _selectionStart) + replaceText + _text.Substring(_selectionStart + _selectionLength);
+            }
+            return text;
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.Key == Key.Back)
+            {
+                string text;
+                if (_selectionLength == 0)
+                {
+                    if (_selectionStart == 0)
+                        return;
+                    else if (_selectionStart == _text.Length)
+                        text = _text.Substring(0, _selectionStart - 1);
+                    else
+                        text = _text.Remove(_selectionStart - 1, 1);
+                    _selectionStart--;
+                }
+                else
+                {
+                    text = ReplaceSelection(null);
+                    _selectionLength = 0;
+                }
+                _isEditing = true;
+                Text = text;
+                _isEditing = false;
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Delete)
+            {
+                string text;
+                if (_selectionLength == 0)
+                {
+                    if (_selectionStart == _text.Length)
+                        return;
+                    else if (_selectionStart == 0)
+                        text = _text.Substring(1);
+                    else
+                        text = _text.Remove(_selectionStart, 1);
+                }
+                else
+                {
+                    text = ReplaceSelection(null);
+                    _selectionLength = 0;
+                }
+                _isEditing = true;
+                Text = text;
+                _isEditing = false;
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                string text;
+                if (_selectionLength == 0)
+                {
+                    if (_selectionStart == 0)
+                        text = "\n" + _text;
+                    else if (_selectionStart == _text.Length)
+                        text = _text + "\n";
+                    else
+                        text = _text.Substring(0, _selectionStart) + "\n" + _text.Substring(_selectionStart);
+                }
+                else
+                {
+                    text = ReplaceSelection("\n");
+                    _selectionLength = 0;
+                }
+                _selectionStart++;
+                _isEditing = true;
+                Text = text;
+                _isEditing = false;
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Space)
+            {
+                string text;
+                if (_selectionLength == 0)
+                {
+                    if (_selectionStart == 0)
+                        text = " " + _text;
+                    else if (_selectionStart == _text.Length)
+                        text = _text + " ";
+                    else
+                        text = _text.Substring(0, _selectionStart) + " " + _text.Substring(_selectionStart);
+                }
+                else
+                {
+                    text = ReplaceSelection(" ");
+                    _selectionLength = 0;
+                }
+                _selectionStart++;
+                _isEditing = true;
+                Text = text;
+                _isEditing = false;
+                e.Handled = true;
+            }
+        }
     }
 }

@@ -9,7 +9,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls.Primitives
 {
-    [TemplatePart(Name = "PART_TextHost", Type = typeof(TextHolder))]
+    [TemplatePart(Name = "PART_TextHost", Type = typeof(TextViewer))]
     public abstract class TextBoxBase : Control
     {
         #region Properties
@@ -110,6 +110,24 @@ namespace Wodsoft.UI.Controls.Primitives
             set { SetValue(CaretBrushProperty, value); }
         }
 
+        #endregion
+
+        #region Events
+
+        public static readonly RoutedEvent SelectionChangedEvent = EventManager.RegisterRoutedEvent(
+            "SelectionChanged",
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(TextBoxBase));
+        public event RoutedEventHandler SelectionChanged { add { AddHandler(SelectionChangedEvent, value); } remove { RemoveHandler(SelectionChangedEvent, value); } }
+
+
+        public static readonly RoutedEvent TextChangedEvent = EventManager.RegisterRoutedEvent(
+            "TextChanged",
+            RoutingStrategy.Bubble,
+            typeof(TextChangedEventHandler),
+            typeof(TextBoxBase));
+        public event TextChangedEventHandler TextChanged { add { AddHandler(TextChangedEvent, value); } remove { RemoveHandler(TextChangedEvent, value); } }
 
         #endregion
     }

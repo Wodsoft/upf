@@ -13,5 +13,9 @@ namespace Wodsoft.UI.Controls.Primitives
         float LineHeight { get; }
 
         float Baseline { get; }
+
+        int Position { get; }
+
+        int Length { get; }
     }
 }

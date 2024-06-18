@@ -10,7 +10,7 @@ namespace Wodsoft.UI.Controls.Primitives
     public interface ITextHost : IInputElement
     {
         char GetChar(int position);
-
+        
         IReadOnlyList<ITextHostLine> Lines { get; }
 
         bool AcceptsReturn { get; }
@@ -27,8 +27,10 @@ namespace Wodsoft.UI.Controls.Primitives
 
         bool IsReadOnly { get; }
 
-        event EventHandler TextChanged;
+        bool IsReadOnlyCaretVisible { get; }
 
-        event EventHandler SelectionChanged;
+        event TextChangedEventHandler TextChanged;
+
+        event RoutedEventHandler SelectionChanged;
     }
 }

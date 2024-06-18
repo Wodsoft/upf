@@ -101,6 +101,35 @@ namespace Wodsoft.UI.Controls
                 if (foreground != null)
                     drawingContext.DrawText(text, _typeface, _textBox.FontSize, foreground, origin);
             }
+            var compositionLength = _textBox.CompositionLength;
+            if (compositionLength != 0 && foreground != null)
+            {
+                selectionStart -= _textBox.ComposttionStart;
+                selectionLength = compositionLength;
+                if ((selectionStart >= _start && selectionStart < _start + _length) ||
+                    (selectionStart + selectionLength > _start && selectionStart + selectionLength <= _start + _length))
+                {
+                    var pen = new Pen(foreground, 1, PenLineCap.Flat, PenLineCap.Flat, PenLineCap.Flat, PenLineJoin.Miter, 1f, DashStyles.DashDot);
+                    if (selectionStart <= _start && selectionStart + selectionLength >= _start + _length)
+                    {
+                        drawingContext.DrawLine(pen, new Point(origin.X, origin.Y), new Point(origin.X + _width, origin.Y));
+                    }
+                    else
+                    {
+                        int left = 0, right = 0;
+                        if (selectionStart > _start)
+                            left = selectionStart - _start;
+                        if (selectionStart + selectionLength < _start + _length)
+                            right = _start + _length - selectionStart - selectionLength;
+                        var offsetX = origin.X;
+                        if (left != 0)
+                            offsetX += _widths.Span[..left].Sum();
+                        var width = _widths.Span[left..^right].Sum();
+                        var offsetY = origin.Y + _typeface.Descent * _textBox.FontSize;
+                        drawingContext.DrawLine(pen, new Point(offsetX, offsetY), new Point(offsetX + width, offsetY));
+                    }
+                }
+            }
         }
 
         public int GetCharPosition(in float x)
