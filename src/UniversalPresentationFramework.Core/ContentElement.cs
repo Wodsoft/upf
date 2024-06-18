@@ -398,6 +398,8 @@ namespace Wodsoft.UI
         public static readonly RoutedEvent GotKeyboardFocusEvent = Keyboard.GotKeyboardFocusEvent.AddOwner(typeof(ContentElement));
         public static readonly RoutedEvent PreviewLostKeyboardFocusEvent = Keyboard.PreviewLostKeyboardFocusEvent.AddOwner(typeof(ContentElement));
         public static readonly RoutedEvent LostKeyboardFocusEvent = Keyboard.LostKeyboardFocusEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent PreviewTextInputEvent = TextCompositionManager.PreviewTextInputEvent.AddOwner(typeof(ContentElement));
+        public static readonly RoutedEvent TextInputEvent = TextCompositionManager.TextInputEvent.AddOwner(typeof(ContentElement));
 
         public event KeyEventHandler PreviewKeyDown { add { AddHandler(Keyboard.PreviewKeyDownEvent, value, false); } remove { RemoveHandler(Keyboard.PreviewKeyDownEvent, value); } }
         public event KeyEventHandler KeyDown { add { AddHandler(Keyboard.KeyDownEvent, value, false); } remove { RemoveHandler(Keyboard.KeyDownEvent, value); } }
@@ -407,7 +409,9 @@ namespace Wodsoft.UI
         public event KeyboardFocusChangedEventHandler GotKeyboardFocus { add { AddHandler(Keyboard.GotKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.GotKeyboardFocusEvent, value); } }
         public event KeyboardFocusChangedEventHandler PreviewLostKeyboardFocus { add { AddHandler(Keyboard.PreviewLostKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.PreviewLostKeyboardFocusEvent, value); } }
         public event KeyboardFocusChangedEventHandler LostKeyboardFocus { add { AddHandler(Keyboard.LostKeyboardFocusEvent, value, false); } remove { RemoveHandler(Keyboard.LostKeyboardFocusEvent, value); } }
-                
+        public event TextCompositionEventHandler PreviewTextInput { add { AddHandler(TextCompositionManager.PreviewTextInputEvent, value, false); } remove { RemoveHandler(TextCompositionManager.PreviewTextInputEvent, value); } }
+        public event TextCompositionEventHandler TextInput { add { AddHandler(TextCompositionManager.TextInputEvent, value, false); } remove { RemoveHandler(TextCompositionManager.TextInputEvent, value); } }
+
         protected internal virtual void OnPreviewKeyDown(KeyEventArgs e) { }
         protected internal virtual void OnKeyDown(KeyEventArgs e) { }
         protected internal virtual void OnPreviewKeyUp(KeyEventArgs e) { }
@@ -417,6 +421,8 @@ namespace Wodsoft.UI
         protected internal virtual void OnPreviewLostKeyboardFocus(KeyboardFocusChangedEventArgs e) { }
         protected internal virtual void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e) { }
         protected virtual void OnIsKeyboardFocusedChanged(DependencyPropertyChangedEventArgs e) { }
+        protected internal virtual void OnPreviewTextInput(TextCompositionEventArgs e) { }
+        protected internal virtual void OnTextInput(TextCompositionEventArgs e) { }
 
         #endregion
 
