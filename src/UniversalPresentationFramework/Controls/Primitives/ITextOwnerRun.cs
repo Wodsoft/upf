@@ -7,7 +7,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls.Primitives
 {
-    public interface ITextHostRun
+    public interface ITextOwnerRun
     {
         bool IsMeasured { get; }
 
@@ -25,7 +25,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         ReadOnlySpan<float> Widths { get; }
 
-        void Wrap(TextTrimming trimming, float width, bool overflow, out ITextHostRun? left, out ITextHostRun? right);
+        void Wrap(TextTrimming trimming, float width, bool overflow, out ITextOwnerRun? left, out ITextOwnerRun? right);
 
         void Draw(DrawingContext drawingContext, in Point origin);
 

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Controls.Primitives
 {
-    public interface ITextHostLine
+    public interface ITextOwnerLine
     {
-        IReadOnlyList<ITextHostRun> Runs { get; }
+        IReadOnlyList<ITextOwnerRun> Runs { get; }
 
         float LineHeight { get; }
 

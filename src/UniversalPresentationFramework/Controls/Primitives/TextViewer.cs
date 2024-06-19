@@ -16,7 +16,7 @@ namespace Wodsoft.UI.Controls.Primitives
 {
     public class TextViewer : FrameworkElement, IInputMethodSource
     {
-        private ITextHost? _textHost;
+        private ITextOwner? _textOwner;
         private float _offsetX, _offsetY, _caretX, _caretY, _caretHeight, _measuredHeight;
         private Storyboard? _caretStoryboard;
         private bool _caretVisible, _caretMove, _caretUpdate;
@@ -120,18 +120,18 @@ namespace Wodsoft.UI.Controls.Primitives
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            if (_textHost == null)
+            if (_textOwner == null)
             {
                 var root = LogicalRoot as FrameworkElement;
-                if (root == null || root.TemplatedParent is not ITextHost textHost)
+                if (root == null || root.TemplatedParent is not ITextOwner textOwner)
                     return Size.Empty;
-                root.TemplatedParent.PreviewTextInput += TextHost_PreviewTextInput;
-                _textHost = textHost;
-                _textHost.SelectionChanged += TextHost_SelectionChanged;
-                _textHost.TextChanged += TextHost_TextChanged;
-                _textHost.GotKeyboardFocus += TextHost_GotKeyboardFocus;
-                _textHost.LostKeyboardFocus += TextHost_LostKeyboardFocus;
-                _textHost.KeyDown += TextHost_KeyDown;
+                root.TemplatedParent.PreviewTextInput += TextOwner_PreviewTextInput;
+                _textOwner = textOwner;
+                _textOwner.SelectionChanged += TextOwner_SelectionChanged;
+                _textOwner.TextChanged += TextOwner_TextChanged;
+                _textOwner.GotKeyboardFocus += TextOwner_GotKeyboardFocus;
+                _textOwner.LostKeyboardFocus += TextOwner_LostKeyboardFocus;
+                _textOwner.KeyDown += TextOwner_KeyDown;
             }
 
             var padding = Padding;
@@ -141,12 +141,12 @@ namespace Wodsoft.UI.Controls.Primitives
             int i = 0, l = 0;
             float maxWidth = 0f, maxHeight = 0f;
             bool fetchWidth = true, fetchHeight = true;
-            var lines = _textHost.Lines;
+            var lines = _textOwner.Lines;
             while (fetchWidth || fetchHeight)
             {
                 if (i == _textPositions.Count)
                 {
-                    ITextHostLine? line = null;
+                    ITextOwnerLine? line = null;
                     if (l == 0 && _textPositions.Count != 0)
                     {
                         var lastRun = _textPositions[_textPositions.Count - 1].Run;
@@ -199,7 +199,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (_textHost == null)
+            if (_textOwner == null)
                 return;
             var textWrapping = TextWrapping;
             var textTrimming = TextTrimming;
@@ -209,11 +209,11 @@ namespace Wodsoft.UI.Controls.Primitives
             drawingContext.PushClip(new RectangleGeometry(new Rect(padding.Left, padding.Top, renderSize.Width - padding.Left - padding.Right, renderSize.Height - padding.Top - padding.Bottom)));
             bool fetch = true;
             int i = 0, l = 0;
-            var lines = _textHost.Lines;
-            float availableWidth = _textHost.AcceptsReturn ? RenderSize.Width - padding.Left - padding.Right : float.PositiveInfinity;
+            var lines = _textOwner.Lines;
+            float availableWidth = _textOwner.AcceptsReturn ? RenderSize.Width - padding.Left - padding.Right : float.PositiveInfinity;
             if (_caretMove)
             {
-                var selectionStart = _textHost!.SelectionStart;
+                var selectionStart = _textOwner!.SelectionStart;
                 int lastRunEnd;
                 if (_textPositions.Count == 0)
                     lastRunEnd = 0;
@@ -248,7 +248,7 @@ namespace Wodsoft.UI.Controls.Primitives
                 {
                     if (i == _textPositions.Count)
                     {
-                        ITextHostLine? line = null;
+                        ITextOwnerLine? line = null;
                         if (l == 0 && _textPositions.Count != 0)
                         {
                             var lastRun = _textPositions[_textPositions.Count - 1].Run;
@@ -295,7 +295,7 @@ namespace Wodsoft.UI.Controls.Primitives
             }
         }
 
-        private void MeasureLine(ITextHostLine line, float availableWidth, TextWrapping textWrapping, TextTrimming textTrimming)
+        private void MeasureLine(ITextOwnerLine line, float availableWidth, TextWrapping textWrapping, TextTrimming textTrimming)
         {
             int currentPositions = _textPositions.Count;
             float lineHeight, baseline, x = 0f, currentAvailableWidth = availableWidth;
@@ -394,7 +394,7 @@ namespace Wodsoft.UI.Controls.Primitives
             adjustLineHeight();
         }
 
-        private void TextHost_TextChanged(object? sender, TextChangedEventArgs e)
+        private void TextOwner_TextChanged(object? sender, TextChangedEventArgs e)
         {
             if (_caretStoryboard != null)
                 _caretStoryboard.Seek(TimeSpan.Zero, TimeSeekOrigin.BeginTime);
@@ -405,7 +405,7 @@ namespace Wodsoft.UI.Controls.Primitives
             InvalidateVisual();
         }
 
-        private void TextHost_SelectionChanged(object? sender, RoutedEventArgs e)
+        private void TextOwner_SelectionChanged(object? sender, RoutedEventArgs e)
         {
             if (_caretStoryboard != null)
                 _caretStoryboard.Seek(TimeSpan.Zero, TimeSeekOrigin.BeginTime);
@@ -415,9 +415,9 @@ namespace Wodsoft.UI.Controls.Primitives
 
         private void UpdateCaret(bool moveView)
         {
-            if (_textHost!.SelectionLength == 0)
+            if (_textOwner!.SelectionLength == 0)
             {
-                var selectionStart = _textHost.SelectionStart;
+                var selectionStart = _textOwner.SelectionStart;
                 var spans = CollectionsMarshal.AsSpan(_textPositions);
                 for (int i = 0; i < spans.Length; i++)
                 {
@@ -509,7 +509,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         public override Visual? HitTest(in Point point)
         {
-            if (_textHost != null)
+            if (_textOwner != null)
             {
                 var renderSize = RenderSize;
                 if (point.X >= 0 && point.X < renderSize.Width && point.Y >= 0 && point.Y < renderSize.Height)
@@ -522,7 +522,7 @@ namespace Wodsoft.UI.Controls.Primitives
         private int _mousePositionStart;
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
-            if (_textHost != null && _textHost.IsSelectable)
+            if (_textOwner != null && _textOwner.IsSelectable)
             {
                 _mouseDown = true;
                 CaptureMouse();
@@ -531,10 +531,10 @@ namespace Wodsoft.UI.Controls.Primitives
                 point.X -= padding.Left - _offsetX;
                 point.Y -= padding.Top - _offsetY;
                 var position = GetTextPosition(point);
-                if (position != _textHost.SelectionStart)
-                    _textHost.Select(position, 0);
+                if (position != _textOwner.SelectionStart)
+                    _textOwner.Select(position, 0);
                 _mousePositionStart = position;
-                _textHost.Focus();
+                _textOwner.Focus();
             }
         }
 
@@ -548,9 +548,9 @@ namespace Wodsoft.UI.Controls.Primitives
                 point.Y -= padding.Top - _offsetY;
                 var position = GetTextPosition(point);
                 if (_mousePositionStart > position)
-                    _textHost!.Select(position, _mousePositionStart - position);
+                    _textOwner!.Select(position, _mousePositionStart - position);
                 else
-                    _textHost!.Select(_mousePositionStart, position - _mousePositionStart);
+                    _textOwner!.Select(_mousePositionStart, position - _mousePositionStart);
             }
         }
 
@@ -593,9 +593,9 @@ namespace Wodsoft.UI.Controls.Primitives
 
         #region Keyboard Input
 
-        private void TextHost_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void TextOwner_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            if (_textHost!.IsReadOnly && !_textHost.IsReadOnlyCaretVisible)
+            if (_textOwner!.IsReadOnly && !_textOwner.IsReadOnlyCaretVisible)
                 return;
             if (_caretStoryboard == null)
             {
@@ -618,7 +618,7 @@ namespace Wodsoft.UI.Controls.Primitives
             {
                 _caretStoryboard.Begin();
             }
-            if (!_textHost.IsReadOnly)
+            if (!_textOwner.IsReadOnly)
             {
                 if (_inputMethodContext == null)
                     _inputMethodContext = InputMethod.Current.CreateContext(this);
@@ -627,9 +627,9 @@ namespace Wodsoft.UI.Controls.Primitives
             }
         }
 
-        private void TextHost_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void TextOwner_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            if (_textHost!.IsReadOnly && !_textHost.IsReadOnlyCaretVisible)
+            if (_textOwner!.IsReadOnly && !_textOwner.IsReadOnlyCaretVisible)
                 return;
             if (_caretStoryboard != null)
             {
@@ -640,29 +640,29 @@ namespace Wodsoft.UI.Controls.Primitives
                 _inputMethodContext.Unfocus();
         }
 
-        private void TextHost_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void TextOwner_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             _caretMove = true;
             if (!_caret.IsVisible)
                 UpdateCaret(true);
         }
 
-        private void TextHost_KeyDown(object sender, KeyEventArgs e)
+        private void TextOwner_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Left)
             {
-                if (_textHost!.SelectionStart == 0)
+                if (_textOwner!.SelectionStart == 0)
                     return;
                 _caretMove = true;
-                _textHost!.Select(_textHost.SelectionStart - 1, 0);
+                _textOwner!.Select(_textOwner.SelectionStart - 1, 0);
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                if (_textHost!.SelectionStart >= _textHost.TextLength)
+                if (_textOwner!.SelectionStart >= _textOwner.TextLength)
                     return;
                 _caretMove = true;
-                _textHost!.Select(_textHost.SelectionStart + 1, 0);
+                _textOwner!.Select(_textOwner.SelectionStart + 1, 0);
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
@@ -697,7 +697,7 @@ namespace Wodsoft.UI.Controls.Primitives
                 {
                     var l = _caretX - (textPosition.X + padding.Left - _offsetX);
                     _caretMove = true;
-                    _textHost!.Select(textPosition.Run.GetCharPosition(l), 0);
+                    _textOwner!.Select(textPosition.Run.GetCharPosition(l), 0);
                 }
             }
             else if (e.Key == Key.Down)
@@ -732,7 +732,7 @@ namespace Wodsoft.UI.Controls.Primitives
                 {
                     var l = _caretX - (textPosition.X + padding.Left - _offsetX);
                     _caretMove = true;
-                    _textHost!.Select(textPosition.Run.GetCharPosition(l), 0);
+                    _textOwner!.Select(textPosition.Run.GetCharPosition(l), 0);
                 }
             }
             else if (e.Key == Key.Home)
@@ -748,10 +748,10 @@ namespace Wodsoft.UI.Controls.Primitives
                         break;
                     textPosition = ref p;
                 }
-                if (_textHost!.SelectionStart != textPosition.Run.Position)
+                if (_textOwner!.SelectionStart != textPosition.Run.Position)
                 {
                     _caretMove = true;
-                    _textHost.Select(textPosition.Run.Position, 0);
+                    _textOwner.Select(textPosition.Run.Position, 0);
                 }
             }
             else if (e.Key == Key.End)
@@ -767,10 +767,10 @@ namespace Wodsoft.UI.Controls.Primitives
                         break;
                     textPosition = ref p;
                 }
-                if (_textHost!.SelectionStart != textPosition.Run.Position + textPosition.Run.Length)
+                if (_textOwner!.SelectionStart != textPosition.Run.Position + textPosition.Run.Length)
                 {
                     _caretMove = true;
-                    _textHost.Select(textPosition.Run.Position + textPosition.Run.Length, 0);
+                    _textOwner.Select(textPosition.Run.Position + textPosition.Run.Length, 0);
                 }
             }
         }
@@ -779,7 +779,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         #region Input Method Source
 
-        UIElement IInputMethodSource.UIScope => (UIElement?)_textHost ?? throw new InvalidOperationException("No ui scope found.");
+        UIElement IInputMethodSource.UIScope => (UIElement?)_textOwner ?? throw new InvalidOperationException("No ui scope found.");
 
         Vector2 IInputMethodSource.CaretPosition
         {
@@ -804,7 +804,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         private struct TextPosition
         {
-            public TextPosition(ITextHostRun run, float x, float y, float height, float baseline)
+            public TextPosition(ITextOwnerRun run, float x, float y, float height, float baseline)
             {
                 Run = run;
                 X = x;
@@ -813,7 +813,7 @@ namespace Wodsoft.UI.Controls.Primitives
                 Baseline = baseline;
             }
 
-            public ITextHostRun Run;
+            public ITextOwnerRun Run;
 
             public float X;
 

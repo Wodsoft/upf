@@ -7,11 +7,9 @@ using Wodsoft.UI.Media.TextFormatting;
 
 namespace Wodsoft.UI.Controls.Primitives
 {
-    public interface ITextHost : IInputElement
-    {
-        char GetChar(int position);
-        
-        IReadOnlyList<ITextHostLine> Lines { get; }
+    public interface ITextOwner : IInputElement
+    {        
+        IReadOnlyList<ITextOwnerLine> Lines { get; }
 
         bool AcceptsReturn { get; }
 

@@ -10,7 +10,7 @@ using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls
 {
-    public class TextBoxHostLine : ITextHostLine, ITextHostRun
+    public class TextBoxLine : ITextOwnerLine, ITextOwnerRun
     {
         private readonly TextBox _textBox;
         private readonly int _start, _length;
@@ -19,14 +19,14 @@ namespace Wodsoft.UI.Controls
         private bool _isMeasured;
         private GlyphTypeface? _typeface;
 
-        public TextBoxHostLine(TextBox textBox, int start, int length)
+        public TextBoxLine(TextBox textBox, int start, int length)
         {
             _textBox = textBox;
             _start = start;
             _length = length;
         }
 
-        public IReadOnlyList<ITextHostRun> Runs => [this];
+        public IReadOnlyList<ITextOwnerRun> Runs => [this];
 
         public float LineHeight => float.NaN;
 
@@ -174,7 +174,7 @@ namespace Wodsoft.UI.Controls
             _baseline = 0;
         }
 
-        public void Wrap(TextTrimming trimming, float width, bool overflow, out ITextHostRun? left, out ITextHostRun? right)
+        public void Wrap(TextTrimming trimming, float width, bool overflow, out ITextOwnerRun? left, out ITextOwnerRun? right)
         {
             if (trimming == TextTrimming.None)
             {
@@ -196,8 +196,8 @@ namespace Wodsoft.UI.Controls
                 if (currentWidth <= width)
                     break;
             }
-            left = new TextBoxHostLine(_textBox, _start, i);
-            right = new TextBoxHostLine(_textBox, _start + i, _length - i);
+            left = new TextBoxLine(_textBox, _start, i);
+            right = new TextBoxLine(_textBox, _start + i, _length - i);
         }
     }
 }

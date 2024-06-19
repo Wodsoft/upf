@@ -12,7 +12,7 @@ using Wodsoft.UI.Input;
 
 namespace Wodsoft.UI.Controls
 {
-    public class TextBox : TextBoxBase, ITextHost
+    public class TextBox : TextBoxBase, ITextOwner
     {
         private string _text = string.Empty;
         private int _selectionStart, _selectionLength, _compositionStart, _compositionLength;
@@ -195,16 +195,17 @@ namespace Wodsoft.UI.Controls
             }
         }
 
+        public void SelectAll()
+        {
+            Select(0, _text.Length);
+        }
+
         #endregion
 
-        #region DependencyValue
+        #region ITextOwner
 
-        #endregion
-
-        #region Text Host
-
-        private List<ITextHostLine> _lines = new List<ITextHostLine>();
-        IReadOnlyList<ITextHostLine> ITextHost.Lines
+        private List<ITextOwnerLine> _lines = new List<ITextOwnerLine>();
+        IReadOnlyList<ITextOwnerLine> ITextOwner.Lines
         {
             get
             {
@@ -212,20 +213,20 @@ namespace Wodsoft.UI.Controls
                 {
                     if (_text.Length == 0)
                     {
-                        _lines.Add(new TextBoxHostLine(this, 0, 0));
+                        _lines.Add(new TextBoxLine(this, 0, 0));
                         return _lines;
                     }
                     var text = _text.AsSpan();
                     int newLine;
                     int start = 0;
-                    _lines = new List<ITextHostLine>();
+                    _lines = new List<ITextOwnerLine>();
                     while ((newLine = text.IndexOf('\n')) != -1)
                     {
-                        _lines.Add(new TextBoxHostLine(this, start, newLine));
+                        _lines.Add(new TextBoxLine(this, start, newLine));
                         start += newLine + 1;
                         text = text.Slice(newLine + 1);
                     }
-                    _lines.Add(new TextBoxHostLine(this, start, text.Length));
+                    _lines.Add(new TextBoxLine(this, start, text.Length));
                 }
                 return _lines;
             }
@@ -262,16 +263,9 @@ namespace Wodsoft.UI.Controls
 
         internal int ComposttionStart => _compositionStart;
 
-        bool ITextHost.IsSelectable => true;
+        bool ITextOwner.IsSelectable => true;
 
-        char ITextHost.GetChar(int position)
-        {
-            if (_text.Length == 0 || position < 0 || position >= _text.Length)
-                return default;
-            return _text[position];
-        }
-
-        int ITextHost.TextLength => _text.Length;
+        int ITextOwner.TextLength => _text.Length;
 
         #endregion
 
