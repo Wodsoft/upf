@@ -133,43 +133,29 @@ namespace Wodsoft.UI.Controls.Primitives
                 _textOwner.LostKeyboardFocus += TextOwner_LostKeyboardFocus;
                 _textOwner.KeyDown += TextOwner_KeyDown;
             }
-
+            if (availableSize != DesiredSize)
+            {
+                _textPositions.Clear();
+                _caretTextPosition = -1;
+                _measuredHeight = 0f;
+                _caretUpdate = true;
+            }
             var padding = Padding;
             var textWrapping = TextWrapping;
             var textTrimming = TextTrimming;
             float width = padding.Left + padding.Right, height = padding.Top + padding.Bottom;
-            int i = 0, l = 0;
+            int i = 0;
             float maxWidth = 0f, maxHeight = 0f;
             bool fetchWidth = true, fetchHeight = true;
-            var lines = _textOwner.Lines;
+            ITextOwnerBlock? block = _textOwner.FirstBlock;
             while (fetchWidth || fetchHeight)
             {
                 if (i == _textPositions.Count)
                 {
-                    ITextOwnerLine? line = null;
-                    if (l == 0 && _textPositions.Count != 0)
-                    {
-                        var lastRun = _textPositions[_textPositions.Count - 1].Run;
-                        var position = lastRun.Position + lastRun.Length;
-                        for (int j = 0; j < lines.Count; j++)
-                        {
-                            if (lines[j].Position < position)
-                                continue;
-                            line = lines[j];
-                            l = j + 1;
-                        }
-                    }
-                    else
-                    {
-                        if (l < lines.Count)
-                        {
-                            line = lines[l];
-                            l++;
-                        }
-                    }
-                    if (line == null)
+                    if (block == null)
                         break;
-                    MeasureLine(line, availableSize.Width - padding.Left - padding.Right, textWrapping, textTrimming);
+                    MeasureBlock(block, availableSize.Width - padding.Left - padding.Right, textWrapping, textTrimming);
+                    block = block.NextBlock;
                 }
                 var spans = CollectionsMarshal.AsSpan(_textPositions);
                 for (; i < spans.Length; i++)
@@ -177,7 +163,7 @@ namespace Wodsoft.UI.Controls.Primitives
                     ref var textPosition = ref spans[i];
                     if (fetchWidth)
                     {
-                        var textRight = textPosition.X + textPosition.Run.Width;
+                        var textRight = textPosition.X + textPosition.Inline.Width;
                         if (textRight > maxWidth)
                             maxWidth = textRight;
                         //if found 
@@ -194,7 +180,7 @@ namespace Wodsoft.UI.Controls.Primitives
                     }
                 }
             }
-            return new Size(width + maxWidth, height + maxHeight);
+            return new Size(MathF.Min(availableSize.Width, width + maxWidth), MathF.Min(availableSize.Height, height + maxHeight));
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -208,8 +194,8 @@ namespace Wodsoft.UI.Controls.Primitives
             var padding = Padding;
             drawingContext.PushClip(new RectangleGeometry(new Rect(padding.Left, padding.Top, renderSize.Width - padding.Left - padding.Right, renderSize.Height - padding.Top - padding.Bottom)));
             bool fetch = true;
-            int i = 0, l = 0;
-            var lines = _textOwner.Lines;
+            int i = 0;
+            ITextOwnerBlock? block = _textOwner.FirstBlock;
             float availableWidth = _textOwner.AcceptsReturn ? RenderSize.Width - padding.Left - padding.Right : float.PositiveInfinity;
             if (_caretMove)
             {
@@ -219,20 +205,23 @@ namespace Wodsoft.UI.Controls.Primitives
                     lastRunEnd = 0;
                 else
                 {
-                    var lastRun = _textPositions[_textPositions.Count - 1].Run;
+                    var lastRun = _textPositions[_textPositions.Count - 1].Inline;
                     lastRunEnd = lastRun.Position + lastRun.Length;
                 }
                 //measure to selection start of line
                 if (selectionStart > lastRunEnd)
                 {
-                    for (; l < lines.Count; l++)
+                    while (block != null)
                     {
-                        var line = lines[l];
-                        if (line.Position < lastRunEnd)
+                        if (block.Position + block.Length < lastRunEnd)
+                        {
+                            block = block.NextBlock;
                             continue;
-                        if (line.Position > selectionStart)
+                        }
+                        if (block.Position > selectionStart)
                             break;
-                        MeasureLine(line, availableWidth, textWrapping, textTrimming);
+                        MeasureBlock(block, availableWidth, textWrapping, textTrimming);
+                        block = block.NextBlock;
                     }
                 }
                 _caretMove = false;
@@ -248,41 +237,44 @@ namespace Wodsoft.UI.Controls.Primitives
                 {
                     if (i == _textPositions.Count)
                     {
-                        ITextOwnerLine? line = null;
-                        if (l == 0 && _textPositions.Count != 0)
-                        {
-                            var lastRun = _textPositions[_textPositions.Count - 1].Run;
-                            var position = lastRun.Position + lastRun.Length;
-                            for (int j = 0; j < lines.Count; j++)
-                            {
-                                if (lines[j].Position < position)
-                                    continue;
-                                line = lines[j];
-                                l = j + 1;
-                            }
-                        }
+                        if (block == null)
+                            break;
+                        int lastRunEnd;
+                        if (_textPositions.Count == 0)
+                            lastRunEnd = 0;
                         else
                         {
-                            if (l < lines.Count)
-                            {
-                                line = lines[l];
-                                l++;
-                            }
+                            var lastRun = _textPositions[_textPositions.Count - 1].Inline;
+                            lastRunEnd = lastRun.Position + lastRun.Length;
                         }
-                        if (line == null)
+                        while (block != null)
+                        {
+                            if (block.Position > lastRunEnd)
+                                break;
+                            block = block.NextBlock;
+                        }
+                        if (block == null)
                             break;
-                        MeasureLine(line, availableWidth, textWrapping, textTrimming);
+                        MeasureBlock(block, availableWidth, textWrapping, textTrimming);
+                        block = block.NextBlock;
                     }
                     var spans = CollectionsMarshal.AsSpan(_textPositions);
                     for (; i < spans.Length; i++)
                     {
                         ref var textPosition = ref spans[i];
-                        if (textPosition.Run.Length == 0)
+                        if (textPosition.Inline.Length == 0)
                             continue;
-                        if (((textPosition.Y >= top && textPosition.Y < bottom) || (textPosition.Y + textPosition.Height > top && textPosition.Y + textPosition.Height <= bottom)) &&
-                            ((textPosition.X >= left && textPosition.X < right) || (textPosition.X + textPosition.Run.Width > left && textPosition.Run.Width <= right) || (textPosition.X <= left && textPosition.X + textPosition.Run.Width >= right)))
+                        if ((textPosition.Y >= top && textPosition.Y < bottom) || (textPosition.Y + textPosition.Height > top && textPosition.Y + textPosition.Height <= bottom))
                         {
-                            textPosition.Run.Draw(drawingContext, new Point(textPosition.X - _offsetX + padding.Left, textPosition.Y - _offsetY + textPosition.Baseline + padding.Top));
+                            if ((textPosition.X >= left && textPosition.X < right) || (textPosition.X + textPosition.Inline.Width > left && textPosition.Inline.Width <= right) || (textPosition.X <= left && textPosition.X + textPosition.Inline.Width >= right))
+                            {
+                                textPosition.Inline.Draw(drawingContext, new Point(textPosition.X - _offsetX + padding.Left, textPosition.Y - _offsetY + textPosition.Baseline + padding.Top));
+                            }
+                        }
+                        else if (textPosition.Y >= bottom)
+                        {
+                            fetch = false;
+                            break;
                         }
                     }
                 }
@@ -295,18 +287,18 @@ namespace Wodsoft.UI.Controls.Primitives
             }
         }
 
-        private void MeasureLine(ITextOwnerLine line, float availableWidth, TextWrapping textWrapping, TextTrimming textTrimming)
+        private void MeasureBlock(ITextOwnerBlock block, float availableWidth, TextWrapping textWrapping, TextTrimming textTrimming)
         {
             int currentPositions = _textPositions.Count;
             float lineHeight, baseline, x = 0f, currentAvailableWidth = availableWidth;
-            if (float.IsNaN(line.LineHeight))
+            if (float.IsNaN(block.LineHeight))
             {
                 baseline = lineHeight = 0f;
             }
             else
             {
-                baseline = line.Baseline;
-                lineHeight = line.LineHeight;
+                baseline = block.Baseline;
+                lineHeight = block.LineHeight;
             }
             var adjustLineHeight = () =>
             {
@@ -316,53 +308,59 @@ namespace Wodsoft.UI.Controls.Primitives
                     spans[i].Height = lineHeight;
                     spans[i].Baseline = baseline;
                 }
+                currentPositions = _textPositions.Count;
             };
-            foreach (var run in line.Runs)
+            ITextOwnerInline? inline = block.FirstInline;
+            while (inline != null)
             {
-                if (!run.IsMeasured)
-                    run.Measure();
-                if (float.IsNaN(line.LineHeight))
+                if (!inline.IsMeasured)
+                    inline.Measure();
+                if (float.IsNaN(block.LineHeight))
                 {
-                    if (run.Height > lineHeight)
+                    if (inline.Height > lineHeight)
                     {
-                        lineHeight = run.Height;
-                        baseline = run.Baseline;
+                        lineHeight = inline.Height;
+                        baseline = inline.Baseline;
                     }
                 }
-                if (run.Width > currentAvailableWidth)
+                currentAvailableWidth -= inline.Width;
+                if (currentAvailableWidth < 0)
                 {
-                    adjustLineHeight();
                     if (textWrapping == TextWrapping.NoWrap || textTrimming == TextTrimming.None)
                     {
-                        TextPosition position = new TextPosition(run, x, _measuredHeight, lineHeight, baseline);
+                        TextPosition position = new TextPosition(inline, x, _measuredHeight, lineHeight, baseline);
                         _textPositions.Add(position);
-                        _measuredHeight += lineHeight;
-                        if (textWrapping == TextWrapping.NoWrap)
-                            //no wrap, go to next line
-                            break;
-                        //no trimming, go to next run
+                        //adjust line because next inline is a new line
+                        if (inline.IsEndOfNewLine)
+                        {
+                            _measuredHeight += lineHeight;
+                            adjustLineHeight();
+                        }
+                        //we should continuing measure follow inline
+                        inline = inline.NextInline;
                         continue;
                     }
-                    run.Wrap(textTrimming, currentAvailableWidth, textWrapping == TextWrapping.WrapWithOverflow, out var leftRun, out var rightRun);
+                    inline.Wrap(textTrimming, currentAvailableWidth, textWrapping == TextWrapping.WrapWithOverflow, out var leftRun, out var rightRun);
                     if (leftRun != null)
                     {
                         TextPosition position = new TextPosition(leftRun, x, _measuredHeight, lineHeight, baseline);
                         _textPositions.Add(position);
                     }
-                    currentPositions = _textPositions.Count;
+                    //adjust line because next inline is a new line
                     _measuredHeight += lineHeight;
+                    adjustLineHeight();
                     currentAvailableWidth = availableWidth;
                     if (rightRun != null)
                     {
-                        if (float.IsNaN(line.LineHeight))
+                        if (float.IsNaN(block.LineHeight))
                         {
                             baseline = rightRun!.Baseline;
                             lineHeight = rightRun!.Height;
                         }
                         else
                         {
-                            baseline = line.Baseline;
-                            lineHeight = line.LineHeight;
+                            baseline = block.Baseline;
+                            lineHeight = block.LineHeight;
                         }
                         x = 0f;
                         TextPosition position = new TextPosition(rightRun, x, _measuredHeight, lineHeight, baseline);
@@ -371,27 +369,48 @@ namespace Wodsoft.UI.Controls.Primitives
                     }
                     else
                     {
-                        if (float.IsNaN(line.LineHeight))
+                        if (float.IsNaN(block.LineHeight))
                         {
                             baseline = lineHeight = 0f;
                         }
                         else
                         {
-                            baseline = line.Baseline;
-                            lineHeight = line.LineHeight;
+                            baseline = block.Baseline;
+                            lineHeight = block.LineHeight;
                         }
                     }
                 }
                 else
                 {
-                    currentAvailableWidth -= run.Width;
-                    TextPosition position = new TextPosition(run, x, _measuredHeight, lineHeight, baseline);
+                    TextPosition position = new TextPosition(inline, x, _measuredHeight, lineHeight, baseline);
                     _textPositions.Add(position);
-                    x += run.Width;
+                    currentAvailableWidth -= inline.Width;
+                    x += inline.Width;
                 }
-                _measuredHeight += lineHeight;
+                var newLine = inline.IsEndOfNewLine;
+                inline = inline.NextInline;
+                if (newLine && inline != null)
+                {
+                    _measuredHeight += lineHeight;
+                    adjustLineHeight();
+                    if (float.IsNaN(block.LineHeight))
+                    {
+                        baseline = inline.Baseline;
+                        lineHeight = inline.Height;
+                    }
+                    else
+                    {
+                        baseline = block.Baseline;
+                        lineHeight = block.LineHeight;
+                    }
+                    x = 0f;
+                }
             }
-            adjustLineHeight();
+            if (currentPositions != _textPositions.Count)
+            {
+                _measuredHeight += lineHeight;
+                adjustLineHeight();
+            }
         }
 
         private void TextOwner_TextChanged(object? sender, TextChangedEventArgs e)
@@ -422,16 +441,16 @@ namespace Wodsoft.UI.Controls.Primitives
                 for (int i = 0; i < spans.Length; i++)
                 {
                     ref var textPosition = ref spans[i];
-                    if (selectionStart < textPosition.Run.Position)
+                    if (selectionStart < textPosition.Inline.Position)
                         continue;
-                    else if (selectionStart > textPosition.Run.Position + textPosition.Run.Length)
+                    else if (selectionStart > textPosition.Inline.Position + textPosition.Inline.Length)
                         continue;
                     var padding = Padding;
                     var x = textPosition.X + 0.5f + padding.Left - _offsetX;
-                    if (selectionStart == textPosition.Run.Position + textPosition.Run.Length)
-                        x += textPosition.Run.Width;
-                    else if (selectionStart > textPosition.Run.Position)
-                        x += textPosition.Run.Widths.Slice(0, selectionStart - textPosition.Run.Position).Sum();
+                    if (selectionStart == textPosition.Inline.Position + textPosition.Inline.Length)
+                        x += textPosition.Inline.Width;
+                    else if (selectionStart > textPosition.Inline.Position)
+                        x += textPosition.Inline.Widths.Slice(0, selectionStart - textPosition.Inline.Position).Sum();
                     var y = textPosition.Y - _offsetY + padding.Top;
                     var clip = new Rect(padding.Left, padding.Top, RenderSize.Width - padding.Left - padding.Right, RenderSize.Height - padding.Top - padding.Bottom);
                     if (moveView)
@@ -488,6 +507,7 @@ namespace Wodsoft.UI.Controls.Primitives
                             caretBrush = new SolidColorBrush(Color.FromRgb(r, g, b));
                         }
                         _caret.IsVisible = true;
+                        clip = new Rect(0, 0, RenderSize.Width, RenderSize.Height);
                         _caret.BuildCaretRender(x, y, textPosition.Height, caretBrush, new RectangleGeometry(clip));
                     }
                     else
@@ -578,15 +598,15 @@ namespace Wodsoft.UI.Controls.Primitives
                     continue;
                 if (y > text.Y + text.Height)
                     continue;
-                if (text.X == 0 && lastLine != text.Y && x > text.X + text.Run.Width)
-                    return text.Run.Position + text.Run.Length;
+                if (text.X == 0 && lastLine != text.Y && x > text.X + text.Inline.Width)
+                    return text.Inline.Position + text.Inline.Length;
                 if (x < text.X && lastLine != text.Y)
-                    return text.Run.Position;
-                if (x >= text.X && x <= text.X + text.Run.Width)
-                    return text.Run.GetCharPosition(x - text.X);
+                    return text.Inline.Position;
+                if (x >= text.X && x <= text.X + text.Inline.Width)
+                    return text.Inline.GetCharPosition(x - text.X);
                 lastLine = text.Y;
             }
-            return _textPositions[i - 1].Run.Position + _textPositions[i - 1].Run.Length;
+            return _textPositions[i - 1].Inline.Position + _textPositions[i - 1].Inline.Length;
         }
 
         #endregion
@@ -693,11 +713,11 @@ namespace Wodsoft.UI.Controls.Primitives
                     if (p.X + padding.Left - _offsetX <= _caretX)
                         break;
                 }
-                if (textPosition.Run != spans[_caretTextPosition].Run)
+                if (textPosition.Inline != spans[_caretTextPosition].Inline)
                 {
                     var l = _caretX - (textPosition.X + padding.Left - _offsetX);
                     _caretMove = true;
-                    _textOwner!.Select(textPosition.Run.GetCharPosition(l), 0);
+                    _textOwner!.Select(textPosition.Inline.GetCharPosition(l), 0);
                 }
             }
             else if (e.Key == Key.Down)
@@ -725,14 +745,14 @@ namespace Wodsoft.UI.Controls.Primitives
                         lineY = p.Y;
                     }
                     textPosition = ref p;
-                    if (p.X + p.Run.Width + padding.Left - _offsetX >= _caretX)
+                    if (p.X + p.Inline.Width + padding.Left - _offsetX >= _caretX)
                         break;
                 }
-                if (textPosition.Run != spans[_caretTextPosition].Run)
+                if (textPosition.Inline != spans[_caretTextPosition].Inline)
                 {
                     var l = _caretX - (textPosition.X + padding.Left - _offsetX);
                     _caretMove = true;
-                    _textOwner!.Select(textPosition.Run.GetCharPosition(l), 0);
+                    _textOwner!.Select(textPosition.Inline.GetCharPosition(l), 0);
                 }
             }
             else if (e.Key == Key.Home)
@@ -748,10 +768,10 @@ namespace Wodsoft.UI.Controls.Primitives
                         break;
                     textPosition = ref p;
                 }
-                if (_textOwner!.SelectionStart != textPosition.Run.Position)
+                if (_textOwner!.SelectionStart != textPosition.Inline.Position)
                 {
                     _caretMove = true;
-                    _textOwner.Select(textPosition.Run.Position, 0);
+                    _textOwner.Select(textPosition.Inline.Position, 0);
                 }
             }
             else if (e.Key == Key.End)
@@ -767,10 +787,10 @@ namespace Wodsoft.UI.Controls.Primitives
                         break;
                     textPosition = ref p;
                 }
-                if (_textOwner!.SelectionStart != textPosition.Run.Position + textPosition.Run.Length)
+                if (_textOwner!.SelectionStart != textPosition.Inline.Position + textPosition.Inline.Length)
                 {
                     _caretMove = true;
-                    _textOwner.Select(textPosition.Run.Position + textPosition.Run.Length, 0);
+                    _textOwner.Select(textPosition.Inline.Position + textPosition.Inline.Length, 0);
                 }
             }
         }
@@ -804,16 +824,16 @@ namespace Wodsoft.UI.Controls.Primitives
 
         private struct TextPosition
         {
-            public TextPosition(ITextOwnerRun run, float x, float y, float height, float baseline)
+            public TextPosition(ITextOwnerInline inline, float x, float y, float height, float baseline)
             {
-                Run = run;
+                Inline = inline;
                 X = x;
                 Y = y;
                 Height = height;
                 Baseline = baseline;
             }
 
-            public ITextOwnerRun Run;
+            public ITextOwnerInline Inline;
 
             public float X;
 
@@ -837,7 +857,9 @@ namespace Wodsoft.UI.Controls.Primitives
                 if (FrameworkCoreProvider.RendererProvider != null)
                 {
                     var drawingContext = FrameworkCoreProvider.RendererProvider.CreateDrawingContext(this);
+                    drawingContext.PushClip(clip);
                     drawingContext.DrawLine(new Pen(brush, 1), new Point(x, y), new Point(x, y + height));
+                    drawingContext.Pop();
                     _drawingContent = drawingContext.Close();
                 }
             }

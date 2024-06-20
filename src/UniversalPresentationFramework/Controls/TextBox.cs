@@ -12,7 +12,7 @@ using Wodsoft.UI.Input;
 
 namespace Wodsoft.UI.Controls
 {
-    public class TextBox : TextBoxBase, ITextOwner
+    public partial class TextBox : TextBoxBase, ITextOwner
     {
         private string _text = string.Empty;
         private int _selectionStart, _selectionLength, _compositionStart, _compositionLength;
@@ -204,37 +204,20 @@ namespace Wodsoft.UI.Controls
 
         #region ITextOwner
 
-        private List<ITextOwnerLine> _lines = new List<ITextOwnerLine>();
-        IReadOnlyList<ITextOwnerLine> ITextOwner.Lines
+        private ITextOwnerBlock? _block;
+        ITextOwnerBlock ITextOwner.FirstBlock
         {
             get
             {
-                if (_lines.Count == 0)
-                {
-                    if (_text.Length == 0)
-                    {
-                        _lines.Add(new TextBoxLine(this, 0, 0));
-                        return _lines;
-                    }
-                    var text = _text.AsSpan();
-                    int newLine;
-                    int start = 0;
-                    _lines = new List<ITextOwnerLine>();
-                    while ((newLine = text.IndexOf('\n')) != -1)
-                    {
-                        _lines.Add(new TextBoxLine(this, start, newLine));
-                        start += newLine + 1;
-                        text = text.Slice(newLine + 1);
-                    }
-                    _lines.Add(new TextBoxLine(this, start, text.Length));
-                }
-                return _lines;
+                if (_block == null)
+                    _block = new TextBoxBlock(this, _text.Length);
+                return _block;
             }
         }
 
         private void OnTextChanged(in string oldValue, in string newValue)
         {
-            _lines.Clear();
+            _block = null;
             if (!_isEditing)
             {
                 var selectionStart = _selectionStart;
@@ -256,8 +239,6 @@ namespace Wodsoft.UI.Controls
             TextChangedEventArgs e = new TextChangedEventArgs(TextChangedEvent, UndoAction.None);
             RaiseEvent(e);
         }
-
-        internal ReadOnlySpan<char> GetText() => _text.AsSpan();
 
         internal int CompositionLength => _compositionLength;
 

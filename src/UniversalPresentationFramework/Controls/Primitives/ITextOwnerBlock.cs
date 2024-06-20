@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Controls.Primitives
 {
-    public interface ITextOwnerLine
+    public interface ITextOwnerBlock
     {
-        IReadOnlyList<ITextOwnerRun> Runs { get; }
+        ITextOwnerInline FirstInline { get; }
+
+        ITextOwnerInline LastInline { get; }
 
         float LineHeight { get; }
 
@@ -17,5 +19,9 @@ namespace Wodsoft.UI.Controls.Primitives
         int Position { get; }
 
         int Length { get; }
+
+        ITextOwnerBlock? PreviousBlock { get; }
+
+        ITextOwnerBlock? NextBlock { get; }
     }
 }

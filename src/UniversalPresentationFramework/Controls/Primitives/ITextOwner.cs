@@ -8,8 +8,8 @@ using Wodsoft.UI.Media.TextFormatting;
 namespace Wodsoft.UI.Controls.Primitives
 {
     public interface ITextOwner : IInputElement
-    {        
-        IReadOnlyList<ITextOwnerLine> Lines { get; }
+    {
+        ITextOwnerBlock FirstBlock { get; }
 
         bool AcceptsReturn { get; }
 
