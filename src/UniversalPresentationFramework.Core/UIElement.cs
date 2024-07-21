@@ -113,6 +113,7 @@ namespace Wodsoft.UI
 
         private Rect _previousFinalRect;
         private bool _isArranging, _isRenderValid;
+        private SizeChangedInfo? _sizeChangedInfo;
         public void Arrange(Rect finalRect)
         {
             if (float.IsPositiveInfinity(finalRect.Width)
@@ -154,6 +155,17 @@ namespace Wodsoft.UI
                 }
                 _previousFinalRect = finalRect;
                 IsArrangeValid = true;
+
+                var widthChanged = !FloatUtil.AreClose(oldRenderSize.Width, _renderSize.Width);
+                var heightChanged = !FloatUtil.AreClose(oldRenderSize.Height, _renderSize.Height);
+                if (uiDispatcher != null && (_sizeChangedInfo == null || widthChanged || heightChanged))
+                {
+                    if (_sizeChangedInfo == null)
+                        _sizeChangedInfo = new SizeChangedInfo(this, oldRenderSize, widthChanged, heightChanged);
+                    else
+                        _sizeChangedInfo.Update(widthChanged, heightChanged);
+                    uiDispatcher.AddSizeChangeInfo(_sizeChangedInfo);
+                }
 
                 if (IsArrangeValid && IsMeasureValid && (!FloatUtil.AreClose(oldRenderSize, _renderSize) || !_isRenderValid))
                 {
@@ -295,7 +307,7 @@ namespace Wodsoft.UI
             }
         }
 
-        private void InvalidateLayout(Visual visual)
+        private static void InvalidateLayout(Visual visual)
         {
             if (visual is UIElement element)
             {
@@ -310,6 +322,8 @@ namespace Wodsoft.UI
                     InvalidateLayout(child);
             }
         }
+
+        protected internal virtual void OnRenderSizeChanged(SizeChangedInfo info) { }
 
         #endregion
 
@@ -328,7 +342,7 @@ namespace Wodsoft.UI
         }
 
         public override bool HasRenderContent => _drawingContent != null;
-
+        
         #endregion
 
         #region Visual
