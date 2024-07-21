@@ -187,6 +187,8 @@ namespace UniversalPresentationFramework.SourceGenerators
                 return "Space";
             else if (directive == XamlLanguage.Uid)
                 return "Uid";
+            else if (directive == XamlLanguage.Initialization)
+                return "Initialization";
             else
                 throw new NotSupportedException($"Not support xaml directive \"{directive}\".");
         }
