@@ -428,7 +428,7 @@ namespace Wodsoft.UI
 
         public virtual DependencyObject? InheritanceContext => null;
 
-        public virtual event EventHandler? InheritanceContextChanged;
+        public event EventHandler? InheritanceContextChanged;
 
         public bool IsInheritanceContextSealed { get; set; }
 
@@ -468,6 +468,17 @@ namespace Wodsoft.UI
             {
                 return false;
             }
+        }
+
+        protected void OnInheritanceContextChanged()
+        {
+            InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
+            OnInheritanceContextChangedCore();
+        }
+
+        protected virtual void OnInheritanceContextChangedCore()
+        {
+
         }
 
         #endregion

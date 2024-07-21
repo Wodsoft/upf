@@ -212,7 +212,7 @@ namespace Wodsoft.UI
             }
         }
 
-        public override event EventHandler? InheritanceContextChanged;
+        //public override event EventHandler? InheritanceContextChanged;
 
         protected override void AddInheritanceContext(DependencyObject context, DependencyProperty? property)
         {
@@ -221,7 +221,7 @@ namespace Wodsoft.UI
             if (_inheritanceContext == null)
                 _inheritanceContext = new List<(DependencyObject, DependencyProperty?)>();
             _inheritanceContext.Add((context, property));
-            InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
+            OnInheritanceContextChanged();
         }
 
         protected override void RemoveInheritanceContext(DependencyObject context, DependencyProperty? property)
@@ -231,7 +231,7 @@ namespace Wodsoft.UI
             if (_inheritanceContext == null)
                 return;
             _inheritanceContext.Remove((context, property));
-            InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
+            OnInheritanceContextChanged();
         }
 
         #endregion
