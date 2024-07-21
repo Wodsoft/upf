@@ -139,10 +139,9 @@ namespace Wodsoft.UI
 
         #endregion
 
-
         #region Connect
 
-        protected internal override void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
+        protected internal override void ConnectTrigger<T>(object source, T container, INameScope? nameScope)
         {
             if (_conditions.Count == 0)
                 return;
@@ -186,12 +185,12 @@ namespace Wodsoft.UI
                 {
                     if (setterBase is Setter setter)
                     {
-                        FrameworkElement? target;
+                        IHaveTriggerValue? target;
                         if (setter.TargetName == null)
                             target = container;
                         else
                         {
-                            target = nameScope!.FindName(setter.TargetName) as FrameworkElement;
+                            target = nameScope!.FindName(setter.TargetName) as IHaveTriggerValue;
                             if (target == null)
                                 continue;
                         }
@@ -211,7 +210,7 @@ namespace Wodsoft.UI
             binding.EnsureState();
         }
 
-        protected internal override void DisconnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
+        protected internal override void DisconnectTrigger<T>(object source, T container, INameScope? nameScope)
         {
             container.RemoveTriggerBinding(this);
         }

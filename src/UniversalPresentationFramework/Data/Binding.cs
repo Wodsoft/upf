@@ -58,7 +58,7 @@ namespace Wodsoft.UI.Data
 
         #region Methods
 
-        protected override BindingExpressionBase CreateBindingExpressionCore(FrameworkElement targetObject, DependencyProperty targetProperty)
+        protected override BindingExpressionBase CreateBindingExpressionCore(DependencyObject targetObject, DependencyProperty targetProperty)
         {
             return new BindingExpression(this, targetObject, targetProperty);
         }

@@ -21,7 +21,7 @@ namespace Wodsoft.UI.Data
         private List<ValidationError>? _errors;
         private ReadOnlyCollection<ValidationError>? _readonlyErrors;
 
-        internal BindingExpression(Binding binding, FrameworkElement targetObject, DependencyProperty targetProperty) : base(targetObject, targetProperty)
+        internal BindingExpression(Binding binding, DependencyObject targetObject, DependencyProperty targetProperty) : base(targetObject, targetProperty)
         {
             _binding = binding;
         }
@@ -59,7 +59,12 @@ namespace Wodsoft.UI.Data
             {
                 if (_binding.ElementName != null)
                 {
-                    source = Target!.FindName(_binding.ElementName);
+                    if (Target is FrameworkElement fe)
+                        source = fe.FindName(_binding.ElementName);
+                    else if (Target is FrameworkContentElement fce)
+                        source = fce.FindName(_binding.ElementName);
+                    else
+                        return false;
                 }
                 else
                 {

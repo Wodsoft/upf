@@ -11,15 +11,15 @@ namespace Wodsoft.UI.Data
 {
     public abstract class BindingExpressionBase : Expression
     {
-        private readonly WeakReference<FrameworkElement> _target;
+        private readonly WeakReference<DependencyObject> _target;
 
-        protected BindingExpressionBase(FrameworkElement targetObject, DependencyProperty targetProperty)
+        protected BindingExpressionBase(DependencyObject targetObject, DependencyProperty targetProperty)
         {
-            _target = new WeakReference<FrameworkElement>(targetObject);
+            _target = new WeakReference<DependencyObject>(targetObject);
             TargetProperty = targetProperty;
         }
 
-        public FrameworkElement? Target
+        public DependencyObject? Target
         {
             get
             {

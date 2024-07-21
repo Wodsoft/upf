@@ -8,13 +8,13 @@ using System.Xaml.Markup;
 
 namespace Wodsoft.UI
 {
-    internal class TriggerBinding : IDisposable
+    public class TriggerBinding : IDisposable
     {
         private readonly object _source;
         private readonly DependencyObject _container;
         private readonly INameScope? _nameScope;
         private readonly TriggerActionCollection? _enterActions, _exitActions;
-        private readonly List<(FrameworkElement, DependencyProperty, TriggerValue, byte)> _setters = new List<(FrameworkElement, DependencyProperty, TriggerValue, byte)>();
+        private readonly List<(IHaveTriggerValue, DependencyProperty, TriggerValue, byte)> _setters = new List<(IHaveTriggerValue, DependencyProperty, TriggerValue, byte)>();
         private readonly List<ConditionBinding> _conditions = new List<ConditionBinding>();
         private bool _disposed, _isEquality;
 
@@ -31,7 +31,7 @@ namespace Wodsoft.UI
 
         public bool HasContent => _setters.Count != 0 || (_enterActions != null && _enterActions.Count != 0) || (_exitActions != null && _exitActions.Count != 0);
 
-        public void AddSetter(FrameworkElement target, DependencyProperty property, TriggerValue value, byte layer)
+        public void AddSetter(IHaveTriggerValue target, DependencyProperty property, TriggerValue value, byte layer)
         {
             target.AddTriggerValue(property, layer, value);
             _setters.Add((target, property, value, layer));

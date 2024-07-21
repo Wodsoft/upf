@@ -68,13 +68,13 @@ namespace Wodsoft.UI.Data
             return CreateBindingExpression(fe, dp);
         }
 
-        internal BindingExpressionBase CreateBindingExpression(FrameworkElement targetObject, DependencyProperty targetProperty)
+        internal BindingExpressionBase CreateBindingExpression(DependencyObject targetObject, DependencyProperty targetProperty)
         {
             _isSealed = true;
             return CreateBindingExpressionCore(targetObject, targetProperty);
         }
 
-        protected abstract BindingExpressionBase CreateBindingExpressionCore(FrameworkElement targetObject, DependencyProperty targetProperty);
+        protected abstract BindingExpressionBase CreateBindingExpressionCore(DependencyObject targetObject, DependencyProperty targetProperty);
 
         public abstract bool IsEqual(BindingBase bindingBase);
 

@@ -180,18 +180,20 @@ namespace Wodsoft.UI.Data
             return this;
         }
 
-        public object? GetSource(FrameworkElement element)
+        public object? GetSource(DependencyObject element)
         {
             switch (_mode)
             {
                 case RelativeSourceMode.Self:
                     return element;
                 case RelativeSourceMode.TemplatedParent:
-                    return element.TemplatedParent;
+                    return (element as FrameworkElement)?.TemplatedParent;
                 case RelativeSourceMode.PreviousData:
                     return null;
                 case RelativeSourceMode.FindAncestor:
-                    return FindAncestorOfType(AncestorType!, AncestorLevel, element);
+                    if (element is Visual visual)
+                        return FindAncestorOfType(AncestorType!, AncestorLevel, visual);
+                    return null;
                 default:
                     return null;
             }

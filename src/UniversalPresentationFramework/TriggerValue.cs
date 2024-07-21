@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI
 {
-    internal class TriggerValue
+    public class TriggerValue
     {
         public TriggerValue(object? value)
         {

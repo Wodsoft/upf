@@ -35,9 +35,26 @@ namespace Wodsoft.UI
         protected override void OnAttach()
         {
             var logicalObject = LogicalTreeHelper.FindMentor(AttachedObject!);
-            if (logicalObject != null && logicalObject.LogicalRoot is FrameworkElement fe)
+            if (logicalObject != null)
             {
-                _rootElement = fe;
+                logicalObject.LogicalRootChanged += AttachObject_LogicalRootChanged;
+                if (logicalObject.LogicalRoot is FrameworkElement fe)
+                {
+                    _rootElement = fe;
+                    _rootElement.TemplatedParentChanged += TemplatedParentChanged;
+                }
+            }
+        }
+
+        private void AttachObject_LogicalRootChanged(object? sender, LogicalRootChangedEventArgs e)
+        {
+            if (_rootElement != null)
+            {
+                _rootElement.TemplatedParentChanged -= TemplatedParentChanged;
+            }
+            _rootElement = e.NewRoot as FrameworkElement;
+            if (_rootElement != null)
+            {
                 _rootElement.TemplatedParentChanged += TemplatedParentChanged;
             }
         }
@@ -49,9 +66,14 @@ namespace Wodsoft.UI
 
         protected override void OnDetach()
         {
-            if (_rootElement != null)
+            var logicalObject = LogicalTreeHelper.FindMentor(AttachedObject!);
+            if (logicalObject != null)
             {
-                _rootElement.TemplatedParentChanged -= TemplatedParentChanged;
+                logicalObject.LogicalRootChanged -= AttachObject_LogicalRootChanged;
+                if (_rootElement != null)
+                {
+                    _rootElement.TemplatedParentChanged -= TemplatedParentChanged;
+                }
             }
         }
 

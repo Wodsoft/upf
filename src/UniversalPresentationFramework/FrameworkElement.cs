@@ -18,7 +18,7 @@ using Wodsoft.UI.Threading;
 namespace Wodsoft.UI
 {
     [RuntimeNameProperty("Name")]
-    public class FrameworkElement : UIElement, ISupportInitialize
+    public class FrameworkElement : UIElement, ISupportInitialize, IHaveTriggerValue
     {
         #region Constructor
 
@@ -474,8 +474,6 @@ namespace Wodsoft.UI
             internal float maxHeight;
         }
 
-
-
         public static readonly DependencyProperty UseLayoutRoundingProperty =
                 DependencyProperty.Register(
                         "UseLayoutRounding",
@@ -488,6 +486,64 @@ namespace Wodsoft.UI
         {
             get { return (bool)GetValue(UseLayoutRoundingProperty)!; }
             set { SetValue(UseLayoutRoundingProperty, value); }
+        }
+
+        private static PropertyMetadata _ActualWidthMetadata = new ReadOnlyFrameworkPropertyMetadata(0d, new GetReadOnlyValueCallback(GetActualWidth));
+        private static object GetActualWidth(DependencyObject d, out DependencyEffectiveSource source)
+        {
+            FrameworkElement fe = (FrameworkElement)d;
+            source = DependencyEffectiveSource.Local;
+            return fe.RenderSize.Width;
+        }
+        private static readonly DependencyPropertyKey _ActualWidthPropertyKey =
+                DependencyProperty.RegisterReadOnly(
+                        "ActualWidth",
+                        typeof(float),
+                        typeof(FrameworkElement),
+                        _ActualWidthMetadata);
+        public static readonly DependencyProperty ActualWidthProperty = _ActualWidthPropertyKey.DependencyProperty;
+
+        private static PropertyMetadata _ActualHeightMetadata = new ReadOnlyFrameworkPropertyMetadata(0d, new GetReadOnlyValueCallback(GetActualHeight));
+        private static object GetActualHeight(DependencyObject d, out DependencyEffectiveSource source)
+        {
+            FrameworkElement fe = (FrameworkElement)d;
+            source = DependencyEffectiveSource.Local;
+            return fe.RenderSize.Height;
+        }
+        private static readonly DependencyPropertyKey _ActualHeightPropertyKey =
+                DependencyProperty.RegisterReadOnly(
+                        "ActualHeight",
+                        typeof(float),
+                        typeof(FrameworkElement),
+                        _ActualHeightMetadata);
+        public static readonly DependencyProperty ActualHeightProperty = _ActualHeightPropertyKey.DependencyProperty;
+
+        public float ActualWidth => RenderSize.Width;
+
+        public float ActualHeight => RenderSize.Height;
+
+        public static readonly RoutedEvent SizeChangedEvent = EventManager.RegisterRoutedEvent("SizeChanged", RoutingStrategy.Direct, typeof(SizeChangedEventHandler), typeof(FrameworkElement));
+
+        protected internal override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            SizeChangedEventArgs localArgs = new SizeChangedEventArgs(this, sizeInfo);
+            localArgs.RoutedEvent = SizeChangedEvent;
+
+            //first, invalidate ActualWidth and/or ActualHeight
+            //Note: if any handler of invalidation will dirtyfy layout,
+            //subsequent handlers will run on effectively dirty layouts
+            //we only guarantee cleaning between elements, not between handlers here
+            if (sizeInfo.WidthChanged)
+            {
+                PropertyChanged(new DependencyPropertyChangedEventArgs(ActualWidthProperty, _ActualWidthMetadata, sizeInfo.PreviousSize.Width, sizeInfo.NewSize.Width));
+            }
+
+            if (sizeInfo.HeightChanged)
+            {
+                PropertyChanged(new DependencyPropertyChangedEventArgs(ActualHeightProperty, _ActualHeightMetadata, sizeInfo.PreviousSize.Height, sizeInfo.NewSize.Height));
+            }
+
+            RaiseEvent(localArgs);
         }
 
         #endregion
@@ -632,7 +688,7 @@ namespace Wodsoft.UI
                 _dispatcherCache = null;
                 if (LogicalChildren != null)
                 {
-                    foreach(var logicalChild in LogicalChildren)
+                    foreach (var logicalChild in LogicalChildren)
                     {
                         if (logicalChild is FrameworkElement fe)
                             fe.OnTemplateParentChanged(null);
@@ -1056,12 +1112,12 @@ namespace Wodsoft.UI
         private readonly Dictionary<TriggerBase, TriggerBinding> _triggerBindings = new Dictionary<TriggerBase, TriggerBinding>();
         private readonly Dictionary<int, TriggerStorage> _triggerStorages = new Dictionary<int, TriggerStorage>();
 
-        internal void AddTriggerBinding(TriggerBase trigger, TriggerBinding triggerBinding)
+        void IHaveTriggerValue.AddTriggerBinding(TriggerBase trigger, TriggerBinding triggerBinding)
         {
             _triggerBindings.Add(trigger, triggerBinding);
         }
 
-        internal void RemoveTriggerBinding(TriggerBase trigger)
+        void IHaveTriggerValue.RemoveTriggerBinding(TriggerBase trigger)
         {
             if (_triggerBindings.TryGetValue(trigger, out var binding))
             {
@@ -1070,7 +1126,7 @@ namespace Wodsoft.UI
             }
         }
 
-        internal void AddTriggerValue(DependencyProperty dp, byte layer, TriggerValue triggerValue)
+        void IHaveTriggerValue.AddTriggerValue(DependencyProperty dp, byte layer, TriggerValue triggerValue)
         {
             if (!_triggerStorages.TryGetValue(dp.GlobalIndex, out var storage))
             {
@@ -1080,7 +1136,7 @@ namespace Wodsoft.UI
             storage.AddValue(layer, triggerValue);
         }
 
-        internal void RemoveTriggerValue(DependencyProperty dp, byte layer, TriggerValue triggerValue)
+        void IHaveTriggerValue.RemoveTriggerValue(DependencyProperty dp, byte layer, TriggerValue triggerValue)
         {
             if (_triggerStorages.TryGetValue(dp.GlobalIndex, out var storage))
             {

@@ -23,8 +23,10 @@ namespace Wodsoft.UI
         /// <returns>Return a new trigger.</returns>
         protected internal abstract TriggerBase Merge(TriggerBase triggerBase);
 
-        protected internal abstract void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope);
+        protected internal abstract void ConnectTrigger<T>(object source, T container, INameScope? nameScope)
+            where T : DependencyObject , IHaveTriggerValue;
 
-        protected internal abstract void DisconnectTrigger(object source, FrameworkElement container, INameScope? nameScope);
+        protected internal abstract void DisconnectTrigger<T>(object source, T container, INameScope? nameScope)
+            where T : DependencyObject, IHaveTriggerValue;
     }
 }

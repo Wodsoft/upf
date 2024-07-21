@@ -288,9 +288,5 @@ namespace Wodsoft.UI
                 eventArgs.Handled = true;
             }
         }
-
-        private bool _sealed = false;
-
-
     }
 }

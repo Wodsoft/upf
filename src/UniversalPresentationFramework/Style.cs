@@ -504,7 +504,51 @@ namespace Wodsoft.UI
             return false;
         }
 
+        internal bool TryApplyProperty(FrameworkContentElement element, DependencyProperty dp, ref DependencyEffectiveValue effectiveValue)
+        {
+            if (_propertySetters.TryGetValue(dp, out var value))
+            {
+                if (value is DynamicResourceExtension dynamicResourceExtension)
+                    effectiveValue = new DependencyEffectiveValue(ResourceHelper.FindResource(element, dynamicResourceExtension.ResourceKey!), DependencyEffectiveSource.Internal);
+                else if (value is BindingBase bindingBase)
+                    effectiveValue = new DependencyEffectiveValue(bindingBase.CreateBindingExpression(element, dp), DependencyEffectiveSource.Internal);
+                else
+                    effectiveValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Internal);
+                return true;
+            }
+            return false;
+        }
+
         internal static void ApplyStyle(FrameworkElement element, Style? oldStyle, Style? newStyle)
+        {
+            if (oldStyle == null && newStyle == null)
+                return;
+            IEnumerable<DependencyProperty> properties;
+            if (oldStyle == null)
+                properties = newStyle!._propertySetters.Keys;
+            else if (newStyle == null)
+                properties = oldStyle._propertySetters.Keys;
+            else
+                properties = oldStyle._propertySetters.Keys.Concat(newStyle._propertySetters.Keys).Distinct();
+            foreach (var property in properties)
+                element.InvalidateProperty(property);
+            if (oldStyle != null)
+            {
+                foreach (var eventSetter in oldStyle._eventSetters)
+                    element.RemoveHandler(eventSetter.Event!, eventSetter.Handler!);
+                foreach (var trigger in oldStyle._mergedTriggers)
+                    trigger.DisconnectTrigger(oldStyle, element, null);
+            }
+            if (newStyle != null)
+            {
+                foreach (var eventSetter in newStyle._eventSetters)
+                    element.AddHandler(eventSetter.Event!, eventSetter.Handler!, eventSetter.HandledEventsToo);
+                foreach (var trigger in newStyle._mergedTriggers)
+                    trigger.ConnectTrigger(newStyle, element, null);
+            }
+        }
+
+        internal static void ApplyStyle(FrameworkContentElement element, Style? oldStyle, Style? newStyle)
         {
             if (oldStyle == null && newStyle == null)
                 return;

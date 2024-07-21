@@ -123,19 +123,19 @@ namespace Wodsoft.UI
 
         #region Connect
 
-        private readonly Dictionary<FrameworkElement, (object Source, INameScope? NameScope)> _scopes = new Dictionary<FrameworkElement, (object, INameScope?)>();
+        private readonly Dictionary<DependencyObject, (object Source, INameScope? NameScope)> _scopes = new Dictionary<DependencyObject, (object, INameScope?)>();
 
-        protected internal override void ConnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
+        protected internal override void ConnectTrigger<T>(object source, T container, INameScope? nameScope)
         {
             if (_routedEvent == null)
                 return;
             if (_actions == null || _actions.Count == 0)
                 return;
-            container.AddHandler(_routedEvent, Handle, false);
+            container.AddHandler(_routedEvent, Handle);
             _scopes[container] = (source, nameScope);
         }
 
-        protected internal override void DisconnectTrigger(object source, FrameworkElement container, INameScope? nameScope)
+        protected internal override void DisconnectTrigger<T>(object source, T container, INameScope? nameScope)
         {
             if (_routedEvent == null)
                 return;

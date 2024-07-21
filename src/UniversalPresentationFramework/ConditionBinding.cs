@@ -10,7 +10,7 @@ using Wodsoft.UI.Data;
 
 namespace Wodsoft.UI
 {
-    internal abstract class ConditionBinding : IDisposable
+    public abstract class ConditionBinding : IDisposable
     {
         public abstract event ConditionBindingEqualityChangedEventHandler? IsMatchedChanged;
 
@@ -52,9 +52,9 @@ namespace Wodsoft.UI
         }
     }
 
-    internal delegate void ConditionBindingEqualityChangedEventHandler(ConditionBinding conditionBinding, bool isMatched);
+    public delegate void ConditionBindingEqualityChangedEventHandler(ConditionBinding conditionBinding, bool isMatched);
 
-    internal class DependencyConditionBinding : ConditionBinding, IDisposable
+    public class DependencyConditionBinding : ConditionBinding, IDisposable
     {
         private readonly DependencyObject _target;
         private readonly DependencyProperty _property;
@@ -127,7 +127,7 @@ namespace Wodsoft.UI
         }
     }
 
-    internal class ExpressionConditionBinding : ConditionBinding, IDisposable
+    public class ExpressionConditionBinding : ConditionBinding, IDisposable
     {
         private readonly BindingExpressionBase _expression;
         private readonly object? _value;
