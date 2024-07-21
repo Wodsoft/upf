@@ -69,8 +69,17 @@ namespace Wodsoft.UI
         }
         protected virtual object? GetValueCore(DependencyProperty dp)
         {
+            PropertyMetadata? metadata = null;
+            if (dp.ReadOnly)
+            {
+                metadata = GetMetadata(dp);
+                if (metadata.GetReadOnlyValueCallback != null)
+                    return metadata.GetReadOnlyValueCallback(this, out _);
+            }
+            if (metadata == null)
+                metadata = GetMetadata(dp);
             _valueStores.TryGetValue(dp.GlobalIndex, out var effectiveValue);
-            return GetEffectiveValue(dp, ref effectiveValue, GetMetadata(dp));
+            return GetEffectiveValue(dp, ref effectiveValue, metadata);
         }
         private object? GetEffectiveValue(DependencyProperty dp, ref DependencyEffectiveValue effectiveValue, PropertyMetadata metadata)
         {

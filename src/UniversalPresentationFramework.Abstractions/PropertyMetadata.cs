@@ -51,6 +51,8 @@ namespace Wodsoft.UI
 
         public PropertyChangedCallback? PropertyChangedCallback { get => _propertyChangedCallback; set { SealCheck(); _propertyChangedCallback = value; } }
 
+        public virtual GetReadOnlyValueCallback? GetReadOnlyValueCallback => null;
+
         public bool IsSealed { get => _isSealed; }
 
         private void SealCheck()
