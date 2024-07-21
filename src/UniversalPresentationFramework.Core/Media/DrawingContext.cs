@@ -377,14 +377,14 @@ namespace Wodsoft.UI.Media
         //    float opacity,
         //    AnimationClock opacityAnimations);
 
-        ///// <summary>
-        /////     PushTransform - 
-        /////     Push a Transform which will apply to all drawing operations until the corresponding 
-        /////     Pop.
-        ///// </summary>
-        ///// <param name="transform"> The Transform to push. </param>
-        //public abstract void PushTransform(
-        //    Transform transform);
+        /// <summary>
+        ///     PushTransform - 
+        ///     Push a Transform which will apply to all drawing operations until the corresponding 
+        ///     Pop.
+        /// </summary>
+        /// <param name="transform"> The Transform to push. </param>
+        public abstract void PushTransform(
+            Transform transform);
 
         ///// <summary>
         /////     PushGuidelineSet - 

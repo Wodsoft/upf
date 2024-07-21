@@ -177,6 +177,13 @@ namespace Wodsoft.UI.Renderers
             _opacityStates.Add(new OpacityState(_canvas.SaveCount, opacity));
         }
 
+        public override void PushTransform(Transform transform)
+        {
+            _canvas.Save();
+            var matrix = transform.Value;
+            _canvas.Concat(new SKMatrix(matrix.M11, matrix.M12, matrix.M31, matrix.M21, matrix.M22, matrix.M32, 0f, 0f, 1f));
+        }
+
         public override void Pop()
         {
             if (_opacityStates.Count != 0)
