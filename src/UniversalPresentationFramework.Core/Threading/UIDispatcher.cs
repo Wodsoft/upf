@@ -32,20 +32,28 @@ namespace Wodsoft.UI.Threading
                 InvalidateLayout(RootElement);
                 UpdateLayoutCore();
             }
-            while (_updateArrangeElements.Count != 0)
+            while (true)
             {
-                var element = _updateArrangeElements[_updateArrangeElements.Count - 1];
-                if (element.IsArrangeValid)
-                    _updateArrangeElements.RemoveAt(_updateArrangeElements.Count - 1);
-                element.Arrange(element.PreviousArrangeRect);
+                while (_updateMeasureElements.Count != 0)
+                {
+                    var element = _updateMeasureElements[_updateMeasureElements.Count - 1];
+                    if (element.IsMeasureValid)
+                        _updateMeasureElements.RemoveAt(_updateMeasureElements.Count - 1);
+                    element.Measure(element.PreviousAvailableSize);
+                }
+                while (_updateArrangeElements.Count != 0)
+                {
+                    var element = _updateArrangeElements[_updateArrangeElements.Count - 1];
+                    if (element.IsArrangeValid)
+                        _updateArrangeElements.RemoveAt(_updateArrangeElements.Count - 1);
+                    element.Arrange(element.PreviousArrangeRect);
+                }
+                FireSizeChangeInfo();
+                if (_updateMeasureElements.Count != 0 || _updateArrangeElements.Count != 0)
+                    continue;
+                break;
             }
-            while (_updateMeasureElements.Count != 0)
-            {
-                var element = _updateMeasureElements[_updateMeasureElements.Count - 1];
-                if (element.IsMeasureValid)
-                    _updateMeasureElements.RemoveAt(_updateMeasureElements.Count - 1);
-                element.Measure(element.PreviousAvailableSize);
-            }
+
             if (_updateRender || _continueFrames < 2)
             {
                 if (_updateRender)
@@ -166,6 +174,7 @@ namespace Wodsoft.UI.Threading
         #region Layout
 
         private bool _updateLayout;
+        private SizeChangedInfo? _sizeChangedInfo;
         private List<UIElement> _updateArrangeElements = new List<UIElement>(), _updateMeasureElements = new List<UIElement>();
 
         protected abstract UIElement RootElement { get; }
@@ -229,6 +238,24 @@ namespace Wodsoft.UI.Threading
         internal void RemoveMeasure(UIElement element)
         {
             _updateMeasureElements.Remove(element);
+        }
+
+        internal void AddSizeChangeInfo(SizeChangedInfo info)
+        {
+            info.Next = _sizeChangedInfo;
+            _sizeChangedInfo = info;
+        }
+
+        private void FireSizeChangeInfo()
+        {
+            var info = _sizeChangedInfo;
+            while (info != null)
+            {
+                var thisInfo = info;
+                info = info.Next;
+                thisInfo.Next = null;
+                thisInfo.Element.OnRenderSizeChanged(thisInfo);
+            }
         }
 
         #endregion
