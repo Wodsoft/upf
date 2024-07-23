@@ -121,16 +121,16 @@ namespace Wodsoft.UI
 
         private void AddInheritanceContext(object? item)
         {
-            if (item is DependencyObject d)
+            if (_owner != null && item is DependencyObject d)
             {
-                if (_owner!.ProvideSelfAsInheritanceContext(d, _ContextProperty))
+                if (_owner.ProvideSelfAsInheritanceContext(d, _ContextProperty))
                     d.IsInheritanceContextSealed = true;
             }
         }
 
         private void RemoveInheritanceContext(object? item)
         {
-            if (item is DependencyObject d && d.IsInheritanceContextSealed && d.InheritanceContext == _owner)
+            if (_owner != null && item is DependencyObject d && d.IsInheritanceContextSealed && d.InheritanceContext == _owner)
             {
                 d.IsInheritanceContextSealed = false;
                 _owner!.RemoveSelfAsInheritanceContext(d, _ContextProperty);
