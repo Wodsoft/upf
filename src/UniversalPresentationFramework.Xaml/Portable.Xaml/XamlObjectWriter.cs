@@ -754,7 +754,8 @@ namespace System.Xaml
             else if (ReferenceEquals(xm, XamlLanguage.Key) || xm == xt.GetAliasedProperty(XamlLanguage.Key))
             {
                 var keyValue = GetCorrectlyTypedValue(null, xt.KeyType, obj, out var isAlreadySet);
-                state.KeyValue = keyValue;
+                if (state.KeyValue == null || ReferenceEquals(xm, XamlLanguage.Key))
+                    state.KeyValue = keyValue;
                 ms.Value = keyValue;
                 ms.IsAlreadySet = isAlreadySet;
             }
