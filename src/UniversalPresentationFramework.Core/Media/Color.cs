@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Media
 {
+    [TypeConverter(typeof(ColorConverter))]
     public struct Color : IFormattable, IEquatable<Color>
     {
         private byte _r, _g, _b, _a;

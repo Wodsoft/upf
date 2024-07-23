@@ -141,5 +141,51 @@ namespace Wodsoft.UI.Media
                 return Color.FromScRgb(1.0f, values[0], values[1], values[2]);
             }
         }
+        public static Color ParseColor(string color, IFormatProvider formatProvider)
+        {
+            return ParseColor(color, formatProvider, null);
+        }
+
+        /// <summary>
+        /// ParseColor
+        /// <param name="color"> string with color description </param>
+        /// <param name="formatProvider">IFormatProvider for processing string</param>
+        /// <param name="context">ITypeDescriptorContext</param>
+        /// </summary>
+        public static Color ParseColor(string color, IFormatProvider formatProvider, ITypeDescriptorContext? context)
+        {
+            bool isPossibleKnowColor;
+            bool isNumericColor;
+            bool isScRgbColor;
+            string trimmedColor = KnownColors.MatchColor(color, out isPossibleKnowColor, out isNumericColor, out isScRgbColor);
+
+            if ((isPossibleKnowColor == false) &&
+                (isNumericColor == false) &&
+                (isScRgbColor == false))
+            {
+                throw new FormatException("Illegal color token.");
+            }
+
+            //Is it a number?
+            if (isNumericColor)
+            {
+                return ParseHexColor(trimmedColor);
+            }
+            else if (isScRgbColor)
+            {
+                return ParseScRgbColor(trimmedColor, formatProvider);
+            }
+            else
+            {
+                KnownColor kc = KnownColors.ColorStringToKnownColor(trimmedColor);
+
+                if (kc == KnownColor.UnknownColor)
+                {
+                    throw new FormatException("Illegal color token.");
+                }
+
+                return Color.FromUInt32((uint)kc);
+            }
+        }
     }
 }
