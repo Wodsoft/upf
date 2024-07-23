@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text;
@@ -11,8 +12,47 @@ using Wodsoft.UI.Threading;
 
 namespace Wodsoft.UI
 {
-    public class FrameworkContentElement : ContentElement, IHaveTriggerValue
+    public class FrameworkContentElement : ContentElement, IHaveTriggerValue, ISupportInitialize
     {
+        #region Initialize
+
+        public bool IsInitPending { get; private set; }
+
+        void ISupportInitialize.BeginInit()
+        {
+            if (IsInitPending)
+                throw new InvalidOperationException("Element is initializing.");
+            IsInitPending = true;
+            BeginInit();
+        }
+
+        void ISupportInitialize.EndInit()
+        {
+            if (!IsInitPending)
+                throw new InvalidOperationException("Element is not initializing.");
+            Initialize();
+            EndInit();
+            IsInitPending = false;
+        }
+
+        protected virtual void BeginInit()
+        {
+        }
+
+        protected virtual void EndInit()
+        {
+        }
+
+        private void Initialize()
+        {
+            if (!_isThemeStyleLoaded)
+                UpdateThemeStyleProperty();
+            if (_style == null)
+                InvalidateProperty(StyleProperty);
+        }
+
+        #endregion
+
         #region NameScope
 
         public static readonly DependencyProperty NameProperty =
