@@ -112,8 +112,8 @@ namespace Wodsoft.UI
                 if (value == null)
                     throw new ArgumentNullException("value");
 
-                if (!typeof(FrameworkElement).IsAssignableFrom(value))
-                    throw new ArgumentException("Target type must derive from FrameworkElement.");
+                if (!typeof(FrameworkElement).IsAssignableFrom(value) && !typeof(FrameworkContentElement).IsAssignableFrom(value))
+                    throw new ArgumentException("Target type must derive from FrameworkElement or FrameworkContentElement.");
 
                 _targetType = value;
             }
