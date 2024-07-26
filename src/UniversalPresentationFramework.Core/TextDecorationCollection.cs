@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ using Wodsoft.UI.Media.Animation;
 
 namespace Wodsoft.UI
 {
+    [TypeConverter(typeof(TextDecorationCollectionConverter))]
     public sealed class TextDecorationCollection : Freezable, IList, IList<TextDecoration>
     {
         private List<TextDecoration> _collection = new List<TextDecoration>();

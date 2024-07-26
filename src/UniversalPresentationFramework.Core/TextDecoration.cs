@@ -112,7 +112,7 @@ namespace Wodsoft.UI
             }
         }
 
-        public static readonly DependencyProperty LocationProperty = DependencyProperty.Register("Location", typeof(TextDecorationUnit), typeof(TextDecoration), new PropertyMetadata(TextDecorationLocation.Underline));
+        public static readonly DependencyProperty LocationProperty = DependencyProperty.Register("Location", typeof(TextDecorationLocation), typeof(TextDecoration), new PropertyMetadata(TextDecorationLocation.Underline));
         /// <summary>
         ///     Location - TextDecorationLocation.  Default value is TextDecorationLocation.Underline.
         ///     The Location of the text decorations
