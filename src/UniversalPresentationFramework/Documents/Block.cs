@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Documents
 {
@@ -68,7 +70,6 @@ namespace Wodsoft.UI.Documents
                 throw new ArgumentNullException("element");
             return (float)element.GetValue(LineHeightProperty)!;
         }
-
 
         /// <summary>
         /// DependencyProperty for <see cref="LineStackingStrategy" /> property.
@@ -290,6 +291,78 @@ namespace Wodsoft.UI.Documents
             }
             return true;
         }
+
+        /// <summary>
+        /// Returns a Block immediately following this one
+        /// on the same level of siblings
+        /// </summary>
+        public Block? NextBlock
+        {
+            get
+            {
+                return NextElement as Block;
+            }
+        }
+
+        /// <summary>
+        /// Returns a block immediately preceding this one
+        /// on the same level of siblings
+        /// </summary>
+        public Block? PreviousBlock
+        {
+            get
+            {
+                return PreviousElement as Block;
+            }
+        }
+
+        public static readonly DependencyProperty BorderThicknessProperty =
+                DependencyProperty.Register(
+                        "BorderThickness",
+                        typeof(Thickness),
+                        typeof(Block),
+                        new FrameworkPropertyMetadata(
+                                new Thickness(),
+                                FrameworkPropertyMetadataOptions.AffectsMeasure),
+                        new ValidateValueCallback(IsValidBorderThickness));
+        private static bool IsValidBorderThickness(object? o)
+        {
+            Thickness t = (Thickness)o!;
+            return IsValidThickness(t, /*allow NaN*/false);
+        }
+        public Thickness BorderThickness
+        {
+            get { return (Thickness)GetValue(BorderThicknessProperty)!; }
+            set { SetValue(BorderThicknessProperty, value); }
+        }
+
+        public static readonly DependencyProperty BorderBrushProperty =
+                DependencyProperty.Register(
+                        "BorderBrush",
+                        typeof(Brush),
+                        typeof(Block),
+                        new FrameworkPropertyMetadata(
+                                null,
+                                FrameworkPropertyMetadataOptions.AffectsRender));
+        public Brush? BorderBrush
+        {
+            get { return (Brush?)GetValue(BorderBrushProperty); }
+            set { SetValue(BorderBrushProperty, value); }
+        }
+
+
+        public static readonly DependencyProperty FlowDirectionProperty = FrameworkElement.FlowDirectionProperty.AddOwner(typeof(Block));
+        public FlowDirection FlowDirection
+        {
+            get { return (FlowDirection)GetValue(FlowDirectionProperty)!; }
+            set { SetValue(FlowDirectionProperty, value); }
+        }
+
+        #endregion
+
+        #region Layout
+
+        public abstract IBlockLayout Layout { get; }
 
         #endregion
     }

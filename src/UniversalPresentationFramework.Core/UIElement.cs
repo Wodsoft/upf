@@ -342,7 +342,9 @@ namespace Wodsoft.UI
         }
 
         public override bool HasRenderContent => _drawingContent != null;
-        
+
+        internal void OnRenderInternal(DrawingContext drawingContext) => OnRender(drawingContext);
+
         #endregion
 
         #region Visual

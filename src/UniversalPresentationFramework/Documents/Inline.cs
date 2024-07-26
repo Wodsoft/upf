@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Documents
 {
@@ -27,29 +28,29 @@ namespace Wodsoft.UI.Documents
         //    }
         //}
 
-        ///// <summary>
-        ///// Returns an Inline immediately following this one
-        ///// on the same level of siblings
-        ///// </summary>
-        //public Inline NextInline
-        //{
-        //    get
-        //    {
-        //        return this.NextElement as Inline;
-        //    }
-        //}
+        /// <summary>
+        /// Returns an Inline immediately following this one
+        /// on the same level of siblings
+        /// </summary>
+        public Inline? NextInline
+        {
+            get
+            {
+                return NextElement as Inline;
+            }
+        }
 
-        ///// <summary>
-        ///// Returns an Inline immediately preceding this one
-        ///// on the same level of siblings
-        ///// </summary>
-        //public Inline PreviousInline
-        //{
-        //    get
-        //    {
-        //        return this.PreviousElement as Inline;
-        //    }
-        //}
+        /// <summary>
+        /// Returns an Inline immediately preceding this one
+        /// on the same level of siblings
+        /// </summary>
+        public Inline? PreviousInline
+        {
+            get
+            {
+                return PreviousElement as Inline;
+            }
+        }
 
         /// <summary>
         /// DependencyProperty for <see cref="BaselineAlignment" /> property.
@@ -76,7 +77,7 @@ namespace Wodsoft.UI.Documents
                         "TextDecorations",
                         typeof(TextDecorationCollection),
                         typeof(Inline),
-                        new FrameworkPropertyMetadata(TextDecorationCollection.Empty, FrameworkPropertyMetadataOptions.AffectsRender));
+                        new FrameworkPropertyMetadata(TextDecorationCollection.Empty, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits));
         /// <summary>
         /// The TextDecorations property specifies decorations that are added to the text of an element.
         /// </summary>
@@ -101,5 +102,11 @@ namespace Wodsoft.UI.Documents
         }
 
         #endregion Public Properties
+
+        #region Layout
+
+        public abstract IInlineLayout Layout { get; }
+
+        #endregion
     }
 }

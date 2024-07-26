@@ -76,7 +76,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         public static readonly DependencyProperty SelectionBrushProperty =
             DependencyProperty.Register("SelectionBrush", typeof(Brush), typeof(TextBoxBase),
-                new FrameworkPropertyMetadata(new SolidColorBrush(SystemColors.HighlightColor)));
+                new FrameworkPropertyMetadata(SystemColors.HighlightBrush));
         public Brush? SelectionBrush
         {
             get { return (Brush?)GetValue(SelectionBrushProperty); }
@@ -85,7 +85,7 @@ namespace Wodsoft.UI.Controls.Primitives
 
         public static readonly DependencyProperty SelectionTextBrushProperty =
             DependencyProperty.Register("SelectionTextBrush", typeof(Brush), typeof(TextBoxBase),
-                new FrameworkPropertyMetadata(new SolidColorBrush(SystemColors.HighlightTextColor)));
+                new FrameworkPropertyMetadata(SystemColors.HighlightTextBrush));
         public Brush? SelectionTextBrush
         {
             get { return (Brush?)GetValue(SelectionTextBrushProperty); }

@@ -16,6 +16,8 @@ namespace Wodsoft.UI
         public static T Sum<T>(this ReadOnlySpan<T> span)
             where T : struct, IAdditionOperators<T, T, T>
         {
+            if (span.Length == 0)
+                return default;
             T sum = default;
             if (Vector.IsHardwareAccelerated)
             {

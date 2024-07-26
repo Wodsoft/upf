@@ -122,9 +122,10 @@ namespace Wodsoft.UI.Shapes
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            var margin = Margin;
             drawingContext.DrawRoundedRectangle(Fill,
                 new Pen(Stroke, StrokeThickness, StrokeStartLineCap, StrokeEndLineCap, StrokeDashCap, StrokeLineJoin, StrokeMiterLimit, new DashStyle(StrokeDashArray, StrokeDashOffset)),
-                new Rect(new Point(), RenderSize),
+                new Rect(new Point(margin.Left, margin.Top), RenderSize),
                 RadiusX,
                 RadiusY);
         }

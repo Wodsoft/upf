@@ -128,32 +128,29 @@ namespace Wodsoft.UI.Controls
                     }
                     else
                     {
-                        int offsetChar = 0;
-                        int offsetLength = selectionLength;
+                        int leftOffsetChar = 0, rightOffsetChar = 0;
                         if (selectionStart > _start)
                         {
-                            var leftText = text[..(selectionStart - _start)];
+                            leftOffsetChar = selectionStart - _start;
+                            var leftText = text[..leftOffsetChar];
                             if (foreground != null)
                                 drawingContext.DrawText(leftText, _typeface, textBox.FontSize, foreground, origin);
-                            offsetChar = selectionStart - _start;
-                            offsetLength = Math.Min(offsetChar + selectionLength, _length - leftText.Length);
                         }
                         if (selectionStart + selectionLength < _start + _length)
                         {
-                            var rightText = text[^(_start + _length - selectionStart - selectionLength)..];
+                            rightOffsetChar = _start + _length - selectionStart - selectionLength;
+                            var rightText = text[^rightOffsetChar..];
                             var rightTextOffset = _width - _widths.Span[^rightText.Length..].Sum();
                             if (foreground != null)
                                 drawingContext.DrawText(rightText, _typeface, textBox.FontSize, foreground, new Point(origin.X + rightTextOffset, origin.Y));
-                            offsetChar = Math.Max(_start, selectionStart) - _start;
-                            offsetLength = selectionStart + selectionLength - _start - offsetChar;
                         }
 
-                        float offsetWidth = _widths.Span[offsetChar..(offsetLength + offsetChar)].Sum();
-                        float offsetX = _widths.Span[..offsetChar].Sum();
+                        float offsetWidth = _widths.Span[leftOffsetChar..^rightOffsetChar].Sum();
+                        float offsetX = _widths.Span[..leftOffsetChar].Sum();
                         if (selectionBrush != null)
                             drawingContext.DrawRectangle(selectionBrush, null, new Rect(origin.X + offsetX, origin.Y - selectionOffset, offsetWidth, _height));
                         if (selectionTextBrush != null)
-                            drawingContext.DrawText(text.Slice(offsetChar, offsetLength), _typeface, textBox.FontSize, selectionTextBrush, new Point(origin.X + offsetX, origin.Y));
+                            drawingContext.DrawText(text[leftOffsetChar..^rightOffsetChar], _typeface, textBox.FontSize, selectionTextBrush, new Point(origin.X + offsetX, origin.Y));
                     }
                 }
                 else

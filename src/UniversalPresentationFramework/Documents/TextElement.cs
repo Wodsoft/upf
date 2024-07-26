@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Controls.Primitives;
 using Wodsoft.UI.Markup;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Documents
 {
-    public abstract class TextElement : FrameworkContentElement, IAddChild
+    public abstract class TextElement : FrameworkContentElement
     {
-        #region Properties
+        #region Appearance Properties
 
         public static readonly DependencyProperty FontFamilyProperty =
                 DependencyProperty.RegisterAttached(
@@ -164,6 +168,7 @@ namespace Wodsoft.UI.Documents
             }
             return true;
         }
+        [TypeConverter(typeof(FontSizeConverter))]
         public float FontSize
         {
             get { return (float)GetValue(FontSizeProperty)!; }
@@ -237,18 +242,96 @@ namespace Wodsoft.UI.Documents
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
+            var metadata = e.Metadata;
+            if (metadata == null)
+                metadata = e.Property.GetMetadata(GetType());
+            if (metadata is FrameworkPropertyMetadata fMetadata && fMetadata.Flags.HasFlag(FrameworkPropertyMetadataOptions.AffectsRender))
+            {
+
+            }
         }
 
         #endregion
 
-        public void AddChild(object value)
+        #region Relationship
+
+        private TextPointer? _contentStart, _contentEnd, _elementStart, _elementEnd;
+        private TextTreeTextElementNode? _textElementNode;
+
+        public TextPointer ContentStart
         {
-            throw new NotImplementedException();
+            get
+            {
+                if (_contentStart is null)
+                {
+                    _contentStart = new TextPointer(EnsureTextContainer(), TextElementNode, ElementEdge.AfterStart, LogicalDirection.Forward);
+                }
+                return _contentStart;
+            }
         }
 
-        public void AddText(string text)
+        public TextPointer ContentEnd
         {
-            throw new NotImplementedException();
+            get
+            {
+                if (_contentEnd is null)
+                    _contentEnd = new TextPointer(EnsureTextContainer(), TextElementNode, ElementEdge.BeforeEnd, LogicalDirection.Backward);
+                return _contentEnd;
+            }
         }
+
+        public TextPointer ElementStart
+        {
+            get
+            {
+                if (_elementStart is null)
+                    _elementStart = new TextPointer(EnsureTextContainer(), TextElementNode, ElementEdge.BeforeStart, LogicalDirection.Forward);
+                return _elementStart;
+            }
+        }
+
+        public TextPointer ElementEnd
+        {
+            get
+            {
+                if (_elementEnd is null)
+                    _elementEnd = new TextPointer(EnsureTextContainer(), TextElementNode, ElementEdge.AfterEnd, LogicalDirection.Backward);
+                return _elementEnd;
+            }
+        }
+
+        protected TextElement? NextElement => (TextElementNode.NextNode as TextTreeTextElementNode)?.TextElement;
+
+        protected TextElement? PreviousElement => (TextElementNode.PreviousNode as TextTreeTextElementNode)?.TextElement;
+
+        protected TextElement? FirstChildElement => (TextElementNode.FirstChildNode as TextTreeTextElementNode)?.TextElement;
+
+        protected TextElement? LastChildElement => (TextElementNode.LastChildNode as TextTreeTextElementNode)?.TextElement;
+
+        protected internal virtual int ContentCount => 0;
+
+        public TextTreeTextElementNode TextElementNode
+        {
+            get
+            {
+                if (_textElementNode == null)
+                    _textElementNode = CreateTextElementNode();
+                return _textElementNode;
+            }
+        }
+
+        protected virtual TextTreeTextElementNode CreateTextElementNode() => new TextTreeTextElementNode(this);
+
+        private IReadOnlyTextContainer EnsureTextContainer()
+        {
+            TextTreeNode node = TextElementNode;
+            while (node.ParentNode != null)
+                node = node.ParentNode;
+            if (node is TextTreeRootNode rootNode)
+                return rootNode.TextContainer;
+            return new ReadOnlyTextContainer(node);
+        }
+
+        #endregion
     }
 }

@@ -4,13 +4,65 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml.Markup;
+using Wodsoft.UI.Controls.Primitives;
+using Wodsoft.UI.Data;
 using Wodsoft.UI.Documents;
 using Wodsoft.UI.Media;
 
 namespace Wodsoft.UI.Controls
 {
-    public class TextBlock : FrameworkElement
+    [ContentProperty("Inlines")]
+    public partial class TextBlock : FrameworkElement
     {
+        private readonly InlineCollection _inlines;
+        private readonly TextBlockTextContainer _textContainer;
+        private readonly Run _textRun;
+        private string _text = string.Empty;
+        private int _selectionStart, _selectionLength;
+
+        #region Constructor
+
+        static TextBlock()
+        {
+            _TextViewerTemplate = new TextBlockTemplate();
+            FrameworkElementFactory textViewer = new FrameworkElementFactory(typeof(RichTextViewer));
+            textViewer.SetValue(MarginProperty, new TemplateBindingExpression(new TemplateBindingExtension(PaddingProperty)));
+            textViewer.SetValue(TextViewer.TextAlignmentProperty, new TemplateBindingExpression(new TemplateBindingExtension(TextAlignmentProperty)));
+            textViewer.SetValue(TextViewer.TextTrimmingProperty, new TemplateBindingExpression(new TemplateBindingExtension(TextTrimmingProperty)));
+            textViewer.SetValue(TextViewer.TextWrappingProperty, new TemplateBindingExpression(new TemplateBindingExtension(TextWrappingProperty)));
+            textViewer.Seal();
+            _TextViewerTemplate.VisualTree = textViewer;
+        }
+
+        public TextBlock()
+        {
+            _textContainer = new TextBlockTextContainer(this);
+            _inlines = new InlineCollection(this, _textContainer.Root.FirstChildNode!);
+            _textRun = new Run();
+            _textRun.SetBinding(Run.TextProperty, new Binding { Source = this, Path = new PropertyPath("Text"), Mode = BindingMode.OneWay });
+            AddLogicalChild(_textRun);
+            ((TextBlockRootNode)_textContainer.Root).AddNode(_textRun.TextElementNode);
+        }
+
+        #endregion
+
+        #region Template
+
+        private static readonly FrameworkTemplate _TextViewerTemplate;
+
+        protected override FrameworkTemplate? GetTemplate()
+        {
+            return _TextViewerTemplate;
+        }
+
+        protected override void OnApplyTemplate()
+        {
+            ((RichTextViewer)TemplatedChild!).InitializeViewer(_textContainer, this);
+        }
+
+        #endregion
+
         #region Properties
 
         public static readonly DependencyProperty BackgroundProperty =
@@ -104,7 +156,7 @@ namespace Wodsoft.UI.Controls
                                 new CoerceValueCallback(CoerceText)));
         private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            OnTextChanged((TextBlock)d, (string?)e.NewValue);
+            OnTextChanged((TextBlock)d, (string)e.NewValue!);
         }
         private static object CoerceText(DependencyObject d, object? value)
         {
@@ -112,7 +164,6 @@ namespace Wodsoft.UI.Controls
 
             if (value == null)
                 value = string.Empty;
-
             //if (textblock._complexContent != null &&
             //    !textblock.CheckFlags(Flags.TextContentChanging) &&
             //    (string)value == (string)textblock.GetValue(TextProperty))
@@ -136,8 +187,9 @@ namespace Wodsoft.UI.Controls
             get { return (string?)GetValue(TextProperty); }
             set { SetValue(TextProperty, value); }
         }
-        private static void OnTextChanged(TextBlock text, string? newText)
+        private static void OnTextChanged(TextBlock text, string newText)
         {
+            text._text = newText;
             //if (text.CheckFlags(Flags.TextContentChanging))
             //{
             //    // The update originated in a TextContainer change -- don't update
@@ -584,18 +636,60 @@ namespace Wodsoft.UI.Controls
             set { SetValue(IsHyphenationEnabledProperty, value); }
         }
 
+        public static readonly DependencyProperty IsTextSelectionEnabledProperty =
+            DependencyProperty.Register("IsTextSelectionEnabled", typeof(bool), typeof(TextBlock), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+        public bool IsTextSelectionEnabled { get => (bool)GetValue(IsTextSelectionEnabledProperty)!; set => SetValue(IsTextSelectionEnabledProperty, value); }
+
+        public TextPointer SelectionStart => _textContainer.SelectionStart;
+
+        public TextPointer SelectionEnd => _textContainer.SelectionEnd;
+
+        public static readonly DependencyProperty SelectionBrushProperty = TextBoxBase.SelectionBrushProperty.AddOwner(typeof(TextBlock));
+        public Brush? SelectionBrush
+        {
+            get { return (Brush?)GetValue(SelectionBrushProperty); }
+            set { SetValue(SelectionBrushProperty, value); }
+        }
+
+        public static readonly DependencyProperty SelectionTextBrushProperty = TextBoxBase.SelectionTextBrushProperty.AddOwner(typeof(TextBlock));
+        public Brush? SelectionTextBrush
+        {
+            get { return (Brush?)GetValue(SelectionTextBrushProperty); }
+            set { SetValue(SelectionTextBrushProperty, value); }
+        }
+
+        public InlineCollection Inlines => _inlines;
+
+        #endregion
+
+        #region Events
+
+        public static readonly RoutedEvent SelectionChangedEvent = TextBoxBase.SelectionChangedEvent.AddOwner(typeof(TextBlock));
+        public event RoutedEventHandler SelectionChanged { add { AddHandler(SelectionChangedEvent, value); } remove { RemoveHandler(SelectionChangedEvent, value); } }
+
+
+        public static readonly RoutedEvent TextChangedEvent = TextBoxBase.TextChangedEvent.AddOwner(typeof(TextBlock));
+        public event TextChangedEventHandler TextChanged { add { AddHandler(TextChangedEvent, value); } remove { RemoveHandler(TextChangedEvent, value); } }
+
         #endregion
 
         #region Layout
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            return base.ArrangeOverride(finalSize);
+            if (TemplatedChild != null)
+            {
+                TemplatedChild.Arrange(new Rect(finalSize));
+            }
+            return finalSize;
         }
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            return base.MeasureOverride(availableSize);
+            if (TemplatedChild == null)
+                return new Size(0.0f, 0.0f);
+            TemplatedChild.Measure(availableSize);
+            return TemplatedChild.DesiredSize;
         }
 
         #endregion
@@ -610,7 +704,24 @@ namespace Wodsoft.UI.Controls
             var background = Background;
             if (background != null)
                 drawingContext.DrawRectangle(background, null, new Rect(0, 0, RenderSize.Width, RenderSize.Height));
+        }
 
+        #endregion
+
+        #region Selection
+
+        public void Select(TextPointer start, TextPointer end)
+        {
+            if (!IsTextSelectionEnabled)
+                return;
+            _textContainer.Select(start, end);
+        }
+
+        public void SelectAll()
+        {
+            if (!IsTextSelectionEnabled)
+                return;
+            _textContainer.Select(_textContainer.DocumentStart, _textContainer.DocumentEnd);
         }
 
         #endregion

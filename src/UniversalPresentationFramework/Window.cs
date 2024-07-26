@@ -15,6 +15,7 @@ namespace Wodsoft.UI
     {
         static Window()
         {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata(typeof(Window)));
             WidthProperty.OverrideMetadata(typeof(Window), new PropertyMetadata(OnWidthChanged));
             HeightProperty.OverrideMetadata(typeof(Window), new PropertyMetadata(OnHeightChanged));
         }
