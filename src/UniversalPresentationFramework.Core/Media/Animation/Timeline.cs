@@ -167,5 +167,37 @@ namespace Wodsoft.UI.Media.Animation
         }
 
         #endregion
+
+        #region Events
+
+        public event EventHandler? Completed;
+
+        public event EventHandler? CurrentTimeInvalidated;
+
+        public event EventHandler? CurrentStateInvalidated;
+
+        public event EventHandler? RemoveRequested;
+
+        internal void RaiseCompleted(object sender)
+        {
+            Completed?.Invoke(sender, EventArgs.Empty);
+        }
+
+        internal void RaiseCurrentTimeInvalidated(object sender)
+        {
+            CurrentTimeInvalidated?.Invoke(sender, EventArgs.Empty);
+        }
+
+        internal void RaiseCurrentStateInvalidated(object sender)
+        {
+            CurrentStateInvalidated?.Invoke(sender, EventArgs.Empty);
+        }
+
+        internal void RaiseRemoveRequested(object sender)
+        {
+            RemoveRequested?.Invoke(sender, EventArgs.Empty);
+        }
+
+        #endregion
     }
 }

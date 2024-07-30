@@ -150,10 +150,10 @@ namespace Wodsoft.UI.Media.Animation
                 ComputeProgress();
             }
             if (totalTime != _totalTime)
-                CurrentTimeInvalidated?.Invoke(this, EventArgs.Empty);
+                _timeline.RaiseCurrentTimeInvalidated(this);
             if (_state == ClockState.Stopped)
             {
-                Completed?.Invoke(this, EventArgs.Empty);
+                _timeline.RaiseCompleted(this);
                 if (_isRoot)
                     OnRootRemoveRequest();
             }
@@ -161,7 +161,7 @@ namespace Wodsoft.UI.Media.Animation
 
         protected internal virtual void OnRootRemoveRequest()
         {
-            RemoveRequested?.Invoke(this, EventArgs.Empty);
+            _timeline.RaiseRemoveRequested(this);
         }
 
         protected internal virtual void OnRootStopRequest()
@@ -184,10 +184,10 @@ namespace Wodsoft.UI.Media.Animation
                 _isExpired = true;
             }
             if (totalTime != _totalTime)
-                CurrentTimeInvalidated?.Invoke(this, EventArgs.Empty);
+                _timeline.RaiseCurrentTimeInvalidated(this);
             if (_state == ClockState.Stopped)
             {
-                Completed?.Invoke(this, EventArgs.Empty);
+                _timeline.RaiseCompleted(this);
                 if (_isRoot)
                     OnRootRemoveRequest();
             }
@@ -384,13 +384,13 @@ namespace Wodsoft.UI.Media.Animation
 
         #region Events
 
-        public event EventHandler? Completed;
+        public event EventHandler Completed { add => _timeline.Completed += value;remove => _timeline.Completed -= value; }
 
-        public event EventHandler? CurrentTimeInvalidated;
+        public event EventHandler CurrentTimeInvalidated { add => _timeline.CurrentTimeInvalidated += value; remove => _timeline.CurrentTimeInvalidated -= value; }
 
-        public event EventHandler? CurrentStateInvalidated;
+        public event EventHandler CurrentStateInvalidated { add => _timeline.CurrentStateInvalidated += value; remove => _timeline.CurrentStateInvalidated -= value; }
 
-        public event EventHandler? RemoveRequested;
+        public event EventHandler RemoveRequested { add => _timeline.RemoveRequested += value; remove => _timeline.RemoveRequested -= value; }
 
         #endregion
     }
