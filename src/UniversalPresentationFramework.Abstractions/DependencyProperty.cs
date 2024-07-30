@@ -107,7 +107,7 @@ namespace Wodsoft.UI
                 }
                 else
                 {
-                    if (validateValueCallback != null && !validateValueCallback(metadata.DefaultValue))
+                    if (metadata.DefaultValue is not DefaultValueFactory && validateValueCallback != null && !validateValueCallback(metadata.DefaultValue))
                         throw new ArgumentException("Default value of metadata validate failed.");
                 }
                 var dp = new DependencyProperty(name, propertyType, ownerType, metadata, validateValueCallback, isReadOnly, isNullable);
@@ -140,7 +140,7 @@ namespace Wodsoft.UI
         {
             if (value == null)
                 return _isNullable;
-            return value.GetType().IsAssignableFrom(PropertyType);
+            return PropertyType.IsAssignableFrom(value.GetType());
         }
         public bool IsValidValue(object? value)
         {
@@ -186,7 +186,7 @@ namespace Wodsoft.UI
             }
             else
             {
-                if (ValidateValueCallback != null && !ValidateValueCallback(metadata.DefaultValue))
+                if (metadata.DefaultValue is not DefaultValueFactory && ValidateValueCallback != null && !ValidateValueCallback(metadata.DefaultValue))
                     throw new ArgumentException("Default value of metadata validate failed.");
             }
             lock (_metadataLocker)
@@ -277,6 +277,8 @@ namespace Wodsoft.UI
         public ValidateValueCallback? ValidateValueCallback { get; }
 
         public static object UnsetValue { get; } = new object();
+
+        internal DependencyPropertyKey? Key => _key;
 
         private record struct FromNameKey
         {

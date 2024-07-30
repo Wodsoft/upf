@@ -15,6 +15,8 @@ namespace Wodsoft.UI
 
         private bool _isFrozen;
 
+        protected internal override bool IsSealed => _isFrozen;
+
         public virtual bool CanFreeze => !_isFrozen && FreezeCore(true);
 
         public bool IsFrozen => _isFrozen;

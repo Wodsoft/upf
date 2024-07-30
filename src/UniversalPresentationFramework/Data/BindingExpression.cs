@@ -201,7 +201,7 @@ namespace Wodsoft.UI.Data
             _readonlyErrors = null;
             _errors = null;
             if (value == DependencyProperty.UnsetValue)
-                value = Target!.GetMetadata(TargetProperty).DefaultValue;
+                value = Target!.GetMetadata(TargetProperty).GetDefaultValue(Target, TargetProperty);
             if (_binding.Converter != null)
             {
                 try
@@ -222,7 +222,7 @@ namespace Wodsoft.UI.Data
         protected internal override object? GetSourceValue()
         {
             if (_hasError)
-                return Target!.GetMetadata(TargetProperty).DefaultValue;
+                return Target!.GetMetadata(TargetProperty).GetDefaultValue(Target, TargetProperty);
             object? value;
             if (_propertyBinding == null)
                 value = _source;
@@ -236,12 +236,12 @@ namespace Wodsoft.UI.Data
                     }
                     catch
                     {
-                        return Target!.GetMetadata(TargetProperty).DefaultValue;
+                        return Target!.GetMetadata(TargetProperty).GetDefaultValue(Target, TargetProperty);
                     }
                 }
                 else
                 {
-                    value = Target!.GetMetadata(TargetProperty).DefaultValue;
+                    value = Target!.GetMetadata(TargetProperty).GetDefaultValue(Target, TargetProperty);
                 }
             }
             if (_binding.Converter != null)
@@ -254,7 +254,7 @@ namespace Wodsoft.UI.Data
                 {
                     _errors = [new ValidationError(this, ex.Message, ex)];
                     _readonlyErrors = new ReadOnlyCollection<ValidationError>(_errors);
-                    return Target!.GetMetadata(TargetProperty).DefaultValue;
+                    return Target!.GetMetadata(TargetProperty).GetDefaultValue(Target, TargetProperty);
                 }
             }
             return value;

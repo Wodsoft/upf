@@ -35,5 +35,10 @@ namespace Wodsoft.UI.Test
             LastChangedNewValue = e.NewValue;
             base.OnPropertyChanged(e);
         }
+
+        internal ref readonly DependencyEffectiveValue InternalGetEffectiveValue(DependencyProperty dp) => ref base.GetEffectiveValue(dp);
+
+        public static readonly DependencyProperty DefaultsProperty = DependencyProperty.Register("Defaults", typeof(IList<MyObject>), typeof(MyObject), new PropertyMetadata(new ObservableCollectionDefaultValueFactory<MyObject>()));
+        public IList<MyObject> Defaults => (IList<MyObject>)GetValue(DefaultsProperty)!;
     }
 }

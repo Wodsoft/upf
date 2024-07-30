@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wodsoft.UI.Test
 {
-    public class DependencyObjectTest
+    public class DependencyObjectTest : BaseTest
     {
         [Fact]
         public void GetSetTest()
@@ -27,6 +27,18 @@ namespace Wodsoft.UI.Test
             Control child = new Control();
             parent.Children.Add(child);
             Assert.Equal(parent.DataContext, child.DataContext);
+        }
+
+        [Fact]
+        public void DefaultValueFactoryTest()
+        {
+            MyObject d = new MyObject();
+            var defaults = d.Defaults;
+            ref readonly var effectiveValue = ref d.InternalGetEffectiveValue(MyObject.DefaultsProperty);
+            Assert.Equal(DependencyEffectiveSource.None, effectiveValue.Source);
+            defaults.Add(new MyObject());
+            effectiveValue = ref d.InternalGetEffectiveValue(MyObject.DefaultsProperty);
+            Assert.Equal(DependencyEffectiveSource.Local, effectiveValue.Source);
         }
     }
 }

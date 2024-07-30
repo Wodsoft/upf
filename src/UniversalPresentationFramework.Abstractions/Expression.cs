@@ -127,7 +127,7 @@ namespace Wodsoft.UI
                 throw new InvalidOperationException("Expression is not attaching.");
             var metadata = _object!.GetMetadata(_property!);
             if (value == NoValue)
-                value = metadata.DefaultValue;
+                value = metadata.GetDefaultValue(_object, _property!);
             if (_object.UpdateExpressionValue(_property!, metadata, value))
             {
                 ValueChanged?.Invoke(this, new ExpressionValueChangedEventArgs(value));

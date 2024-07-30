@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Wodsoft.UI.Threading;
 
@@ -16,7 +17,11 @@ namespace Wodsoft.UI
             _valueStores = new Dictionary<int, DependencyEffectiveValue>(EffectiveValuesInitialSize);
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected virtual int EffectiveValuesInitialSize => 2;
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected internal virtual bool IsSealed => false;
 
         public void ClearValue(DependencyProperty dp)
         {
@@ -94,10 +99,10 @@ namespace Wodsoft.UI
                         value = parent.GetValueCore(dp);
                     }
                     else
-                        value = metadata.DefaultValue;
+                        value = metadata.GetDefaultValue(this, dp);
                 }
                 else
-                    value = metadata.DefaultValue;
+                    value = metadata.GetDefaultValue(this, dp);
             }
             return value;
         }
@@ -151,6 +156,8 @@ namespace Wodsoft.UI
         }
         protected virtual void SetValueCore(DependencyProperty dp, object? value)
         {
+            if (IsSealed)
+                throw new InvalidOperationException("Object is sealed. Can't change value.");
             DependencyEffectiveValue oldValue, newValue;
             _valueStores.TryGetValue(dp.GlobalIndex, out oldValue);
             var metadata = GetMetadata(dp);
@@ -291,7 +298,7 @@ namespace Wodsoft.UI
                     {
                         var expressionValue = newEffectiveValue.Expression.GetSourceValue();
                         if (expressionValue == Expression.NoValue)
-                            expressionValue = metadata.DefaultValue;
+                            expressionValue = metadata.GetDefaultValue(this, dp);
                         if (dp.ValidateValueCallback != null && !dp.ValidateValueCallback(expressionValue))
                             expressionValue = DependencyProperty.UnsetValue;
                         newEffectiveValue.UpdateValue(expressionValue);
@@ -381,30 +388,30 @@ namespace Wodsoft.UI
             return ref value;
         }
 
-        protected Enumerable GetEffectiveValues()
+        protected DependencyObjectEnumerable GetEffectiveValues()
         {
-            return new Enumerable(_valueStores);
+            return new DependencyObjectEnumerable(_valueStores);
         }
 
-        public ref struct Enumerable
+        public ref struct DependencyObjectEnumerable
         {
-            private readonly Enumerator _enumerator;
+            private readonly DependencyObjectEnumerableEnumerator _enumerator;
 
-            public Enumerable(Dictionary<int, DependencyEffectiveValue> values)
+            public DependencyObjectEnumerable(Dictionary<int, DependencyEffectiveValue> values)
             {
-                _enumerator = new Enumerator(values);
+                _enumerator = new DependencyObjectEnumerableEnumerator(values);
             }
 
-            public Enumerator GetEnumerator() => _enumerator;
+            public DependencyObjectEnumerableEnumerator GetEnumerator() => _enumerator;
         }
 
-        public ref struct Enumerator
+        public ref struct DependencyObjectEnumerableEnumerator
         {
             private Dictionary<int, DependencyEffectiveValue>.Enumerator _enumerator;
             private readonly Dictionary<int, DependencyEffectiveValue> _values;
             private DependencyEffectiveValueEntry _current;
 
-            public Enumerator(Dictionary<int, DependencyEffectiveValue> values)
+            public DependencyObjectEnumerableEnumerator(Dictionary<int, DependencyEffectiveValue> values)
             {
                 _enumerator = values.GetEnumerator();
                 _values = values;
@@ -470,7 +477,7 @@ namespace Wodsoft.UI
             }
         }
 
-        protected void OnInheritanceContextChanged()
+        protected internal void OnInheritanceContextChanged()
         {
             InheritanceContextChanged?.Invoke(this, EventArgs.Empty);
             OnInheritanceContextChangedCore();
