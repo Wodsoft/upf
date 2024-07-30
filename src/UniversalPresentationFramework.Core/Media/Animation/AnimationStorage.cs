@@ -77,7 +77,7 @@ namespace Wodsoft.UI.Media.Animation
         public bool TryGetValue(ref object? baseValue)
         {
             if (baseValue == DependencyProperty.UnsetValue)
-                baseValue = _d.GetMetadata(_dp).DefaultValue;
+                baseValue = _d.GetMetadata(_dp).GetDefaultValue(_d, _dp);
             object? defaultDestinationValue = baseValue;
             object? currentLayerValue = baseValue;
             bool hasClock = false;
