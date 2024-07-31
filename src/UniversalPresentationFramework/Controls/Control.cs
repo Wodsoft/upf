@@ -51,6 +51,17 @@ namespace Wodsoft.UI.Controls
             set { SetValue(TemplateProperty, value); }
         }
 
+        protected override void OnPreApplyTemplate()
+        {
+            _visualStateChangeSuspended = true;
+        }
+
+        protected override void OnPostApplyTemplate()
+        {
+            _visualStateChangeSuspended = false;
+            UpdateVisualState(false);
+        }
+
         #endregion
 
         #region Layout
@@ -247,5 +258,29 @@ namespace Wodsoft.UI.Controls
             }
             return base.HitTestCore(point);
         }
+
+        #region VisualState
+
+        private bool _visualStateChangeSuspended;
+
+        protected internal void UpdateVisualState()
+        {
+            UpdateVisualState(true);
+        }
+
+        internal void UpdateVisualState(bool useTransitions)
+        {
+            if (!_visualStateChangeSuspended)
+            {
+                ChangeVisualState(useTransitions);
+            }
+        }
+
+        protected virtual void ChangeVisualState(bool useTransitions)
+        {
+
+        }
+
+        #endregion
     }
 }

@@ -1,0 +1,24 @@
+﻿<local:MyObject xmlns="http://schemas.wodsoft.com/upf/presentation"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.FrameworkTest">
+    <Control.Template>
+        <ControlTemplate>
+            <Grid>
+                <Rectangle Name="rect" Width="0"/>
+				<VisualStateManager.VisualStateGroups>
+					<VisualStateGroup>
+						<VisualState Name="on">
+							<Storyboard>
+								<SingleAnimation Storyboard.TargetName="rect" Storyboard.TargetProperty="Width" To="100" Duration="0:0:1"/>
+							</Storyboard>
+						</VisualState>
+						<VisualState Name="off">
+							<Storyboard>
+								<SingleAnimation Storyboard.TargetName="rect" Storyboard.TargetProperty="Width" To="50" Duration="0:0:1"/>
+							</Storyboard>
+						</VisualState>
+					</VisualStateGroup>
+				</VisualStateManager.VisualStateGroups>
+            </Grid>
+        </ControlTemplate>
+    </Control.Template>
+</local:MyObject>

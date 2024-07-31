@@ -511,6 +511,12 @@ namespace Wodsoft.UI
 
         #endregion
 
+        #region Zero
+
+        public static readonly Duration Zero = new Duration(TimeSpan.Zero);
+
+        #endregion
+
         /// <summary>
         /// An enumeration of the different types of Duration behaviors.
         /// </summary>

@@ -1,0 +1,24 @@
+﻿<local:MyObject xmlns="http://schemas.wodsoft.com/upf/presentation"
+	  xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.FrameworkTest">
+    <Control.Template>
+        <ControlTemplate>
+            <Grid>
+                <Rectangle Name="rect"/>
+				<VisualStateManager.VisualStateGroups>
+					<VisualStateGroup>
+						<VisualState Name="on">
+							<VisualState.Setters>
+								<Setter TargetName="rect" Property="Width" Value="100"/>
+							</VisualState.Setters>
+						</VisualState>
+						<VisualState Name="off">
+							<VisualState.Setters>
+								<Setter TargetName="rect" Property="Width" Value="50"/>
+							</VisualState.Setters>
+						</VisualState>
+					</VisualStateGroup>
+				</VisualStateManager.VisualStateGroups>
+            </Grid>
+        </ControlTemplate>
+    </Control.Template>
+</local:MyObject>

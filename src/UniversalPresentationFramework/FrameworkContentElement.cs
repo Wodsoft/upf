@@ -220,10 +220,10 @@ namespace Wodsoft.UI
             {
                 if (!_triggerStorages.TryGetValue(dp.GlobalIndex, out triggerStorage))
                     return;
-                if (triggerStorage.TryGetValue(TriggerLayer.ParentTemplate, out var value))
+                if (triggerStorage.TryGetValue(TriggerLayer.VisualState, out var value) || triggerStorage.TryGetValue(TriggerLayer.ParentTemplate, out value))
                 {
                     if (!dp.IsValidValue(value))
-                        value = metadata.DefaultValue;
+                        value = metadata.GetDefaultValue(this, dp);
                     if (triggerModifiedValue == null)
                         triggerModifiedValue = new TriggerModifiedValue(value);
                     else
@@ -244,16 +244,10 @@ namespace Wodsoft.UI
                 if (triggerStorage == null && _triggerStorages.TryGetValue(dp.GlobalIndex, out triggerStorage))
                 {
                     object? value;
-                    if (triggerStorage.TryGetValue(TriggerLayer.Style, out value))
-                    { }
-                    else if (triggerStorage.TryGetValue(TriggerLayer.ControlTemplate, out value))
-                    { }
-                    else if (triggerStorage.TryGetValue(TriggerLayer.ThemeStyle, out value))
-                    { }
-                    else
+                    if (!triggerStorage.TryGetValue(out value))
                         return;
                     if (!dp.IsValidValue(value))
-                        value = metadata.DefaultValue;
+                        value = metadata.GetDefaultValue(this, dp);
                     effectiveValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Internal);
                 }
             }

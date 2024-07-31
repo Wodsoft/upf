@@ -47,5 +47,23 @@ namespace Wodsoft.UI
             value = null;
             return false;
         }
+
+        public bool TryGetValue(out object? value)
+        {
+            foreach(var list in _values.Values)
+            {
+                for(int i = 0; i < list.Count; i++)
+                {
+                    var triggerValue = list[i];
+                    if (triggerValue.IsEnabled)
+                    {
+                        value = triggerValue.Value;
+                        return true;
+                    }
+                }
+            }
+            value = null;
+            return false;
+        }
     }
 }

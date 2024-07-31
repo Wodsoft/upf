@@ -8,9 +8,10 @@ namespace Wodsoft.UI
 {
     internal static class TriggerLayer
     {
-        public const byte ParentTemplate = 0;
-        public const byte Style = 1;
-        public const byte ControlTemplate = 2;
-        public const byte ThemeStyle = 3;
+        public const byte VisualState = 0;
+        public const byte ParentTemplate = 1;
+        public const byte Style = 2;
+        public const byte ControlTemplate = 3;
+        public const byte ThemeStyle = 4;
     }
 }
