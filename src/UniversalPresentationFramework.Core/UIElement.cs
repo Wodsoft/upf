@@ -636,10 +636,10 @@ namespace Wodsoft.UI
 
         protected override void EvaluateBaseValue(DependencyProperty dp, PropertyMetadata metadata, ref DependencyEffectiveValue effectiveValue)
         {
-            FrameworkCoreModifiedValue? modifiedValue = effectiveValue.ModifiedValue as FrameworkCoreModifiedValue;
             if (AnimationStorage.TryGetStorage(this, dp, out var storage))
             {
                 object? value;
+                FrameworkCoreModifiedValue? modifiedValue = effectiveValue.ModifiedValue as FrameworkCoreModifiedValue;
                 if (modifiedValue == null)
                     value = effectiveValue.Value;
                 else
@@ -667,30 +667,30 @@ namespace Wodsoft.UI
                     effectiveValue.ModifyValue(modifiedValue);
                     return;
                 }
-            }
-
-            //Animation completed, may need to reset effective value
-            //If fill behavior is stop and there is no animation value, nothing to do
-            if (modifiedValue == null)
-                return;
-            modifiedValue = modifiedValue.Clone();
-            //Clean animation value
-            modifiedValue.CleanAnimationValue();
-            //Reset effective value if modified value is empty
-            if (modifiedValue.IsEmpty)
-            {
-                if (modifiedValue.Expression == null)
+                //Animation completed
+                else if (modifiedValue != null)
                 {
-                    effectiveValue = new DependencyEffectiveValue(modifiedValue.BaseValue, DependencyEffectiveSource.Local);
-                }
-                else
-                {
-                    //Rebuild expression effective value
-                    effectiveValue = new DependencyEffectiveValue(modifiedValue.Expression);
+                    modifiedValue = modifiedValue.Clone();
+                    //Clean animation value
+                    modifiedValue.CleanAnimationValue();
+                    //Reset effective value if modified value is empty
+                    if (modifiedValue.IsEmpty)
+                    {
+                        if (modifiedValue.Expression == null)
+                        {
+                            effectiveValue = new DependencyEffectiveValue(modifiedValue.BaseValue, DependencyEffectiveSource.Local);
+                        }
+                        else
+                        {
+                            //Rebuild expression effective value
+                            effectiveValue = new DependencyEffectiveValue(modifiedValue.Expression);
+                        }
+                    }
+                    else
+                        effectiveValue.ModifyValue(modifiedValue);
                 }
             }
-            else
-                effectiveValue.ModifyValue(modifiedValue);
+            //We keep animation value even animation remove if it FillBehavior is HoldEnd
         }
 
         protected virtual FrameworkCoreModifiedValue CreateModifiedValue()

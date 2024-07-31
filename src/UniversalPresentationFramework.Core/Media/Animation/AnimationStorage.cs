@@ -14,11 +14,13 @@ namespace Wodsoft.UI.Media.Animation
         private readonly List<AnimationClock> _clocks = new List<AnimationClock>();
         private readonly DependencyObject _d;
         private readonly DependencyProperty _dp;
+        private object? _snapshotValue;
 
         public AnimationStorage(DependencyObject d, DependencyProperty dp)
         {
             _d = d;
             _dp = dp;
+            _snapshotValue = DependencyProperty.UnsetValue;
         }
 
         #region Methods
@@ -27,6 +29,7 @@ namespace Wodsoft.UI.Media.Animation
         {
             if (handoffBehavior == HandoffBehavior.SnapshotAndReplace)
             {
+                _snapshotValue = _d.GetValue(_dp);
                 ClearClocks();
             }
             clock.CurrentTimeInvalidated += Clock_CurrentTimeInvalidated;
@@ -66,7 +69,7 @@ namespace Wodsoft.UI.Media.Animation
         {
             if (_clocks.Count == 0)
             {
-                _d.InvalidateProperty(_dp);
+                //_d.InvalidateProperty(_dp);
                 var storages = _Storages[_d];
                 if (storages.Count == 1)
                     _Storages.Remove(_d);
@@ -79,7 +82,11 @@ namespace Wodsoft.UI.Media.Animation
             if (baseValue == DependencyProperty.UnsetValue)
                 baseValue = _d.GetMetadata(_dp).GetDefaultValue(_d, _dp);
             object? defaultDestinationValue = baseValue;
-            object? currentLayerValue = baseValue;
+            object? currentLayerValue;
+            if (_snapshotValue == DependencyProperty.UnsetValue)
+                currentLayerValue = baseValue;
+            else
+                currentLayerValue = _snapshotValue;
             bool hasClock = false;
             for (int i = 0; i < _clocks.Count; i++)
             {
@@ -92,6 +99,8 @@ namespace Wodsoft.UI.Media.Animation
             }
             if (hasClock)
                 baseValue = currentLayerValue;
+            else if (_snapshotValue != DependencyProperty.UnsetValue)
+                _snapshotValue = DependencyProperty.UnsetValue;
             return hasClock;
         }
 
