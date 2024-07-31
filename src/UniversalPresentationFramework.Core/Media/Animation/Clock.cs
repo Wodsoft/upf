@@ -15,10 +15,10 @@ namespace Wodsoft.UI.Media.Animation
         private readonly RepeatBehavior _repeatBehavior;
         private readonly TimeSpan _beginTime;
         private readonly FillBehavior _fillBehavior;
-        private readonly double _acce, _dece, _transitionTime;
-        private double _speedRatio;
+        private readonly float _acce, _dece, _transitionTime;
+        private float _speedRatio;
         private Duration _duration, _totalDuration;
-        private double _progress;
+        private float _progress;
         private int _iteration;
         private bool _isReverse, _hasControllableRoot, _isStopped, _isPaused, _isExpired;
         private TimeSpan _currentTime, _totalTime;
@@ -57,7 +57,7 @@ namespace Wodsoft.UI.Media.Animation
 
         public bool IsExpired => _isExpired;
 
-        public double SpeedRatio { get => _speedRatio; internal set => _speedRatio = value; }
+        public float SpeedRatio { get => _speedRatio; internal set => _speedRatio = value; }
 
         public bool IsReverse => _isReverse;
 
@@ -67,7 +67,7 @@ namespace Wodsoft.UI.Media.Animation
 
         public TimeSpan TotalTime => _totalTime;
 
-        public double CurrentProgress => _progress;
+        public float CurrentProgress => _progress;
 
         public bool HasControllableRoot { get => _hasControllableRoot; internal set => _hasControllableRoot = value; }
 
@@ -248,15 +248,15 @@ namespace Wodsoft.UI.Media.Animation
         protected void ComputeProgress()
         {
             if (_duration == Duration.Forever)
-                _progress = 0d;
+                _progress = 0f;
             else if (_currentTime == _duration.TimeSpan)
-                _progress = 1d;
+                _progress = 1f;
             else
             {
-                _progress = _currentTime / _duration.TimeSpan;
+                _progress = (float)(_currentTime / _duration.TimeSpan);
                 if (_transitionTime != 0)
                 {
-                    double maxRate = 2 / (2 - _transitionTime);
+                    float maxRate = 2 / (2 - _transitionTime);
 
                     if (_progress < _acce)
                     {
@@ -271,7 +271,7 @@ namespace Wodsoft.UI.Media.Animation
                     else
                     {
                         // Deceleration phase
-                        double tc = 1 - _progress;  // t's complement from 1
+                        float tc = 1 - _progress;  // t's complement from 1
                         _progress = 1 - maxRate * tc * tc / (2 * _dece);
                     }
                 }
@@ -371,7 +371,7 @@ namespace Wodsoft.UI.Media.Animation
             _isPaused = false;
             _isExpired = false;
             _currentTime = _totalTime = TimeSpan.Zero;
-            _progress = 0d;
+            _progress = 0f;
             OnRootStopRequest();
         }
 
@@ -384,7 +384,7 @@ namespace Wodsoft.UI.Media.Animation
 
         #region Events
 
-        public event EventHandler Completed { add => _timeline.Completed += value;remove => _timeline.Completed -= value; }
+        public event EventHandler Completed { add => _timeline.Completed += value; remove => _timeline.Completed -= value; }
 
         public event EventHandler CurrentTimeInvalidated { add => _timeline.CurrentTimeInvalidated += value; remove => _timeline.CurrentTimeInvalidated -= value; }
 

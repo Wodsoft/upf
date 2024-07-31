@@ -24,6 +24,10 @@ namespace Wodsoft.UI.Test
             Assert.Equal(175f, myObject.Width);
             ApplyTick(TimeSpan.FromMilliseconds(1000));
             Assert.Equal(200f, myObject.Width);
+            storyboard.Remove();
+            Assert.Equal(200f, myObject.Width);
+            myObject.InvalidateProperty(FrameworkElement.WidthProperty);
+            Assert.Equal(200f, myObject.Width);
         }
 
         [Fact]

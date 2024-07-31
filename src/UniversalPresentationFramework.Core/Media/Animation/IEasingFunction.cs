@@ -18,6 +18,6 @@ namespace Wodsoft.UI.Media.Animation
         /// </summary>
         /// <param name="normalizedTime">normalized time (progress) of the animation</param>
         /// <returns>transformed progress</returns>
-        double Ease(double normalizedTime);
+        float Ease(float normalizedTime);
     }
 }

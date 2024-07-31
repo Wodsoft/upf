@@ -9,8 +9,8 @@ namespace Wodsoft.UI.Media.Animation
 {
     public sealed class SetStoryboardSpeedRatio : ControllableStoryboardAction
     {
-        private double _speedRatio = 1d;
-        public double SpeedRatio
+        private float _speedRatio = 1f;
+        public float SpeedRatio
         {
             get
             {

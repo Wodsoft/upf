@@ -13,21 +13,21 @@ namespace Wodsoft.UI.Media.Animation
         public static readonly DependencyProperty AccelerationRatioProperty =
             DependencyProperty.Register(
                 "AccelerationRatio",
-                typeof(double),
+                typeof(float),
                 typeof(Timeline),
-                new PropertyMetadata(0.0d),
+                new PropertyMetadata(0.0f),
                 new ValidateValueCallback(ValidateAccelerationDecelerationRatio));
         private static bool ValidateAccelerationDecelerationRatio(object? value)
         {
-            if (value is double newValue)
+            if (value is float newValue)
             {
-                if (newValue < 0 || newValue > 1 || double.IsNaN(newValue))
+                if (newValue < 0 || newValue > 1 || float.IsNaN(newValue))
                     return false;
                 return true;
             }
             return false;
         }
-        public double AccelerationRatio { get { return (double)GetValue(AccelerationRatioProperty)!; } set { SetValue(AccelerationRatioProperty, value); } }
+        public float AccelerationRatio { get { return (float)GetValue(AccelerationRatioProperty)!; } set { SetValue(AccelerationRatioProperty, value); } }
 
         public static readonly DependencyProperty AutoReverseProperty =
             DependencyProperty.Register(
@@ -49,11 +49,11 @@ namespace Wodsoft.UI.Media.Animation
         public static readonly DependencyProperty DecelerationRatioProperty =
             DependencyProperty.Register(
                 "DecelerationRatio",
-                typeof(double),
+                typeof(float),
                 typeof(Timeline),
-                new PropertyMetadata(0.0d),
+                new PropertyMetadata(0.0f),
                 new ValidateValueCallback(ValidateAccelerationDecelerationRatio));
-        public double DecelerationRatio { get { return (double)GetValue(DecelerationRatioProperty)!; } set { SetValue(DecelerationRatioProperty, value); } }
+        public float DecelerationRatio { get { return (float)GetValue(DecelerationRatioProperty)!; } set { SetValue(DecelerationRatioProperty, value); } }
 
         public static readonly DependencyProperty DurationProperty =
             DependencyProperty.Register(
@@ -104,27 +104,27 @@ namespace Wodsoft.UI.Media.Animation
                 "RepeatBehavior",
                 typeof(RepeatBehavior),
                 typeof(Timeline),
-                new PropertyMetadata(new RepeatBehavior(1d)));
+                new PropertyMetadata(new RepeatBehavior(1f)));
         public RepeatBehavior RepeatBehavior { get { return (RepeatBehavior)GetValue(RepeatBehaviorProperty)!; } set { SetValue(RepeatBehaviorProperty, value); } }
 
         public static readonly DependencyProperty SpeedRatioProperty =
             DependencyProperty.Register(
                 "SpeedRatio",
-                typeof(double),
+                typeof(float),
                 typeof(Timeline),
-                new PropertyMetadata(1d),
+                new PropertyMetadata(1f),
                 new ValidateValueCallback(ValidateSpeedRatio));
         private static bool ValidateSpeedRatio(object? value)
         {
-            if (value is double newValue)
+            if (value is float newValue)
             {
-                if (newValue <= 0 || newValue > double.MaxValue || double.IsNaN(newValue))
+                if (newValue <= 0 || newValue > float.MaxValue || float.IsNaN(newValue))
                     return false;
                 return true;
             }
             return false;
         }
-        public double SpeedRatio { get { return (double)GetValue(SpeedRatioProperty)!; } set { SetValue(SpeedRatioProperty, value); } }
+        public float SpeedRatio { get { return (float)GetValue(SpeedRatioProperty)!; } set { SetValue(SpeedRatioProperty, value); } }
 
         #endregion
 

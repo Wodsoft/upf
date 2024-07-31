@@ -13,13 +13,21 @@ namespace Wodsoft.UI.Media.Animation
     /// This collection is used in conjunction with a KeyFrameBooleanAnimation
     /// to animate a Boolean property value along a set of key frames.
     /// </summary>
-    public class BooleanKeyFrameCollection : KeyFrameCollection<BooleanKeyFrame>
+    public class BooleanKeyFrameCollection : KeyFrameCollection<BooleanKeyFrame>, IHaveEmpty<BooleanKeyFrameCollection>
     {
         #region Data
 
         private static BooleanKeyFrameCollection? _EmptyCollection;
 
         #endregion
+
+        public BooleanKeyFrameCollection()
+        {
+        }
+
+        protected BooleanKeyFrameCollection(int capacity) : base(capacity)
+        {
+        }
 
         #region Static Methods
 
@@ -32,7 +40,7 @@ namespace Wodsoft.UI.Media.Animation
             {
                 if (_EmptyCollection == null)
                 {
-                    BooleanKeyFrameCollection emptyCollection = new BooleanKeyFrameCollection();
+                    BooleanKeyFrameCollection emptyCollection = new BooleanKeyFrameCollection(0);
                     emptyCollection.Freeze();
                     _EmptyCollection = emptyCollection;
                 }

@@ -258,12 +258,12 @@ namespace Wodsoft.UI.Media.Animation
             GetStoryboardClock(container, true)?.Remove();
         }
 
-        public void SetSpeedRatio(double speedRatio)
+        public void SetSpeedRatio(float speedRatio)
         {
             SetSpeedRatio(this, speedRatio);
         }
 
-        public void SetSpeedRatio(DependencyObject containingObject, double speedRatio)
+        public void SetSpeedRatio(DependencyObject containingObject, float speedRatio)
         {
             var clock = GetStoryboardClock(containingObject);
             if (clock != null)

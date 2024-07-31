@@ -11,27 +11,27 @@ namespace Wodsoft.UI.Media.Animation
     {
         #region Interpolation Methods
 
-        internal static Byte InterpolateByte(Byte from, Byte to, Double progress)
+        internal static byte InterpolateByte(in byte from, in byte to, in float progress)
         {
-            return (Byte)((Int32)from + (Int32)((((Double)(to - from)) + (Double)0.5) * progress));
+            return (byte)(from + (int)((to - from + 0.5f) * progress));
         }
 
-        internal static Color InterpolateColor(Color from, Color to, Double progress)
-        {
-            return from + ((to - from) * (Single)progress);
-        }
-
-        internal static Decimal InterpolateDecimal(Decimal from, Decimal to, Double progress)
-        {
-            return from + ((to - from) * (Decimal)progress);
-        }
-
-        internal static Double InterpolateDouble(Double from, Double to, Double progress)
+        internal static Color InterpolateColor(in Color from, in Color to, in float progress)
         {
             return from + ((to - from) * progress);
         }
 
-        internal static Int16 InterpolateInt16(Int16 from, Int16 to, Double progress)
+        internal static decimal InterpolateDecimal(in decimal from, in decimal to, in float progress)
+        {
+            return from + ((to - from) * (decimal)progress);
+        }
+
+        internal static double InterpolateDouble(in double from, in double to, in float progress)
+        {
+            return from + ((to - from) * progress);
+        }
+
+        internal static short InterpolateInt16(in short from, in short to, in float progress)
         {
             if (progress == 0.0)
             {
@@ -43,15 +43,15 @@ namespace Wodsoft.UI.Media.Animation
             }
             else
             {
-                Double addend = (Double)(to - from);
+                double addend = (float)(to - from);
                 addend *= progress;
                 addend += (addend > 0.0) ? 0.5 : -0.5;
 
-                return (Int16)(from + (Int16)addend);
+                return (short)(from + (short)addend);
             }
         }
 
-        internal static Int32 InterpolateInt32(Int32 from, Int32 to, Double progress)
+        internal static int InterpolateInt32(in int from, in int to, in float progress)
         {
             if (progress == 0.0)
             {
@@ -63,15 +63,15 @@ namespace Wodsoft.UI.Media.Animation
             }
             else
             {
-                Double addend = (Double)(to - from);
+                double addend = (float)(to - from);
                 addend *= progress;
                 addend += (addend > 0.0) ? 0.5 : -0.5;
 
-                return from + (Int32)addend;
+                return from + (int)addend;
             }
         }
 
-        internal static Int64 InterpolateInt64(Int64 from, Int64 to, Double progress)
+        internal static long InterpolateInt64(in long from, in long to, in float progress)
         {
             if (progress == 0.0)
             {
@@ -83,30 +83,30 @@ namespace Wodsoft.UI.Media.Animation
             }
             else
             {
-                Double addend = (Double)(to - from);
+                double addend = (float)(to - from);
                 addend *= progress;
                 addend += (addend > 0.0) ? 0.5 : -0.5;
 
-                return from + (Int64)addend;
+                return from + (long)addend;
             }
         }
 
-        internal static Point InterpolatePoint(Point from, Point to, Double progress)
+        internal static Point InterpolatePoint(in Point from, in Point to, in float progress)
         {
             return from + ((to - from) * (float)progress);
         }
 
-        //internal static Point3D InterpolatePoint3D(Point3D from, Point3D to, Double progress)
+        //internal static Point3D InterpolatePoint3D(in Point3D from, in Point3D to, in float progress)
         //{
         //    return from + ((to - from) * progress);
         //}
 
-        internal static Quaternion InterpolateQuaternion(Quaternion from, Quaternion to, Double progress, bool useShortestPath)
+        internal static Quaternion InterpolateQuaternion(in Quaternion from, in Quaternion to, float progress, in bool useShortestPath)
         {
             return Quaternion.Slerp(from, to, (float)progress);
         }
 
-        internal static Rect InterpolateRect(Rect from, Rect to, Double progress)
+        internal static Rect InterpolateRect(in Rect from, in Rect to, in float progress)
         {
             Rect temp = new Rect();
 
@@ -121,78 +121,78 @@ namespace Wodsoft.UI.Media.Animation
             return temp;
         }
 
-        //internal static Rotation3D InterpolateRotation3D(Rotation3D from, Rotation3D to, Double progress)
+        //internal static Rotation3D InterpolateRotation3D(in Rotation3D from, in Rotation3D to, in float progress)
         //{
         //    return new QuaternionRotation3D(InterpolateQuaternion(from.InternalQuaternion, to.InternalQuaternion, progress, /* useShortestPath = */ true));
         //}
 
-        internal static Single InterpolateSingle(Single from, Single to, Double progress)
+        internal static float InterpolateSingle(in float from, in float to, in float progress)
         {
-            return from + (Single)((to - from) * progress);
+            return from + (float)((to - from) * progress);
         }
 
-        internal static Size InterpolateSize(Size from, Size to, Double progress)
+        internal static Size InterpolateSize(in Size from, in Size to, in float progress)
         {
             return (Size)InterpolateVector((Vector2)from, (Vector2)to, progress);
         }
 
-        internal static Vector2 InterpolateVector(Vector2 from, Vector2 to, Double progress)
+        internal static Vector2 InterpolateVector(in Vector2 from, in Vector2 to, in float progress)
         {
             return from + ((to - from) * (float)progress);
         }
 
-        //internal static Vector3 InterpolateVector3D(Vector3 from, Vector3 to, Double progress)
-        //{
-        //    return from + ((to - from) * progress);
-        //}
+        internal static Vector3 InterpolateVector3D(in Vector3 from, in Vector3 to, in float progress)
+        {
+            return from + ((to - from) * progress);
+        }
 
         #endregion
 
         #region Add Methods
 
-        internal static Byte AddByte(Byte value1, Byte value2)
+        internal static byte AddByte(in byte value1, in byte value2)
         {
-            return (Byte)(value1 + value2);
+            return (byte)(value1 + value2);
         }
 
-        internal static Color AddColor(Color value1, Color value2)
-        {
-            return value1 + value2;
-        }
-
-        internal static Decimal AddDecimal(Decimal value1, Decimal value2)
+        internal static Color AddColor(in Color value1, in Color value2)
         {
             return value1 + value2;
         }
 
-        internal static Double AddDouble(Double value1, Double value2)
+        internal static decimal AddDecimal(in decimal value1, in decimal value2)
         {
             return value1 + value2;
         }
 
-        internal static Int16 AddInt16(Int16 value1, Int16 value2)
-        {
-            return (Int16)(value1 + value2);
-        }
-
-        internal static Int32 AddInt32(Int32 value1, Int32 value2)
+        internal static double AddDouble(in double value1, in double value2)
         {
             return value1 + value2;
         }
 
-        internal static Int64 AddInt64(Int64 value1, Int64 value2)
+        internal static short AddInt16(in short value1, in short value2)
+        {
+            return (short)(value1 + value2);
+        }
+
+        internal static int AddInt32(in int value1, in int value2)
         {
             return value1 + value2;
         }
 
-        internal static Point AddPoint(Point value1, Point value2)
+        internal static long AddInt64(in long value1, in long value2)
+        {
+            return value1 + value2;
+        }
+
+        internal static Point AddPoint(in Point value1, in Point value2)
         {
             return new Point(
                 value1.X + value2.X,
                 value1.Y + value2.Y);
         }
 
-        //internal static Point3D AddPoint3D(Point3D value1, Point3D value2)
+        //internal static Point3D AddPoint3D(in Point3D value1, in Point3D value2)
         //{
         //    return new Point3D(
         //        value1.X + value2.X,
@@ -200,41 +200,41 @@ namespace Wodsoft.UI.Media.Animation
         //        value1.Z + value2.Z);
         //}
 
-        internal static Quaternion AddQuaternion(Quaternion value1, Quaternion value2)
+        internal static Quaternion AddQuaternion(in Quaternion value1, in Quaternion value2)
         {
             return value1 * value2;
         }
 
-        internal static Single AddSingle(Single value1, Single value2)
+        internal static float AddSingle(in float value1, in float value2)
         {
             return value1 + value2;
         }
 
-        internal static Size AddSize(Size value1, Size value2)
+        internal static Size AddSize(in Size value1, in Size value2)
         {
             return new Size(
                 value1.Width + value2.Width,
                 value1.Height + value2.Height);
         }
 
-        internal static Vector2 AddVector(Vector2 value1, Vector2 value2)
+        internal static Vector2 AddVector(in Vector2 value1, in Vector2 value2)
         {
             return value1 + value2;
         }
 
-        internal static Vector3 AddVector3D(Vector3 value1, Vector3 value2)
+        internal static Vector3 AddVector3D(in Vector3 value1, in Vector3 value2)
         {
             return value1 + value2;
         }
 
-        internal static Rect AddRect(Rect value1, Rect value2)
+        internal static Rect AddRect(in Rect value1, in Rect value2)
         {
             return new Rect(
                 AddPoint(value1.Location, value2.Location),
                 AddSize(value1.Size, value2.Size));
         }
 
-        //internal static Rotation3D AddRotation3D(Rotation3D value1, Rotation3D value2)
+        //internal static Rotation3D AddRotation3D(in Rotation3D value1, in Rotation3D value2)
         //{
         //    if (value1 == null)
         //    {
@@ -252,49 +252,49 @@ namespace Wodsoft.UI.Media.Animation
 
         #region Subtract Methods
 
-        internal static Byte SubtractByte(Byte value1, Byte value2)
+        internal static byte SubtractByte(in byte value1, in byte value2)
         {
-            return (Byte)(value1 - value2);
+            return (byte)(value1 - value2);
         }
 
-        internal static Color SubtractColor(Color value1, Color value2)
-        {
-            return value1 - value2;
-        }
-
-        internal static Decimal SubtractDecimal(Decimal value1, Decimal value2)
+        internal static Color SubtractColor(in Color value1, in Color value2)
         {
             return value1 - value2;
         }
 
-        internal static Double SubtractDouble(Double value1, Double value2)
+        internal static decimal SubtractDecimal(in decimal value1, in decimal value2)
         {
             return value1 - value2;
         }
 
-        internal static Int16 SubtractInt16(Int16 value1, Int16 value2)
-        {
-            return (Int16)(value1 - value2);
-        }
-
-        internal static Int32 SubtractInt32(Int32 value1, Int32 value2)
+        internal static double SubtractDouble(in double value1, in double value2)
         {
             return value1 - value2;
         }
 
-        internal static Int64 SubtractInt64(Int64 value1, Int64 value2)
+        internal static short SubtractInt16(in short value1, in short value2)
+        {
+            return (short)(value1 - value2);
+        }
+
+        internal static int SubtractInt32(in int value1, in int value2)
         {
             return value1 - value2;
         }
 
-        internal static Point SubtractPoint(Point value1, Point value2)
+        internal static long SubtractInt64(in long value1, in long value2)
+        {
+            return value1 - value2;
+        }
+
+        internal static Point SubtractPoint(in Point value1, in Point value2)
         {
             return new Point(
                 value1.X - value2.X,
                 value1.Y - value2.Y);
         }
 
-        //internal static Point3D SubtractPoint3D(Point3D value1, Point3D value2)
+        //internal static Point3D SubtractPoint3D(in Point3D value1, in Point3D value2)
         //{
         //    return new Point3D(
         //        value1.X - value2.X,
@@ -302,43 +302,43 @@ namespace Wodsoft.UI.Media.Animation
         //        value1.Z - value2.Z);
         //}
 
-        //internal static Quaternion SubtractQuaternion(Quaternion value1, Quaternion value2)
-        //{
-        //    value2.Invert();
+        internal static Quaternion SubtractQuaternion(in Quaternion value1, in Quaternion value2)
+        {
+            return value1 - value2;
+            //value2.Invert();
+            //return value1 * value2;
+        }
 
-        //    return value1 * value2;
-        //}
-
-        internal static Single SubtractSingle(Single value1, Single value2)
+        internal static float SubtractSingle(in float value1, in float value2)
         {
             return value1 - value2;
         }
 
-        internal static Size SubtractSize(Size value1, Size value2)
+        internal static Size SubtractSize(in Size value1, in Size value2)
         {
             return new Size(
                 value1.Width - value2.Width,
                 value1.Height - value2.Height);
         }
 
-        internal static Vector2 SubtractVector(Vector2 value1, Vector2 value2)
+        internal static Vector2 SubtractVector(in Vector2 value1, in Vector2 value2)
         {
             return value1 - value2;
         }
 
-        internal static Vector3 SubtractVector3D(Vector3 value1, Vector3 value2)
+        internal static Vector3 SubtractVector3D(in Vector3 value1, in Vector3 value2)
         {
             return value1 - value2;
         }
 
-        internal static Rect SubtractRect(Rect value1, Rect value2)
+        internal static Rect SubtractRect(in Rect value1, in Rect value2)
         {
             return new Rect(
                 SubtractPoint(value1.Location, value2.Location),
                 SubtractSize(value1.Size, value2.Size));
         }
 
-        //internal static Rotation3D SubtractRotation3D(Rotation3D value1, Rotation3D value2)
+        //internal static Rotation3D SubtractRotation3D(in Rotation3D value1, in Rotation3D value2)
         //{
         //    return new QuaternionRotation3D(SubtractQuaternion(value1.InternalQuaternion, value2.InternalQuaternion));
         //}
@@ -347,7 +347,7 @@ namespace Wodsoft.UI.Media.Animation
 
         #region GetSegmentLength Methods
 
-        internal static float GetSegmentLengthBoolean(Boolean from, Boolean to)
+        internal static float GetSegmentLengthBoolean(in bool from, in bool to)
         {
             if (from != to)
             {
@@ -359,12 +359,12 @@ namespace Wodsoft.UI.Media.Animation
             }
         }
 
-        internal static float GetSegmentLengthByte(Byte from, Byte to)
+        internal static float GetSegmentLengthByte(in byte from, in byte to)
         {
-            return Math.Abs((Int32)to - (Int32)from);
+            return Math.Abs(to - from);
         }
 
-        internal static float GetSegmentLengthChar(Char from, Char to)
+        internal static float GetSegmentLengthChar(in char from, in char to)
         {
             if (from != to)
             {
@@ -376,7 +376,7 @@ namespace Wodsoft.UI.Media.Animation
             }
         }
 
-        internal static float GetSegmentLengthColor(Color from, Color to)
+        internal static float GetSegmentLengthColor(in Color from, in Color to)
         {
             return Math.Abs(to.ScA - from.ScA)
                  + Math.Abs(to.ScR - from.ScR)
@@ -384,35 +384,35 @@ namespace Wodsoft.UI.Media.Animation
                  + Math.Abs(to.ScB - from.ScB);
         }
 
-        internal static float GetSegmentLengthDecimal(Decimal from, Decimal to)
+        internal static float GetSegmentLengthDecimal(in decimal from, in decimal to)
         {
             // We may lose precision here, but it's not likely going to be a big deal
-            // for the purposes of this method.  The relative lengths of Decimal
+            // for the purposes of this method.  The relative lengths of decimal
             // segments will still be adequately represented.
             return (float)Math.Abs(to - from);
         }
 
-        internal static float GetSegmentLengthDouble(float from, float to)
+        internal static float GetSegmentLengthDouble(in double from, in double to)
+        {
+            return (float)Math.Abs(to - from);
+        }
+
+        internal static float GetSegmentLengthInt16(in short from, in short to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static float GetSegmentLengthInt16(Int16 from, Int16 to)
+        internal static float GetSegmentLengthInt32(in int from, in int to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static float GetSegmentLengthInt32(Int32 from, Int32 to)
+        internal static float GetSegmentLengthInt64(in long from, in long to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static float GetSegmentLengthInt64(Int64 from, Int64 to)
-        {
-            return Math.Abs(to - from);
-        }
-
-        internal static float GetSegmentLengthMatrix(Matrix3x2 from, Matrix3x2 to)
+        internal static float GetSegmentLengthMatrix(in Matrix3x2 from, in Matrix3x2 to)
         {
             if (from != to)
             {
@@ -424,29 +424,51 @@ namespace Wodsoft.UI.Media.Animation
             }
         }
 
-        internal static float GetSegmentLengthObject(Object from, Object to)
+        internal static float GetSegmentLengthObject(object? from, object? to)
         {
             return 1.0f;
         }
 
-        internal static float GetSegmentLengthPoint(Point from, Point to)
+        internal static float GetSegmentLengthPoint(in Point from, in Point to)
         {
             return Math.Abs((to - from).Length());
         }
 
-        //internal static float GetSegmentLengthPoint3D(Point3D from, Point3D to)
+        //internal static float GetSegmentLengthPoint3D(in Point3D from, in Point3D to)
         //{
         //    return Math.Abs((to - from).Length);
         //}
 
-        //internal static float GetSegmentLengthQuaternion(Quaternion from, Quaternion to)
-        //{
-        //    from.Invert();
+        internal static float GetSegmentLengthQuaternion(in Quaternion from, in Quaternion to)
+        {
+            var value = to * -from;
 
-        //    return (to * from).Angle;
-        //}
+            float msin = MathF.Sqrt(value.X * value.X + value.Y * value.Y + value.Z * value.Z);
+            float mcos = value.W;
 
-        internal static float GetSegmentLengthRect(Rect from, Rect to)
+            if (!(msin <= float.MaxValue))
+            {
+                // Overflowed probably in squaring, so let's scale
+                // the values.  We don't need to include _w in the
+                // scale factor because we're not going to square
+                // it.
+                float maxcoeff = Math.Max(Math.Abs(value.X), Math.Max(Math.Abs(value.Y), Math.Abs(value.Z)));
+                float x = value.X / maxcoeff;
+                float y = value.Y / maxcoeff;
+                float z = value.Z / maxcoeff;
+                msin = MathF.Sqrt(x * x + y * y + z * z);
+                // Scale mcos too.
+                mcos = value.W / maxcoeff;
+            }
+
+            // Atan2 is better than acos.  (More precise and more efficient.)
+            return MathF.Atan2(msin, mcos) * (360.0f / MathF.PI);
+
+            //from.Invert();
+            //return (to * from).Angle;
+        }
+
+        internal static float GetSegmentLengthRect(in Rect from, in Rect to)
         {
             // This seems to me to be the most logical way to define the
             // distance between two rects.  Lots of sqrt, but since paced
@@ -459,22 +481,22 @@ namespace Wodsoft.UI.Media.Animation
             return MathF.Sqrt((a * a) + (b * b));
         }
 
-        //internal static float GetSegmentLengthRotation3D(Rotation3D from, Rotation3D to)
+        //internal static float GetSegmentLengthRotation3D(in Rotation3D from, in Rotation3D to)
         //{
         //    return GetSegmentLengthQuaternion(from.InternalQuaternion, to.InternalQuaternion);
         //}
 
-        internal static float GetSegmentLengthSingle(Single from, Single to)
+        internal static float GetSegmentLengthSingle(in float from, in float to)
         {
             return Math.Abs(to - from);
         }
 
-        internal static float GetSegmentLengthSize(Size from, Size to)
+        internal static float GetSegmentLengthSize(in Size from, in Size to)
         {
             return Math.Abs(((Vector2)to - (Vector2)from).Length());
         }
 
-        internal static float GetSegmentLengthString(String from, String to)
+        internal static float GetSegmentLengthString(in string from, in string to)
         {
             if (from != to)
             {
@@ -486,12 +508,12 @@ namespace Wodsoft.UI.Media.Animation
             }
         }
 
-        internal static float GetSegmentLengthVector(Vector2 from, Vector2 to)
+        internal static float GetSegmentLengthVector(in Vector2 from, in Vector2 to)
         {
             return Math.Abs((to - from).Length());
         }
 
-        internal static float GetSegmentLengthVector3D(Vector3 from, Vector3 to)
+        internal static float GetSegmentLengthVector3D(in Vector3 from, in Vector3 to)
         {
             return Math.Abs((to - from).Length());
         }
@@ -500,49 +522,49 @@ namespace Wodsoft.UI.Media.Animation
 
         #region Scale Methods
 
-        internal static Byte ScaleByte(Byte value, Double factor)
+        internal static byte ScaleByte(in byte value, in float factor)
         {
-            return (Byte)((Double)value * factor);
+            return (byte)(value * factor);
         }
 
-        internal static Color ScaleColor(Color value, Double factor)
-        {
-            return value * (Single)factor;
-        }
-
-        internal static Decimal ScaleDecimal(Decimal value, Double factor)
-        {
-            return value * (Decimal)factor;
-        }
-
-        internal static Double ScaleDouble(Double value, Double factor)
+        internal static Color ScaleColor(in Color value, in float factor)
         {
             return value * factor;
         }
 
-        internal static Int16 ScaleInt16(Int16 value, Double factor)
+        internal static decimal ScaleDecimal(in decimal value, in float factor)
         {
-            return (Int16)((Double)value * factor);
+            return value * (decimal)factor;
         }
 
-        internal static Int32 ScaleInt32(Int32 value, Double factor)
+        internal static double ScaleDouble(in double value, in float factor)
         {
-            return (Int32)((Double)value * factor);
+            return value * factor;
         }
 
-        internal static Int64 ScaleInt64(Int64 value, Double factor)
+        internal static short ScaleInt16(in short value, in float factor)
         {
-            return (Int64)((Double)value * factor);
+            return (short)(value * factor);
         }
 
-        internal static Point ScalePoint(Point value, Double factor)
+        internal static int ScaleInt32(in int value, in float factor)
+        {
+            return (int)(value * factor);
+        }
+
+        internal static long ScaleInt64(in long value, in float factor)
+        {
+            return (long)(value * factor);
+        }
+
+        internal static Point ScalePoint(in Point value, in float factor)
         {
             return new Point(
-                value.X * (float)factor,
-                value.Y * (float)factor);
+                value.X * factor,
+                value.Y * factor);
         }
 
-        //internal static Point3D ScalePoint3D(Point3D value, Double factor)
+        //internal static Point3D ScalePoint3D(in Point3D value, in float factor)
         //{
         //    return new Point3D(
         //        value.X * factor,
@@ -550,80 +572,81 @@ namespace Wodsoft.UI.Media.Animation
         //        value.Z * factor);
         //}
 
-        //internal static Quaternion ScaleQuaternion(Quaternion value, Double factor)
-        //{
-        //    return new Quaternion(value.Axis, value.Angle * factor);
-        //}
+        internal static Quaternion ScaleQuaternion(in Quaternion value, in float factor)
+        {
+            return Quaternion.Multiply(value, factor);
+            //return new Quaternion(value.Axis, value.Angle * factor);
+        }
 
-        internal static Rect ScaleRect(Rect value, Double factor)
+        internal static Rect ScaleRect(in Rect value, in float factor)
         {
             Rect temp = new Rect();
 
             temp.Location = new Point(
-                value.Location.X * (float)factor,
-                value.Location.Y * (float)factor);
+                value.Location.X * factor,
+                value.Location.Y * factor);
             temp.Size = new Size(
-                value.Size.Width * (float)factor,
-                value.Size.Height * (float)factor);
+                value.Size.Width * factor,
+                value.Size.Height * factor);
 
             return temp;
         }
 
-        //internal static Rotation3D ScaleRotation3D(Rotation3D value, Double factor)
+        //internal static Rotation3D ScaleRotation3D(in Rotation3D value, in float factor)
         //{
         //    return new QuaternionRotation3D(ScaleQuaternion(value.InternalQuaternion, factor));
         //}
 
-        internal static Single ScaleSingle(Single value, Double factor)
+        internal static float ScaleSingle(in float value, in float factor)
         {
-            return (Single)((Double)value * factor);
+            return (float)((float)value * factor);
         }
 
-        internal static Size ScaleSize(Size value, Double factor)
+        internal static Size ScaleSize(in Size value, in float factor)
         {
-            return (Size)((Vector2)value * (float)factor);
+            return (Size)((Vector2)value * factor);
         }
 
-        internal static Vector2 ScaleVector(Vector2 value, Double factor)
+        internal static Vector2 ScaleVector(in Vector2 value, in float factor)
         {
-            return value * (float)factor;
+            return value * factor;
         }
 
-        internal static Vector3 ScaleVector3D(Vector3 value, Double factor)
+        internal static Vector3 ScaleVector3D(in Vector3 value, in float factor)
         {
-            return value * (float)factor;
+            return value * factor;
         }
 
         #endregion
 
         #region EnsureValidAnimationValue Methods
 
-        internal static bool IsValidAnimationValueBoolean(Boolean value)
+        internal static bool IsValidAnimationValueBoolean(in bool value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueByte(Byte value)
+        internal static bool IsValidAnimationValueByte(in byte value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueChar(Char value)
+        internal static bool IsValidAnimationValueChar(in char value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueColor(Color value)
+        internal static bool IsValidAnimationValueColor(in Color value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueDecimal(Decimal value)
+        internal static bool IsValidAnimationValueDecimal(in decimal value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueDouble(Double value)
+        internal static bool IsValidAnimationValueDouble(in double value)
         {
             if (IsInvalidDouble(value))
             {
@@ -633,27 +656,27 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        internal static bool IsValidAnimationValueInt16(Int16 value)
+        internal static bool IsValidAnimationValueInt16(in short value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueInt32(Int32 value)
+        internal static bool IsValidAnimationValueInt32(in int value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueInt64(Int64 value)
+        internal static bool IsValidAnimationValueInt64(in long value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueMatrix(Matrix3x2 value)
+        internal static bool IsValidAnimationValueMatrix(in Matrix3x2 value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValuePoint(Point value)
+        internal static bool IsValidAnimationValuePoint(in Point value)
         {
             if (IsInvalidDouble(value.X) || IsInvalidDouble(value.Y))
             {
@@ -663,7 +686,7 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        //internal static bool IsValidAnimationValuePoint3D(Point3D value)
+        //internal static bool IsValidAnimationValuePoint3D(in Point3D value)
         //{
         //    if (IsInvalidDouble(value.X) || IsInvalidDouble(value.Y) || IsInvalidDouble(value.Z))
         //    {
@@ -673,7 +696,7 @@ namespace Wodsoft.UI.Media.Animation
         //    return true;
         //}
 
-        internal static bool IsValidAnimationValueQuaternion(Quaternion value)
+        internal static bool IsValidAnimationValueQuaternion(in Quaternion value)
         {
             if (IsInvalidDouble(value.X) || IsInvalidDouble(value.Y)
                 || IsInvalidDouble(value.Z) || IsInvalidDouble(value.W))
@@ -684,7 +707,7 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        internal static bool IsValidAnimationValueRect(Rect value)
+        internal static bool IsValidAnimationValueRect(in Rect value)
         {
             if (IsInvalidDouble(value.Location.X) || IsInvalidDouble(value.Location.Y)
                 || IsInvalidDouble(value.Size.Width) || IsInvalidDouble(value.Size.Height)
@@ -696,12 +719,12 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        //internal static bool IsValidAnimationValueRotation3D(Rotation3D value)
+        //internal static bool IsValidAnimationValueRotation3D(in Rotation3D value)
         //{
         //    return IsValidAnimationValueQuaternion(value.InternalQuaternion);
         //}
 
-        internal static bool IsValidAnimationValueSingle(Single value)
+        internal static bool IsValidAnimationValueSingle(in float value)
         {
             if (float.IsInfinity(value) || float.IsNaN(value))
             {
@@ -711,7 +734,7 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        internal static bool IsValidAnimationValueSize(Size value)
+        internal static bool IsValidAnimationValueSize(in Size value)
         {
             if (IsInvalidDouble(value.Width) || IsInvalidDouble(value.Height))
             {
@@ -721,12 +744,12 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        internal static bool IsValidAnimationValueString(String value)
+        internal static bool IsValidAnimationValueString(in string value)
         {
             return true;
         }
 
-        internal static bool IsValidAnimationValueVector(Vector2 value)
+        internal static bool IsValidAnimationValueVector(in Vector2 value)
         {
             if (IsInvalidDouble(value.X) || IsInvalidDouble(value.Y))
             {
@@ -736,7 +759,7 @@ namespace Wodsoft.UI.Media.Animation
             return true;
         }
 
-        internal static bool IsValidAnimationValueVector3D(Vector3 value)
+        internal static bool IsValidAnimationValueVector3D(in Vector3 value)
         {
             if (IsInvalidDouble(value.X) || IsInvalidDouble(value.Y) || IsInvalidDouble(value.Z))
             {
@@ -750,82 +773,82 @@ namespace Wodsoft.UI.Media.Animation
 
         #region GetZeroValueMethods
 
-        internal static Byte GetZeroValueByte(Byte baseValue)
+        internal static byte GetZeroValueByte(in byte baseValue)
         {
             return 0;
         }
 
-        internal static Color GetZeroValueColor(Color baseValue)
+        internal static Color GetZeroValueColor(in Color baseValue)
         {
             return Color.FromScRgb(0.0F, 0.0F, 0.0F, 0.0F);
         }
 
-        internal static Decimal GetZeroValueDecimal(Decimal baseValue)
+        internal static decimal GetZeroValueDecimal(in decimal baseValue)
         {
-            return Decimal.Zero;
+            return decimal.Zero;
         }
 
-        internal static Double GetZeroValueDouble(Double baseValue)
+        internal static double GetZeroValueDouble(in double baseValue)
         {
             return 0.0;
         }
 
-        internal static Int16 GetZeroValueInt16(Int16 baseValue)
+        internal static short GetZeroValueInt16(in short baseValue)
         {
             return 0;
         }
 
-        internal static Int32 GetZeroValueInt32(Int32 baseValue)
+        internal static int GetZeroValueInt32(in int baseValue)
         {
             return 0;
         }
 
-        internal static Int64 GetZeroValueInt64(Int64 baseValue)
+        internal static long GetZeroValueInt64(in long baseValue)
         {
             return 0;
         }
 
-        internal static Point GetZeroValuePoint(Point baseValue)
+        internal static Point GetZeroValuePoint(in Point baseValue)
         {
             return new Point();
         }
 
-        //internal static Point3D GetZeroValuePoint3D(Point3D baseValue)
+        //internal static Point3D GetZeroValuePoint3D(in Point3D baseValue)
         //{
         //    return new Point3D();
         //}
 
-        internal static Quaternion GetZeroValueQuaternion(Quaternion baseValue)
+        internal static Quaternion GetZeroValueQuaternion(in Quaternion baseValue)
         {
             return Quaternion.Identity;
         }
 
-        internal static Single GetZeroValueSingle(Single baseValue)
+        internal static float GetZeroValueSingle(in float baseValue)
         {
             return 0.0F;
         }
 
-        internal static Size GetZeroValueSize(Size baseValue)
+        internal static Size GetZeroValueSize(in Size baseValue)
         {
             return new Size();
         }
 
-        internal static Vector2 GetZeroValueVector(Vector2 baseValue)
+        internal static Vector2 GetZeroValueVector(in Vector2 baseValue)
         {
             return Vector2.Zero;
         }
 
-        internal static Vector3 GetZeroValueVector3D(Vector3 baseValue)
+        internal static Vector3 GetZeroValueVector3D(in Vector3 baseValue)
         {
             return Vector3.Zero;
         }
 
-        internal static Rect GetZeroValueRect(Rect baseValue)
+        internal static Rect GetZeroValueRect(in Rect baseValue)
         {
             return new Rect(new Point(), new Vector2());
         }
 
-        //internal static Rotation3D GetZeroValueRotation3D(Rotation3D baseValue)
+        //internal static Rotation3D GetZeroValueRotation3D(in Rotation3D baseValue)
         //{
         //    return Rotation3D.Identity;
         //}
@@ -834,7 +857,7 @@ namespace Wodsoft.UI.Media.Animation
 
         #region Helpers
 
-        private static Boolean IsInvalidDouble(double value)
+        private static bool IsInvalidDouble(in double value)
         {
             return double.IsInfinity(value)
                 || double.IsNaN(value);

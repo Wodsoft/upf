@@ -19,6 +19,11 @@ namespace Wodsoft.UI.Media.Animation
             _keyFrames = new List<T>(2);
         }
 
+        protected KeyFrameCollection(int capacity)
+        {
+            _keyFrames = new List<T>(capacity);
+        }
+
         protected List<T> KeyFrames { get => _keyFrames; set => _keyFrames = value; }
 
         #region IEnumerable

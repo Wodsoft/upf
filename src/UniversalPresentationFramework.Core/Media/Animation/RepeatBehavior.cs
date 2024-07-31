@@ -11,7 +11,7 @@ namespace Wodsoft.UI.Media.Animation
     [TypeConverter(typeof(RepeatBehaviorConverter))]
     public struct RepeatBehavior : IFormattable
     {
-        private double _iterationCount;
+        private float _iterationCount;
         private TimeSpan _repeatDuration;
         private RepeatBehaviorType _type;
 
@@ -21,10 +21,10 @@ namespace Wodsoft.UI.Media.Animation
         /// Creates a new RepeatBehavior that represents and iteration count.
         /// </summary>
         /// <param name="count">The number of iterations specified by this RepeatBehavior.</param>
-        public RepeatBehavior(double count)
+        public RepeatBehavior(float count)
         {
-            if (double.IsInfinity(count)
-                || double.IsNaN(count)
+            if (float.IsInfinity(count)
+                || float.IsNaN(count)
                 || count < 0.0)
             {
                 throw new ArgumentOutOfRangeException("count", "Invalid iteration count.");
@@ -47,7 +47,7 @@ namespace Wodsoft.UI.Media.Animation
                 throw new ArgumentOutOfRangeException("duration", "Duration can't be negative.");
             }
 
-            _iterationCount = 0.0;
+            _iterationCount = 0.0f;
             _repeatDuration = duration;
             _type = RepeatBehaviorType.RepeatDuration;
         }
@@ -102,7 +102,7 @@ namespace Wodsoft.UI.Media.Animation
         /// </summary>
         /// <value>The iteration count specified by this RepeatBehavior.</value>
         /// <exception cref="System.InvalidOperationException">Thrown if this RepeatBehavior does not represent an iteration count.</exception>
-        public double Count
+        public float Count
         {
             get
             {

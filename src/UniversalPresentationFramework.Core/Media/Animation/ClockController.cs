@@ -18,11 +18,11 @@ namespace Wodsoft.UI.Media.Animation
 
         public Clock Clock => _clock;
 
-        public double SpeedRatio
+        public float SpeedRatio
         {
             get => _clock.SpeedRatio; set
             {
-                if (value < 0 || value > double.MaxValue || double.IsNaN(value))
+                if (value < 0 || value > float.MaxValue || float.IsNaN(value))
                     throw new ArgumentException("Speed ratio value invalid.", "value");
                 _clock.SpeedRatio = value;
             }

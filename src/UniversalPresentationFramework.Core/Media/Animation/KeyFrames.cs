@@ -12,142 +12,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameBooleanAnimation to animate a
     /// bool property value along a set of key frames.
     /// </summary>
-    public abstract class BooleanKeyFrame : Freezable, IKeyFrame
+    public abstract class BooleanKeyFrame : GenericAnimationKeyFrame<bool>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new BooleanKeyFrame.
-        /// </summary>
         protected BooleanKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new BooleanKeyFrame.
-        /// </summary>
-        protected BooleanKeyFrame(bool value)
-            : this()
+        protected BooleanKeyFrame(bool value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteBooleanKeyFrame.
-        /// </summary>
-        protected BooleanKeyFrame(bool value, KeyTime keyTime)
-            : this()
+        protected BooleanKeyFrame(bool value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(BooleanKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(bool),
-                    typeof(BooleanKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (bool)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public bool Value
-        {
-            get
-            {
-                return (bool)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public bool InterpolateValue(
-            bool baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract bool InterpolateValueCore(
-            bool baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -156,142 +33,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameByteAnimation to animate a
     /// byte property value along a set of key frames.
     /// </summary>
-    public abstract class ByteKeyFrame : Freezable, IKeyFrame
+    public abstract class ByteKeyFrame : GenericAnimationKeyFrame<byte>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new ByteKeyFrame.
-        /// </summary>
         protected ByteKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new ByteKeyFrame.
-        /// </summary>
-        protected ByteKeyFrame(byte value)
-            : this()
+        protected ByteKeyFrame(byte value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteByteKeyFrame.
-        /// </summary>
-        protected ByteKeyFrame(byte value, KeyTime keyTime)
-            : this()
+        protected ByteKeyFrame(byte value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(ByteKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(byte),
-                    typeof(ByteKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (byte)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public byte Value
-        {
-            get
-            {
-                return (byte)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public byte InterpolateValue(
-            byte baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract byte InterpolateValueCore(
-            byte baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -300,142 +54,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameCharAnimation to animate a
     /// Char property value along a set of key frames.
     /// </summary>
-    public abstract class CharKeyFrame : Freezable, IKeyFrame
+    public abstract class CharKeyFrame : GenericAnimationKeyFrame<char>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new CharKeyFrame.
-        /// </summary>
         protected CharKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new CharKeyFrame.
-        /// </summary>
-        protected CharKeyFrame(Char value)
-            : this()
+        protected CharKeyFrame(char value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteCharKeyFrame.
-        /// </summary>
-        protected CharKeyFrame(Char value, KeyTime keyTime)
-            : this()
+        protected CharKeyFrame(char value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(CharKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Char),
-                    typeof(CharKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Char)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Char Value
-        {
-            get
-            {
-                return (Char)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Char InterpolateValue(
-            Char baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Char InterpolateValueCore(
-            Char baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -444,142 +75,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameColorAnimation to animate a
     /// Color property value along a set of key frames.
     /// </summary>
-    public abstract class ColorKeyFrame : Freezable, IKeyFrame
+    public abstract class ColorKeyFrame : GenericAnimationKeyFrame<Color>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new ColorKeyFrame.
-        /// </summary>
         protected ColorKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new ColorKeyFrame.
-        /// </summary>
-        protected ColorKeyFrame(Color value)
-            : this()
+        protected ColorKeyFrame(Color value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteColorKeyFrame.
-        /// </summary>
-        protected ColorKeyFrame(Color value, KeyTime keyTime)
-            : this()
+        protected ColorKeyFrame(Color value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(ColorKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Color),
-                    typeof(ColorKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Color)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Color Value
-        {
-            get
-            {
-                return (Color)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Color InterpolateValue(
-            Color baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Color InterpolateValueCore(
-            Color baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -588,142 +96,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameDecimalAnimation to animate a
     /// Decimal property value along a set of key frames.
     /// </summary>
-    public abstract class DecimalKeyFrame : Freezable, IKeyFrame
+    public abstract class DecimalKeyFrame : GenericAnimationKeyFrame<decimal>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new DecimalKeyFrame.
-        /// </summary>
         protected DecimalKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new DecimalKeyFrame.
-        /// </summary>
-        protected DecimalKeyFrame(Decimal value)
-            : this()
+        protected DecimalKeyFrame(decimal value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteDecimalKeyFrame.
-        /// </summary>
-        protected DecimalKeyFrame(Decimal value, KeyTime keyTime)
-            : this()
+        protected DecimalKeyFrame(decimal value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(DecimalKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Decimal),
-                    typeof(DecimalKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Decimal)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Decimal Value
-        {
-            get
-            {
-                return (Decimal)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Decimal InterpolateValue(
-            Decimal baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Decimal InterpolateValueCore(
-            Decimal baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -732,142 +117,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameDoubleAnimation to animate a
     /// float property value along a set of key frames.
     /// </summary>
-    public abstract class DoubleKeyFrame : Freezable, IKeyFrame
+    public abstract class DoubleKeyFrame : GenericAnimationKeyFrame<double>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new DoubleKeyFrame.
-        /// </summary>
         protected DoubleKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new DoubleKeyFrame.
-        /// </summary>
-        protected DoubleKeyFrame(double value)
-            : this()
+        protected DoubleKeyFrame(double value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteDoubleKeyFrame.
-        /// </summary>
-        protected DoubleKeyFrame(double value, KeyTime keyTime)
-            : this()
+        protected DoubleKeyFrame(double value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(DoubleKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(double),
-                    typeof(DoubleKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (double)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public double Value
-        {
-            get
-            {
-                return (double)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public double InterpolateValue(
-            double baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract double InterpolateValueCore(
-            double baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -876,142 +138,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameInt16Animation to animate a
     /// Int16 property value along a set of key frames.
     /// </summary>
-    public abstract class Int16KeyFrame : Freezable, IKeyFrame
+    public abstract class Int16KeyFrame : GenericAnimationKeyFrame<short>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new Int16KeyFrame.
-        /// </summary>
         protected Int16KeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new Int16KeyFrame.
-        /// </summary>
-        protected Int16KeyFrame(Int16 value)
-            : this()
+        protected Int16KeyFrame(short value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteInt16KeyFrame.
-        /// </summary>
-        protected Int16KeyFrame(Int16 value, KeyTime keyTime)
-            : this()
+        protected Int16KeyFrame(short value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(Int16KeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Int16),
-                    typeof(Int16KeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Int16)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Int16 Value
-        {
-            get
-            {
-                return (Int16)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Int16 InterpolateValue(
-            Int16 baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Int16 InterpolateValueCore(
-            Int16 baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -1020,142 +159,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameInt32Animation to animate a
     /// Int32 property value along a set of key frames.
     /// </summary>
-    public abstract class Int32KeyFrame : Freezable, IKeyFrame
+    public abstract class Int32KeyFrame : GenericAnimationKeyFrame<int>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new Int32KeyFrame.
-        /// </summary>
         protected Int32KeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new Int32KeyFrame.
-        /// </summary>
-        protected Int32KeyFrame(Int32 value)
-            : this()
+        protected Int32KeyFrame(int value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteInt32KeyFrame.
-        /// </summary>
-        protected Int32KeyFrame(Int32 value, KeyTime keyTime)
-            : this()
+        protected Int32KeyFrame(int value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(Int32KeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Int32),
-                    typeof(Int32KeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Int32)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Int32 Value
-        {
-            get
-            {
-                return (Int32)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Int32 InterpolateValue(
-            Int32 baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Int32 InterpolateValueCore(
-            Int32 baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -1164,287 +180,40 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameInt64Animation to animate a
     /// Int64 property value along a set of key frames.
     /// </summary>
-    public abstract class Int64KeyFrame : Freezable, IKeyFrame
+    public abstract class Int64KeyFrame : GenericAnimationKeyFrame<long>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new Int64KeyFrame.
-        /// </summary>
         protected Int64KeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new Int64KeyFrame.
-        /// </summary>
-        protected Int64KeyFrame(Int64 value)
-            : this()
+        protected Int64KeyFrame(long value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteInt64KeyFrame.
-        /// </summary>
-        protected Int64KeyFrame(Int64 value, KeyTime keyTime)
-            : this()
+        protected Int64KeyFrame(long value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(Int64KeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Int64),
-                    typeof(Int64KeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Int64)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Int64 Value
-        {
-            get
-            {
-                return (Int64)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Int64 InterpolateValue(
-            Int64 baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Int64 InterpolateValueCore(
-            Int64 baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
+    /// <summary>
+    /// This class is used as part of a MatrixKeyFrameCollection in
+    /// conjunction with a KeyFrameMatrixAnimation to animate a
+    /// Matrix property value along a set of key frames.
+    /// </summary>
+    public abstract class MatrixKeyFrame : GenericAnimationKeyFrame<Matrix3x2>
+    {
+        protected MatrixKeyFrame()
+        {
+        }
 
-    ///// <summary>
-    ///// This class is used as part of a MatrixKeyFrameCollection in
-    ///// conjunction with a KeyFrameMatrixAnimation to animate a
-    ///// Matrix property value along a set of key frames.
-    ///// </summary>
-    //public abstract class MatrixKeyFrame : Freezable, IKeyFrame
-    //{
-    //    #region Constructors
+        protected MatrixKeyFrame(Matrix3x2 value) : base(value)
+        {
+        }
 
-    //    /// <summary>
-    //    /// Creates a new MatrixKeyFrame.
-    //    /// </summary>
-    //    protected MatrixKeyFrame()
-    //        : base()
-    //    {
-    //    }
-
-    //    /// <summary>
-    //    /// Creates a new MatrixKeyFrame.
-    //    /// </summary>
-    //    protected MatrixKeyFrame(Matrix value)
-    //        : this()
-    //    {
-    //        Value = value;
-    //    }
-
-    //    /// <summary>
-    //    /// Creates a new DiscreteMatrixKeyFrame.
-    //    /// </summary>
-    //    protected MatrixKeyFrame(Matrix value, KeyTime keyTime)
-    //        : this()
-    //    {
-    //        Value = value;
-    //        KeyTime = keyTime;
-    //    }
-
-    //    #endregion
-
-    //    #region IKeyFrame
-
-    //    /// <summary>
-    //    /// KeyTime Property
-    //    /// </summary>
-    //    public static readonly DependencyProperty KeyTimeProperty =
-    //        DependencyProperty.Register(
-    //                "KeyTime",
-    //                typeof(KeyTime),
-    //                typeof(MatrixKeyFrame),
-    //                new PropertyMetadata(KeyTime.Uniform));
-
-    //    /// <summary>
-    //    /// The time at which this KeyFrame's value should be equal to the Value
-    //    /// property.
-    //    /// </summary>
-    //    public KeyTime KeyTime
-    //    {
-    //        get
-    //        {
-    //            return (KeyTime)GetValue(KeyTimeProperty)!;
-    //        }
-    //        set
-    //        {
-    //            SetValue(KeyTimeProperty, value);
-    //        }
-    //    }
-
-    //    /// <summary>
-    //    /// Value Property
-    //    /// </summary>
-    //    public static readonly DependencyProperty ValueProperty =
-    //        DependencyProperty.Register(
-    //                "Value",
-    //                typeof(Matrix),
-    //                typeof(MatrixKeyFrame),
-    //                new PropertyMetadata());
-
-    //    /// <summary>
-    //    /// The value of this key frame at the KeyTime specified.
-    //    /// </summary>
-    //    object? IKeyFrame.Value
-    //    {
-    //        get
-    //        {
-    //            return Value;
-    //        }
-    //        set
-    //        {
-    //            Value = (Matrix)value;
-    //        }
-    //    }
-
-    //    /// <summary>
-    //    /// The value of this key frame at the KeyTime specified.
-    //    /// </summary>
-    //    public Matrix Value
-    //    {
-    //        get
-    //        {
-    //            return (Matrix)GetValue(ValueProperty);
-    //        }
-    //        set
-    //        {
-    //            SetValue(ValueProperty, value);
-    //        }
-    //    }
-
-    //    #endregion
-
-    //    #region Public Methods
-
-    //    /// <summary>
-    //    /// Gets the interpolated value of the key frame at the progress value
-    //    /// provided.  The progress value should be calculated in terms of this 
-    //    /// specific key frame.
-    //    /// </summary>
-    //    public Matrix InterpolateValue(
-    //        Matrix baseValue,
-    //        float keyFrameProgress)
-    //    {
-    //        if (keyFrameProgress < 0.0
-    //            || keyFrameProgress > 1.0)
-    //        {
-    //            throw new ArgumentOutOfRangeException("keyFrameProgress");
-    //        }
-
-    //        return InterpolateValueCore(baseValue, keyFrameProgress);
-    //    }
-
-    //    #endregion
-
-    //    #region Protected Methods
-
-    //    /// <summary>
-    //    /// This method should be implemented by derived classes to calculate
-    //    /// the value of this key frame at the progress value provided.
-    //    /// </summary>
-    //    protected abstract Matrix InterpolateValueCore(
-    //        Matrix baseValue,
-    //        float keyFrameProgress);
-
-    //    #endregion
-    //}
+        protected MatrixKeyFrame(Matrix3x2 value, KeyTime keyTime) : base(value, keyTime)
+        {
+        }
+    }
 
 
     /// <summary>
@@ -1452,142 +221,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameObjectAnimation to animate a
     /// Object property value along a set of key frames.
     /// </summary>
-    public abstract class ObjectKeyFrame : Freezable, IKeyFrame
+    public abstract class ObjectKeyFrame : GenericAnimationKeyFrame<object?>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new ObjectKeyFrame.
-        /// </summary>
         protected ObjectKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new ObjectKeyFrame.
-        /// </summary>
-        protected ObjectKeyFrame(Object value)
-            : this()
+        protected ObjectKeyFrame(object? value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteObjectKeyFrame.
-        /// </summary>
-        protected ObjectKeyFrame(Object value, KeyTime keyTime)
-            : this()
+        protected ObjectKeyFrame(object? value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(ObjectKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Object),
-                    typeof(ObjectKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = value;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Object? Value
-        {
-            get
-            {
-                return GetValue(ValueProperty);
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public object? InterpolateValue(
-            object? baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract object? InterpolateValueCore(
-            object? baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -1596,142 +242,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFramePointAnimation to animate a
     /// Point property value along a set of key frames.
     /// </summary>
-    public abstract class PointKeyFrame : Freezable, IKeyFrame
+    public abstract class PointKeyFrame : GenericAnimationKeyFrame<Point>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new PointKeyFrame.
-        /// </summary>
         protected PointKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new PointKeyFrame.
-        /// </summary>
-        protected PointKeyFrame(Point value)
-            : this()
+        protected PointKeyFrame(Point value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscretePointKeyFrame.
-        /// </summary>
-        protected PointKeyFrame(Point value, KeyTime keyTime)
-            : this()
+        protected PointKeyFrame(Point value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(PointKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Point),
-                    typeof(PointKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Point)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Point Value
-        {
-            get
-            {
-                return (Point)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Point InterpolateValue(
-            Point baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Point InterpolateValueCore(
-            Point baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -1884,142 +407,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameQuaternionAnimation to animate a
     /// Quaternion property value along a set of key frames.
     /// </summary>
-    public abstract class QuaternionKeyFrame : Freezable, IKeyFrame
+    public abstract class QuaternionKeyFrame : GenericAnimationKeyFrame<Quaternion>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new QuaternionKeyFrame.
-        /// </summary>
         protected QuaternionKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new QuaternionKeyFrame.
-        /// </summary>
-        protected QuaternionKeyFrame(Quaternion value)
-            : this()
+        protected QuaternionKeyFrame(Quaternion value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteQuaternionKeyFrame.
-        /// </summary>
-        protected QuaternionKeyFrame(Quaternion value, KeyTime keyTime)
-            : this()
+        protected QuaternionKeyFrame(Quaternion value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(QuaternionKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Quaternion),
-                    typeof(QuaternionKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Quaternion)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Quaternion Value
-        {
-            get
-            {
-                return (Quaternion)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Quaternion InterpolateValue(
-            Quaternion baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Quaternion InterpolateValueCore(
-            Quaternion baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -2172,142 +572,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameRectAnimation to animate a
     /// Rect property value along a set of key frames.
     /// </summary>
-    public abstract class RectKeyFrame : Freezable, IKeyFrame
+    public abstract class RectKeyFrame : GenericAnimationKeyFrame<Rect>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new RectKeyFrame.
-        /// </summary>
         protected RectKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new RectKeyFrame.
-        /// </summary>
-        protected RectKeyFrame(Rect value)
-            : this()
+        protected RectKeyFrame(Rect value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteRectKeyFrame.
-        /// </summary>
-        protected RectKeyFrame(Rect value, KeyTime keyTime)
-            : this()
+        protected RectKeyFrame(Rect value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(RectKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Rect),
-                    typeof(RectKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Rect)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Rect Value
-        {
-            get
-            {
-                return (Rect)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Rect InterpolateValue(
-            Rect baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Rect InterpolateValueCore(
-            Rect baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -2316,142 +593,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameSingleAnimation to animate a
     /// Single property value along a set of key frames.
     /// </summary>
-    public abstract class SingleKeyFrame : Freezable, IKeyFrame
+    public abstract class SingleKeyFrame : GenericAnimationKeyFrame<float>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new SingleKeyFrame.
-        /// </summary>
         protected SingleKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new SingleKeyFrame.
-        /// </summary>
-        protected SingleKeyFrame(Single value)
-            : this()
+        protected SingleKeyFrame(float value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteSingleKeyFrame.
-        /// </summary>
-        protected SingleKeyFrame(Single value, KeyTime keyTime)
-            : this()
+        protected SingleKeyFrame(float value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(SingleKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Single),
-                    typeof(SingleKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Single)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Single Value
-        {
-            get
-            {
-                return (Single)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Single InterpolateValue(
-            Single baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Single InterpolateValueCore(
-            Single baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -2460,142 +614,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameSizeAnimation to animate a
     /// Size property value along a set of key frames.
     /// </summary>
-    public abstract class SizeKeyFrame : Freezable, IKeyFrame
+    public abstract class SizeKeyFrame : GenericAnimationKeyFrame<Size>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new SizeKeyFrame.
-        /// </summary>
         protected SizeKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new SizeKeyFrame.
-        /// </summary>
-        protected SizeKeyFrame(Size value)
-            : this()
+        protected SizeKeyFrame(Size value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteSizeKeyFrame.
-        /// </summary>
-        protected SizeKeyFrame(Size value, KeyTime keyTime)
-            : this()
+        protected SizeKeyFrame(Size value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(SizeKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Size),
-                    typeof(SizeKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Size)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Size Value
-        {
-            get
-            {
-                return (Size)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Size InterpolateValue(
-            Size baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Size InterpolateValueCore(
-            Size baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -2604,142 +635,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameStringAnimation to animate a
     /// String property value along a set of key frames.
     /// </summary>
-    public abstract class StringKeyFrame : Freezable, IKeyFrame
+    public abstract class StringKeyFrame : GenericAnimationKeyFrame<string>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new StringKeyFrame.
-        /// </summary>
         protected StringKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new StringKeyFrame.
-        /// </summary>
-        protected StringKeyFrame(String value)
-            : this()
+        protected StringKeyFrame(string value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteStringKeyFrame.
-        /// </summary>
-        protected StringKeyFrame(String value, KeyTime keyTime)
-            : this()
+        protected StringKeyFrame(string value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(StringKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(String),
-                    typeof(StringKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (string?)value;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public string? Value
-        {
-            get
-            {
-                return (string?)GetValue(ValueProperty);
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public string? InterpolateValue(
-            string? baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract string? InterpolateValueCore(
-            string? baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -2748,142 +656,19 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameVectorAnimation to animate a
     /// Vector2 property value along a set of key frames.
     /// </summary>
-    public abstract class VectorKeyFrame : Freezable, IKeyFrame
+    public abstract class VectorKeyFrame : GenericAnimationKeyFrame<Vector2>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new VectorKeyFrame.
-        /// </summary>
         protected VectorKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new VectorKeyFrame.
-        /// </summary>
-        protected VectorKeyFrame(Vector2 value)
-            : this()
+        protected VectorKeyFrame(Vector2 value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteVectorKeyFrame.
-        /// </summary>
-        protected VectorKeyFrame(Vector2 value, KeyTime keyTime)
-            : this()
+        protected VectorKeyFrame(Vector2 value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(VectorKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Vector2),
-                    typeof(VectorKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Vector2)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Vector2 Value
-        {
-            get
-            {
-                return (Vector2)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Vector2 InterpolateValue(
-            Vector2 baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Vector2 InterpolateValueCore(
-            Vector2 baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 
 
@@ -2892,141 +677,18 @@ namespace Wodsoft.UI.Media.Animation
     /// conjunction with a KeyFrameVector3DAnimation to animate a
     /// Vector3 property value along a set of key frames.
     /// </summary>
-    public abstract class Vector3DKeyFrame : Freezable, IKeyFrame
+    public abstract class Vector3DKeyFrame : GenericAnimationKeyFrame<Vector3>
     {
-        #region Constructors
-
-        /// <summary>
-        /// Creates a new Vector3DKeyFrame.
-        /// </summary>
         protected Vector3DKeyFrame()
-            : base()
         {
         }
 
-        /// <summary>
-        /// Creates a new Vector3DKeyFrame.
-        /// </summary>
-        protected Vector3DKeyFrame(Vector3 value)
-            : this()
+        protected Vector3DKeyFrame(Vector3 value) : base(value)
         {
-            Value = value;
         }
 
-        /// <summary>
-        /// Creates a new DiscreteVector3DKeyFrame.
-        /// </summary>
-        protected Vector3DKeyFrame(Vector3 value, KeyTime keyTime)
-            : this()
+        protected Vector3DKeyFrame(Vector3 value, KeyTime keyTime) : base(value, keyTime)
         {
-            Value = value;
-            KeyTime = keyTime;
         }
-
-        #endregion
-
-        #region IKeyFrame
-
-        /// <summary>
-        /// KeyTime Property
-        /// </summary>
-        public static readonly DependencyProperty KeyTimeProperty =
-            DependencyProperty.Register(
-                    "KeyTime",
-                    typeof(KeyTime),
-                    typeof(Vector3DKeyFrame),
-                    new PropertyMetadata(KeyTime.Uniform));
-
-        /// <summary>
-        /// The time at which this KeyFrame's value should be equal to the Value
-        /// property.
-        /// </summary>
-        public KeyTime KeyTime
-        {
-            get
-            {
-                return (KeyTime)GetValue(KeyTimeProperty)!;
-            }
-            set
-            {
-                SetValue(KeyTimeProperty, value);
-            }
-        }
-
-        /// <summary>
-        /// Value Property
-        /// </summary>
-        public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(
-                    "Value",
-                    typeof(Vector3),
-                    typeof(Vector3DKeyFrame),
-                    new PropertyMetadata());
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        object? IKeyFrame.Value
-        {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = (Vector3)value!;
-            }
-        }
-
-        /// <summary>
-        /// The value of this key frame at the KeyTime specified.
-        /// </summary>
-        public Vector3 Value
-        {
-            get
-            {
-                return (Vector3)GetValue(ValueProperty)!;
-            }
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Gets the interpolated value of the key frame at the progress value
-        /// provided.  The progress value should be calculated in terms of this 
-        /// specific key frame.
-        /// </summary>
-        public Vector3 InterpolateValue(
-            Vector3 baseValue,
-            float keyFrameProgress)
-        {
-            if (keyFrameProgress < 0.0
-                || keyFrameProgress > 1.0)
-            {
-                throw new ArgumentOutOfRangeException("keyFrameProgress");
-            }
-
-            return InterpolateValueCore(baseValue, keyFrameProgress);
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// This method should be implemented by derived classes to calculate
-        /// the value of this key frame at the progress value provided.
-        /// </summary>
-        protected abstract Vector3 InterpolateValueCore(
-            Vector3 baseValue,
-            float keyFrameProgress);
-
-        #endregion
     }
 }

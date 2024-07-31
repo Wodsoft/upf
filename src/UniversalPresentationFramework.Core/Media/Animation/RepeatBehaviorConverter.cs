@@ -75,11 +75,11 @@ namespace Wodsoft.UI.Media.Animation
                 else if (stringValue.Length > 0
                          && stringValue[stringValue.Length - 1] == _IterationCharacter)
                 {
-                    string stringDoubleValue = stringValue.TrimEnd(_IterationCharacter);
+                    string stringFloatValue = stringValue.TrimEnd(_IterationCharacter);
 
-                    double doubleValue = (double)TypeDescriptor.GetConverter(typeof(double)).ConvertFrom(td, cultureInfo, stringDoubleValue)!;
+                    float floatValue = (float)TypeDescriptor.GetConverter(typeof(float)).ConvertFrom(td, cultureInfo, stringFloatValue)!;
 
-                    return new RepeatBehavior(doubleValue);
+                    return new RepeatBehavior(floatValue);
                 }
             }
 
