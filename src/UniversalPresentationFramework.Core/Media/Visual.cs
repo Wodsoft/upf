@@ -54,6 +54,40 @@ namespace Wodsoft.UI.Media
 
         public bool HasVisualParent => _parent != null;
 
+        protected void InvalidateForceInheritPropertyOnChildren(DependencyProperty property)
+        {
+            InvalidateForceInheritPropertyOnChildren(this, property);
+        }
+
+        private static void InvalidateForceInheritPropertyOnChildren(Visual v, DependencyProperty property)
+        {
+            int cChildren = v.VisualChildrenCount;
+            for (int iChild = 0; iChild < cChildren; iChild++)
+            {
+                Visual child = v.GetVisualChild(iChild);
+                if (child is UIElement uie)
+                {
+                    if (property == UIElement.IsVisibleProperty)
+                    {
+                        // For Read-Only force-inherited properties, use
+                        // a private update method.
+                        uie.UpdateIsVisibleCache();
+                    }
+                    else
+                    {
+                        // For Read/Write force-inherited properties, use
+                        // the standard coersion pattern.
+                        uie.CoerceValue(property);
+                    }
+                }
+                else
+                {
+                    // We have to "walk through" non-UIElement visuals.
+                    child.InvalidateForceInheritPropertyOnChildren(property);
+                }
+            }
+        }
+
         #endregion
 
         #region Render

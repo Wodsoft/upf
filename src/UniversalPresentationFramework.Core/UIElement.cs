@@ -389,6 +389,107 @@ namespace Wodsoft.UI
                                 new UIPropertyMetadata(1.0f));
         public float Opacity { get { return (float)GetValue(OpacityProperty)!; } set { SetValue(OpacityProperty, value); } }
 
+        private bool _isVisible;
+        private static readonly DependencyPropertyKey _IsVisiblePropertyKey =
+                    DependencyProperty.RegisterReadOnly(
+                                "IsVisible",
+                                typeof(bool),
+                                typeof(UIElement),
+                                new ReadOnlyPropertyMetadata(false,
+                                    new GetReadOnlyValueCallback(GetIsVisible),
+                                    new PropertyChangedCallback(OnIsVisibleChanged)));
+        private static object GetIsVisible(DependencyObject d, out DependencyEffectiveSource source)
+        {
+            source = DependencyEffectiveSource.Local;
+            return ((UIElement)d).IsVisible;
+        }
+        private static void OnIsVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement uie = (UIElement)d;
+
+            // Raise the public changed event.
+            uie.IsVisibleChanged?.Invoke(uie, e);
+
+            // Invalidate the children so that they will inherit the new value.
+            uie.InvalidateForceInheritPropertyOnChildren(e.Property);
+
+            //// The input manager needs to re-hittest because something changed
+            //// that is involved in the hit-testing we do, so a different result
+            //// could be returned.
+            //InputManager.SafeCurrentNotifyHitTestInvalidated();
+        }
+        public static readonly DependencyProperty IsVisibleProperty = _IsVisiblePropertyKey.DependencyProperty;
+        public bool IsVisible => _isVisible;
+
+        public event DependencyPropertyChangedEventHandler? IsVisibleChanged;
+
+        internal void UpdateIsVisibleCache()
+        {
+            // IsVisible is a read-only property.  It derives its "base" value
+            // from the Visibility property.
+            bool isVisible = (Visibility == Visibility.Visible);
+
+            // We must be false if our parent is false, but we can be
+            // either true or false if our parent is true.
+            //
+            // Another way of saying this is that we can only be true
+            // if our parent is true, but we can always be false.
+            if (isVisible)
+            {
+                bool constraintAllowsVisible = false;
+
+                // Our parent can constrain us.  We can be plugged into either
+                // a "visual" or "content" tree.  If we are plugged into a
+                // "content" tree, the visual tree is just considered a
+                // visual representation, and is normally composed of raw
+                // visuals, not UIElements, so we prefer the content tree.
+                //
+                // The content tree uses the "logical" links.  But not all
+                // "logical" links lead to a content tree.
+                //
+                // However, ContentElements don't understand IsVisible,
+                // so we ignore them.
+                //
+                UIElement? parent = InputElement.GetContainingUIElement(VisualParent);
+
+                if (parent != null)
+                {
+                    constraintAllowsVisible = parent.IsVisible;
+                }
+                else
+                {
+                    // We cannot be visible if we have no visual parent, unless:
+                    // 1) We are the root, connected to a PresentationHost.
+                    PresentationSource? presentationSource = PresentationSource.FromVisual(this);
+                    if (presentationSource != null)
+                    {
+                        constraintAllowsVisible = true;
+                    }
+                    else
+                    {
+                        // What if We are the root of a VisualBrush?  How can we tell?
+                    }
+
+                }
+
+                if (!constraintAllowsVisible)
+                {
+                    isVisible = false;
+                }
+            }
+
+            if (isVisible != _isVisible)
+            {
+                // Our IsVisible force-inherited property has changed.  Update our
+                // cache and raise a change notification.
+
+                _isVisible = isVisible;
+
+                PropertyChanged(new DependencyPropertyChangedEventArgs(IsVisibleProperty, IsVisibleProperty.DefaultMetadata, !isVisible, isVisible));
+            }
+        }
+
+
         #endregion
 
         #region Event
