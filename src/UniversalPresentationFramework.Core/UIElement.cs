@@ -273,7 +273,7 @@ namespace Wodsoft.UI
 
         public bool IsArrangeValid { get; private set; }
 
-        public static float RoundLayoutValue(float value, float dpiScale)
+        public static float RoundLayoutValue(in float value, in float dpiScale)
         {
             float newValue;
 
@@ -344,6 +344,37 @@ namespace Wodsoft.UI
         public override bool HasRenderContent => _drawingContent != null;
 
         internal void OnRenderInternal(DrawingContext drawingContext) => OnRender(drawingContext);
+
+        private bool _snapsToDevicePixelsCache;
+        public static readonly DependencyProperty SnapsToDevicePixelsProperty =
+                DependencyProperty.Register(
+                        "SnapsToDevicePixels",
+                        typeof(bool),
+                        typeof(UIElement),
+                        new PropertyMetadata(
+                                false,
+                                new PropertyChangedCallback(SnapsToDevicePixels_Changed)));
+        private static void SnapsToDevicePixels_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement uie = (UIElement)d;
+            uie._snapsToDevicePixelsCache = (bool)e.NewValue!;
+
+            // if never measured, then nothing to do, it should be measured at some point
+            if (uie.IsMeasureValid || uie.IsArrangeValid)
+            {
+                uie.InvalidateArrange();
+            }
+        }
+        public bool SnapsToDevicePixels
+        {
+            get { return _snapsToDevicePixelsCache; }
+            set { SetValue(SnapsToDevicePixelsProperty, value); }
+        }
+
+        protected static Size RoundLayoutSize(in Size size, in float dpiScaleX, in float dpiScaleY)
+        {
+            return new Size(RoundLayoutValue(size.Width, dpiScaleX), RoundLayoutValue(size.Height, dpiScaleY));
+        }
 
         #endregion
 
