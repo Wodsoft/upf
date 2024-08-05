@@ -63,7 +63,7 @@ namespace Wodsoft.UI.Documents
                 var child = _container._child;
                 if (child != null)
                 {
-                    drawingContext.PushTransform(new TranslateTransform(origin.X, origin.Y));
+                    drawingContext.PushTransform(new TranslateTransform(origin.X + child.VisualOffset.X, origin.Y + child.VisualOffset.Y));
                     child.OnRenderInternal(drawingContext);
                     drawingContext.Pop();
                 }

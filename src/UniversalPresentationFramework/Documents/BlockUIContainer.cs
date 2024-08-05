@@ -72,7 +72,7 @@ namespace Wodsoft.UI.Documents
                 var child = _container._child;
                 if (child != null)
                 {
-                    drawingContext.PushTransform(new TranslateTransform(origin.X + margin.Left + padding.Left, origin.Y + margin.Top + padding.Top));
+                    drawingContext.PushTransform(new TranslateTransform(origin.X + margin.Left + padding.Left + child.VisualOffset.X, origin.Y + margin.Top + padding.Top + child.VisualOffset.Y));
                     child.OnRenderInternal(drawingContext);
                     drawingContext.Pop();
                 }
@@ -103,7 +103,7 @@ namespace Wodsoft.UI.Documents
                 _height = margin.Top + padding.Top + margin.Bottom + padding.Bottom;
                 if (child == null)
                     return;
-                child.Arrange(new Rect(0, 0, availableSize.Width, 0));
+                child.Arrange(new Rect(0, 0, availableSize.Width - margin.Left - margin.Right - padding.Left - padding.Right, 0));
                 var desiredSize = child.DesiredSize;
                 _height += desiredSize.Height;
             }
