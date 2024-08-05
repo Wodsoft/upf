@@ -32,7 +32,17 @@ namespace Wodsoft.UI.Media
             DrawText(text, glyphTypeface, fontSize, foreground, origin);
         }
 
+        public void DrawText(ReadOnlySpan<char> text, FontFamily fontFamily, float fontSize, FontStyle style, FontWeight weight, FontStretch stretch, Brush foreground, Point origin, Size size)
+        {
+            var glyphTypeface = fontFamily.GetGlyphTypeface(style, weight, stretch);
+            if (glyphTypeface == null)
+                return;
+            DrawText(text, glyphTypeface, fontSize, foreground, origin, size);
+        }
+
         public abstract void DrawText(ReadOnlySpan<char> text, GlyphTypeface glyphTypeface, float fontSize, Brush foreground, Point origin);
+
+        public abstract void DrawText(ReadOnlySpan<char> text, GlyphTypeface glyphTypeface, float fontSize, Brush foreground, Point origin, Size size);
 
         /// <summary>
         ///     DrawLine - 

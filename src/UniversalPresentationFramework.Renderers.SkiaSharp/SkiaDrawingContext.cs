@@ -80,33 +80,91 @@ namespace Wodsoft.UI.Renderers
         public override void DrawRoundedRectangle(Brush? brush, Pen? pen, Rect rectangle, float radiusX, float radiusY)
         {
             CheckClosed();
-            SKPaint paint = SkiaHelper.GetPaint(brush, pen);
-            ApplyPaint(paint);
-            _canvas.DrawRoundRect(new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), radiusX, radiusY, paint);
+            if (brush == null && pen == null)
+                return;
+            var rect = new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom);
+            if (brush != null)
+            {
+                SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rectangle);
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawRoundRect(rect, radiusX, radiusY, paint);
+                }
+            }
+            if (pen != null)
+            {
+                SKPaint? paint = SkiaHelper.GetStrokePaint(pen, rectangle);
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawRoundRect(rect, radiusX, radiusY, paint);
+                }
+            }
         }
 
         public override void DrawRectangle(Brush? brush, Pen? pen, Rect rectangle)
         {
             CheckClosed();
-            SKPaint paint = SkiaHelper.GetPaint(brush, pen);
-            ApplyPaint(paint);
-            _canvas.DrawRect(new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom), paint);
+            if (brush == null && pen == null)
+                return;
+            var rect = new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom);
+            if (brush != null)
+            {
+                SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rectangle);
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawRect(rect, paint);
+                }
+            }
+            if (pen != null)
+            {
+                SKPaint? paint = SkiaHelper.GetStrokePaint(pen, rectangle);
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawRect(rect, paint);
+                }
+            }
         }
 
         public override void DrawLine(Pen? pen, Point point0, Point point1)
         {
             CheckClosed();
-            SKPaint paint = SkiaHelper.GetPaint(null, pen);
-            ApplyPaint(paint);
-            _canvas.DrawLine(point0.X, point0.Y, point1.X, point1.Y, paint);
+            if (pen != null)
+            {
+                SKPaint? paint = SkiaHelper.GetStrokePaint(pen, new Rect(point0, point1));
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawLine(point0.X, point0.Y, point1.X, point1.Y, paint);
+                }
+            }
         }
 
         public override void DrawEllipse(Brush? brush, Pen? pen, Point center, float radiusX, float radiusY)
         {
             CheckClosed();
-            SKPaint paint = SkiaHelper.GetPaint(brush, pen);
-            ApplyPaint(paint);
-            _canvas.DrawOval(center.X, center.Y, radiusX, radiusY, paint);
+            var rect = new Rect(center.X - radiusX, center.Y - radiusY, radiusX * 2, radiusY * 2);
+            if (brush != null)
+            {
+                SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rect);
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawOval(center.X, center.Y, radiusX, radiusY, paint);
+                }
+            }
+            if (pen != null)
+            {
+                SKPaint? paint = SkiaHelper.GetStrokePaint(pen, rect);
+                if (paint != null)
+                {
+                    ApplyPaint(paint);
+                    _canvas.DrawOval(center.X, center.Y, radiusX, radiusY, paint);
+                }
+            }
         }
 
         public override void DrawImage(ImageSource imageSource, Rect rectangle)
@@ -179,13 +237,15 @@ namespace Wodsoft.UI.Renderers
 
         public override void PushTransform(Transform transform)
         {
+            CheckClosed();
             _canvas.Save();
             var matrix = transform.Value;
-            _canvas.Concat(new SKMatrix(matrix.M11, matrix.M12, matrix.M31, matrix.M21, matrix.M22, matrix.M32, 0f, 0f, 1f));
+            _canvas.Concat(SkiaHelper.GetMatrix(matrix));
         }
 
         public override void Pop()
         {
+            CheckClosed();
             if (_opacityStates.Count != 0)
             {
                 ref var state = ref CollectionsMarshal.AsSpan(_opacityStates)[_opacityStates.Count - 1];
@@ -200,6 +260,7 @@ namespace Wodsoft.UI.Renderers
 
         public override void DrawGeometry(Brush? brush, Pen? pen, Geometry geometry)
         {
+            CheckClosed();
             if (geometry is RectangleGeometry rectangle)
             {
                 float rx = rectangle.RadiusX, ry = rectangle.RadiusY;
@@ -213,16 +274,40 @@ namespace Wodsoft.UI.Renderers
                 var data = geometry.GetPathGeometryData();
                 if (data == null)
                     return;
-                SKPaint paint = SkiaHelper.GetPaint(brush, pen);
-                ApplyPaint(paint);
-                if (data is SkiaGeometryData skData)
+                var rect = geometry.Bounds;
+                if (brush != null)
                 {
-                    _canvas.DrawPath(skData.Path, paint);
+                    SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rect);
+                    if (paint != null)
+                    {
+                        ApplyPaint(paint);
+                        if (data is SkiaGeometryData skData)
+                        {
+                            _canvas.DrawPath(skData.Path, paint);
+                        }
+                        else
+                        {
+                            var path = SKPath.ParseSvgPathData(data.ToPathString());
+                            _canvas.DrawPath(path, paint);
+                        }
+                    }
                 }
-                else
+                if (pen != null)
                 {
-                    var path = SKPath.ParseSvgPathData(data.ToPathString());
-                    _canvas.DrawPath(path, paint);
+                    SKPaint? paint = SkiaHelper.GetStrokePaint(pen, rect);
+                    if (paint != null)
+                    {
+                        ApplyPaint(paint);
+                        if (data is SkiaGeometryData skData)
+                        {
+                            _canvas.DrawPath(skData.Path, paint);
+                        }
+                        else
+                        {
+                            var path = SKPath.ParseSvgPathData(data.ToPathString());
+                            _canvas.DrawPath(path, paint);
+                        }
+                    }
                 }
             }
         }
@@ -231,11 +316,30 @@ namespace Wodsoft.UI.Renderers
         {
             if (glyphTypeface is not SkiaGlyphTypeface skiaGlyphTypeface)
                 throw new NotSupportedException("Only support SkiaGlyphTypeface.");
+            CheckClosed();
             var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
-            var paint = SkiaHelper.GetPaint(foreground, null);
-            ApplyPaint(paint);
-            _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y, paint);
-            _hasContent = true;
+            var blob = SKTextBlob.Create(text, font)!;
+            var textRect = blob.Bounds;            
+            var paint = SkiaHelper.GetFillPaint(foreground, null, new Rect(origin, new Size(textRect.Width, textRect.Height)));
+            if (paint != null)
+            {
+                ApplyPaint(paint);
+                _canvas.DrawText(blob, origin.X, origin.Y, paint);
+            }
+        }
+
+        public override void DrawText(ReadOnlySpan<char> text, GlyphTypeface glyphTypeface, float fontSize, Brush foreground, Point origin, Size size)
+        {
+            if (glyphTypeface is not SkiaGlyphTypeface skiaGlyphTypeface)
+                throw new NotSupportedException("Only support SkiaGlyphTypeface.");
+            CheckClosed();
+            var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
+            var paint = SkiaHelper.GetFillPaint(foreground, null, new Rect(origin, size));
+            if (paint != null)
+            {
+                ApplyPaint(paint);
+                _canvas.DrawText(SKTextBlob.Create(text, font), origin.X, origin.Y, paint);
+            }
         }
 
         private struct OpacityState

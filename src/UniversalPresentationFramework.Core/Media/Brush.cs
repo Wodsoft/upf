@@ -7,11 +7,12 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using Wodsoft.UI.Media.Animation;
 
 namespace Wodsoft.UI.Media
 {
     [TypeConverter(typeof(BrushConverter))]
-    public abstract class Brush : Freezable
+    public abstract class Brush : Animatable
     {
         static Brush()
         {
