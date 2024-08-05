@@ -249,6 +249,7 @@ namespace Wodsoft.UI
         protected void WritePostscript()
         {
             OnChanged();
+            Changed?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -275,6 +276,8 @@ namespace Wodsoft.UI
                 ProvideSelfAsInheritanceContext(newValue, property);
             }
         }
+
+        public event EventHandler? Changed;
 
         #endregion
 
