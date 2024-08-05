@@ -345,6 +345,9 @@ namespace Wodsoft.UI
 
         protected sealed override void ArrangeCore(Rect finalRect)
         {
+            bool useLayoutRounding = UseLayoutRounding;
+            DpiScale dpi = GetDpi();
+
             Size arrangeSize = finalRect.Size;
 
             var margin = Margin;
@@ -391,6 +394,13 @@ namespace Wodsoft.UI
             //    arrangeSize.Height = unclippedDesiredSize.Height;
 
             MinMax mm = new MinMax(this);
+            if (useLayoutRounding)
+            {
+                mm.maxHeight = RoundLayoutValue(mm.maxHeight, dpi.DpiScaleY);
+                mm.maxWidth = RoundLayoutValue(mm.maxWidth, dpi.DpiScaleX);
+                mm.minHeight = RoundLayoutValue(mm.minHeight, dpi.DpiScaleY);
+                mm.minWidth = RoundLayoutValue(mm.minWidth, dpi.DpiScaleX);
+            }
             float effectiveMaxWidth = Math.Max(unclippedDesiredSize.Width, mm.maxWidth);
             if (FloatUtil.LessThan(effectiveMaxWidth, arrangeSize.Width))
             {
@@ -412,24 +422,47 @@ namespace Wodsoft.UI
             //if (mm.maxHeight < unclippedDesiredSize.Height)
             //    unclippedDesiredSize.Height = mm.maxHeight;
 
+            if (useLayoutRounding)
+                arrangeSize = RoundLayoutSize(arrangeSize, dpi.DpiScaleX, dpi.DpiScaleY);
+
             Size renderSize = ArrangeOverride(arrangeSize);
+            if (useLayoutRounding)
+                renderSize = RoundLayoutSize(renderSize, dpi.DpiScaleX, dpi.DpiScaleY);
+
+            Size clippedRenderSize = new Size(Math.Min(renderSize.Width, mm.maxWidth), Math.Min(renderSize.Height, mm.maxHeight));
+            if (useLayoutRounding)
+                clippedRenderSize = RoundLayoutSize(clippedRenderSize, dpi.DpiScaleX, dpi.DpiScaleY);
+            needClip |= FloatUtil.LessThan(clippedRenderSize.Width, renderSize.Width) || FloatUtil.LessThan(clippedRenderSize.Height, renderSize.Height);
+
+            Size clientSize = new Size(Math.Max(0, finalRect.Width - marginWidth), Math.Max(0, finalRect.Height - marginHeight));
+            needClip |= FloatUtil.LessThan(clientSize.Width, clippedRenderSize.Width) || FloatUtil.LessThan(clientSize.Height, clippedRenderSize.Height);
 
             var hAlignment = HorizontalAlignment;
             var vAlignment = VerticalAlignment;
+            if (hAlignment == HorizontalAlignment.Stretch && clippedRenderSize.Width > clientSize.Width)
+                hAlignment = HorizontalAlignment.Left;
+            if (vAlignment == VerticalAlignment.Stretch && clippedRenderSize.Height > clientSize.Height)
+                vAlignment = VerticalAlignment.Top;
             float x, y;
             if (hAlignment == HorizontalAlignment.Left)
                 x = margin.Left;
             else if (hAlignment == HorizontalAlignment.Right)
-                x = finalRect.Width - renderSize.Width - margin.Right;
+                x = clientSize.Width - clippedRenderSize.Width;
             else
-                x = (finalRect.Width - renderSize.Width + margin.Left - margin.Right) / 2;
+                x = (clientSize.Width - clippedRenderSize.Width) / 2;
             if (vAlignment == VerticalAlignment.Top)
                 y = margin.Top;
             else if (vAlignment == VerticalAlignment.Bottom)
-                y = finalRect.Height - renderSize.Height - margin.Bottom;
+                y = clientSize.Height - clippedRenderSize.Height;
             else
-                y = (finalRect.Height - renderSize.Height + margin.Top - margin.Bottom) / 2;
-            VisualOffset = new Vector2(finalRect.X + x, finalRect.Y + y);
+                y = (clientSize.Height - clippedRenderSize.Height) / 2;
+            var offset = new Vector2(finalRect.X + x + margin.Left, finalRect.Y + y + margin.Top);
+            if (useLayoutRounding)
+            {
+                offset.X = RoundLayoutValue(offset.X, dpi.DpiScaleX);
+                offset.Y = RoundLayoutValue(offset.Y, dpi.DpiScaleY);
+            }
+            VisualOffset = offset;
             RenderSize = renderSize;
         }
 
@@ -890,6 +923,22 @@ namespace Wodsoft.UI
                     effectiveValue = new DependencyEffectiveValue(value, DependencyEffectiveSource.Internal);
                 }
             }
+        }
+
+        protected bool HasNonDefaultValue(DependencyProperty dp)
+        {
+            ref readonly var effectiveValue = ref GetEffectiveValue(dp);
+            if (effectiveValue.Source == DependencyEffectiveSource.None)
+                return true;
+            return false;
+        }
+
+        protected bool HasNonDefaultOrInheritedValue(DependencyProperty dp)
+        {
+            ref readonly var effectiveValue = ref GetEffectiveValue(dp);
+            if (effectiveValue.Source == DependencyEffectiveSource.None || effectiveValue.Source == DependencyEffectiveSource.Inherited)
+                return true;
+            return false;
         }
 
         #endregion
