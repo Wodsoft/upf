@@ -95,7 +95,7 @@ namespace Wodsoft.UI.Renderers
             return true;
         }
 
-        public override IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
+        public override IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat)
         {
             SKColorSpace colorSpace;
             switch (pixelFormat.ColorSpace)

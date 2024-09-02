@@ -24,7 +24,7 @@ namespace Wodsoft.UI.Media.Imaging
             _context = FrameworkCoreProvider.GetRendererProvider().CreateBitmapContext(source.Context);
         }
 
-        public WriteableBitmap(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette palette)
+        public WriteableBitmap(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat, BitmapPalette palette)
         {
             _context = FrameworkCoreProvider.GetRendererProvider().CreateBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat, palette);
         }

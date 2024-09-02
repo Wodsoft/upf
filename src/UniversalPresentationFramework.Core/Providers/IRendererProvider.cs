@@ -17,11 +17,11 @@ namespace Wodsoft.UI.Providers
 
         IImageContext CreateImageContext(Stream stream, int newWidth, int newHeight, Rotation rotation);
 
-        IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette? palette);
+        IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat, BitmapPalette? palette);
 
         IBitmapContext CreateBitmapContext(IImageContext context);
 
-        IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat);
+        IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat);
 
         StreamGeometryContext CreateGeometryContext();
 

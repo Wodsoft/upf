@@ -12,7 +12,7 @@ namespace Wodsoft.UI.Renderers
 {
     public class SkiaRendererProvider : IRendererProvider
     {
-        public virtual IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat, BitmapPalette? palette)
+        public virtual IBitmapContext CreateBitmapContext(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat, BitmapPalette? palette)
         {
             if (pixelFormat.IsPalettized)
                 throw new NotSupportedException("Skia do not support palettized pixel format.");
@@ -74,7 +74,7 @@ namespace Wodsoft.UI.Renderers
             return new SkiaImageContext(image, rotation);
         }
 
-        public virtual IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
+        public virtual IRenderBitmapContext CreateRenderBitmapContext(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat)
         {
             SKImageInfo info = new SKImageInfo();
             info.Width = pixelWidth;

@@ -9,17 +9,17 @@ namespace Wodsoft.UI.Media.Imaging
     public sealed class RenderTargetBitmap : BitmapSource
     {
         private readonly IRenderBitmapContext _context;
-        private readonly double _dpiX;
-        private readonly double _dpiY;
+        private readonly float _dpiX;
+        private readonly float _dpiY;
 
-        private RenderTargetBitmap(IRenderBitmapContext context, double dpiX, double dpiY)
+        private RenderTargetBitmap(IRenderBitmapContext context, float dpiX, float dpiY)
         {
             _context = context;
             _dpiX = dpiX;
             _dpiY = dpiY;
         }
 
-        public RenderTargetBitmap(int pixelWidth, int pixelHeight, double dpiX, double dpiY, PixelFormat pixelFormat)
+        public RenderTargetBitmap(int pixelWidth, int pixelHeight, float dpiX, float dpiY, PixelFormat pixelFormat)
         {
             _context = FrameworkCoreProvider.GetRendererProvider().CreateRenderBitmapContext(pixelWidth, pixelHeight, dpiX, dpiY, pixelFormat);
             _dpiX = dpiX;
