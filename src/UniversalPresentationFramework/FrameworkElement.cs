@@ -627,7 +627,7 @@ namespace Wodsoft.UI
         private TriggerCollection? _appliedTemplateTriggers;
         private FrameworkElement? _templatedContent, _templatedParent;
 
-        public FrameworkElement? TemplatedParent => _templatedParent;
+        public FrameworkElement? TemplatedParent => _templatedParent ?? (LogicalRoot as FrameworkElement)?._templatedParent;
 
         public FrameworkElement? TemplatedChild => _templatedContent;
 
