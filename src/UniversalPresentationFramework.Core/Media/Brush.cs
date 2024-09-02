@@ -38,10 +38,40 @@ namespace Wodsoft.UI.Media
 
         public static readonly DependencyProperty OpacityProperty =
                   DependencyProperty.Register("Opacity",
-                                              typeof(double),
+                                              typeof(float),
                                               typeof(Brush),
                                               new PropertyMetadata(1.0f));
         public float Opacity { get { return (float)GetValue(OpacityProperty)!; } set { SetValue(OpacityProperty, value); } }
+
+
+        public static readonly DependencyProperty TransformProperty = RegisterProperty("Transform",
+                                   typeof(Transform),
+                                   typeof(Brush),
+                                   Transform.Identity,
+                                   null,
+                                   null,
+                                   /* isIndependentlyAnimated  = */ false,
+                                   /* coerceValueCallback */ null);
+        public Transform? Transform
+        {
+            get { return (Transform?)GetValue(TransformProperty); }
+            set { SetValue(TransformProperty, value); }
+        }
+
+
+        public static readonly DependencyProperty RelativeTransformProperty = RegisterProperty("RelativeTransform",
+                                   typeof(Transform),
+                                   typeof(Brush),
+                                   Transform.Identity,
+                                   null,
+                                   null,
+                                   /* isIndependentlyAnimated  = */ false,
+                                   /* coerceValueCallback */ null);
+        public Transform? RelativeTransform
+        {
+            get { return (Transform?)GetValue(RelativeTransformProperty); }
+            set { SetValue(RelativeTransformProperty, value); }
+        }
 
         #endregion
     }

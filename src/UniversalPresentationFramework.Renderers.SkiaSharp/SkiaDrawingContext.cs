@@ -85,7 +85,7 @@ namespace Wodsoft.UI.Renderers
             var rect = new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom);
             if (brush != null)
             {
-                SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rectangle);
+                SKPaint? paint = SkiaHelper.GetFillPaint(brush, rectangle);
                 if (paint != null)
                 {
                     ApplyPaint(paint);
@@ -111,7 +111,7 @@ namespace Wodsoft.UI.Renderers
             var rect = new SKRect(rectangle.X, rectangle.Y, rectangle.Right, rectangle.Bottom);
             if (brush != null)
             {
-                SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rectangle);
+                SKPaint? paint = SkiaHelper.GetFillPaint(brush, rectangle);
                 if (paint != null)
                 {
                     ApplyPaint(paint);
@@ -149,7 +149,7 @@ namespace Wodsoft.UI.Renderers
             var rect = new Rect(center.X - radiusX, center.Y - radiusY, radiusX * 2, radiusY * 2);
             if (brush != null)
             {
-                SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rect);
+                SKPaint? paint = SkiaHelper.GetFillPaint(brush, rect);
                 if (paint != null)
                 {
                     ApplyPaint(paint);
@@ -277,7 +277,7 @@ namespace Wodsoft.UI.Renderers
                 var rect = geometry.Bounds;
                 if (brush != null)
                 {
-                    SKPaint? paint = SkiaHelper.GetFillPaint(brush, pen, rect);
+                    SKPaint? paint = SkiaHelper.GetFillPaint(brush, rect);
                     if (paint != null)
                     {
                         ApplyPaint(paint);
@@ -320,7 +320,7 @@ namespace Wodsoft.UI.Renderers
             var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
             var blob = SKTextBlob.Create(text, font)!;
             var textRect = blob.Bounds;            
-            var paint = SkiaHelper.GetFillPaint(foreground, null, new Rect(origin, new Size(textRect.Width, textRect.Height)));
+            var paint = SkiaHelper.GetFillPaint(foreground, new Rect(origin, new Size(textRect.Width, textRect.Height)));
             if (paint != null)
             {
                 ApplyPaint(paint);
@@ -334,7 +334,7 @@ namespace Wodsoft.UI.Renderers
                 throw new NotSupportedException("Only support SkiaGlyphTypeface.");
             CheckClosed();
             var font = skiaGlyphTypeface.SKTypeface.ToFont(fontSize);
-            var paint = SkiaHelper.GetFillPaint(foreground, null, new Rect(origin, size));
+            var paint = SkiaHelper.GetFillPaint(foreground, new Rect(origin, size));
             if (paint != null)
             {
                 ApplyPaint(paint);

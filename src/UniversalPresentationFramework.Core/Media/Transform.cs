@@ -10,6 +10,14 @@ namespace Wodsoft.UI.Media
 {
     public abstract class Transform : GeneralTransform
     {
+        private static Transform _Identity;
+        static Transform()
+        {
+            _Identity = new MatrixTransform(Matrix3x2.Identity);
+            _Identity.Freeze();
+        }
+        public static Transform Identity => _Identity;
+
         public abstract Matrix3x2 Value { get; }
 
         public override bool TryTransform(Point inPoint, out Point result)
