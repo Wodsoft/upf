@@ -31,17 +31,7 @@ namespace Wodsoft.UI.Renderers
 
         public override PixelFormat PixelFormat { get; }
 
-        public override SKImage Image
-        {
-            get
-            {
-                if (_image == null)
-                {
-                    _image = SKImage.FromTexture(_rendererContext.GRContext, _rendererContext.Texture, GRSurfaceOrigin.TopLeft, _rendererContext.ColorType);
-                }
-                return _image;
-            }
-        }
+        public override SKImage Image => _rendererContext.Image;
 
         public void Render(Visual visual)
         {
