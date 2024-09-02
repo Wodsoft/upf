@@ -281,6 +281,12 @@ namespace Wodsoft.UI.Controls
 
         }
 
+        protected static void OnVisualStatePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Control control)
+                control.UpdateVisualState();
+        }
+
         #endregion
     }
 }
