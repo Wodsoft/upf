@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
+using Wodsoft.UI.Data;
 using Wodsoft.UI.Markup;
 using Wodsoft.UI.Media;
 
@@ -12,7 +13,7 @@ namespace Wodsoft.UI.Controls
 {
     [DefaultProperty("Content")]
     [ContentProperty("Content")]
-    public class ContentControl : Control, IAddChild
+    public class ContentControl : Control, IAddChild, IItemContainer
     {
         static ContentControl()
         {
@@ -91,7 +92,7 @@ namespace Wodsoft.UI.Controls
             ContentControl ctrl = (ContentControl)d;
             ctrl.OnContentTemplateSelectorChanged((DataTemplateSelector?)e.NewValue, (DataTemplateSelector?)e.NewValue);
         }
-        public DataTemplateSelector? ContentTemplateSelector { get { return (DataTemplateSelector?)GetValue(ContentTemplateSelectorProperty); } set { SetValue(ContentTemplateSelectorProperty, value); } }        
+        public DataTemplateSelector? ContentTemplateSelector { get { return (DataTemplateSelector?)GetValue(ContentTemplateSelectorProperty); } set { SetValue(ContentTemplateSelectorProperty, value); } }
         protected virtual void OnContentTemplateSelectorChanged(DataTemplateSelector? oldContentTemplateSelector, DataTemplateSelector? newContentTemplateSelector)
         {
             OnTemplateSettingChanged();
@@ -132,6 +133,54 @@ namespace Wodsoft.UI.Controls
         void IAddChild.AddText(string text)
         {
             Content = text;
+        }
+
+        #endregion
+
+        #region PreparableContainer
+
+        protected bool ContentIsNotLogical { get; set; }
+
+        protected bool ContentIsItem { get; set; }
+
+        public virtual void PrepareContainer(ItemsControl parent, object? item)
+        {
+            if (item != this)
+            {
+                // don't treat Content as a logical child
+                ContentIsNotLogical = true;
+
+                // copy styles from the ItemsControl
+                if (ContentIsItem || !HasNonDefaultValue(ContentProperty))
+                {
+                    Content = item;
+                    ContentIsItem = true;
+                }
+                var itemTemplate = parent.ItemTemplate;
+                var itemTemplateSelector = parent.ItemTemplateSelector;
+                var itemStringFormat = parent.ItemStringFormat;
+                if (itemTemplate != null)
+                    ContentTemplate = itemTemplate;
+                if (itemTemplateSelector != null)
+                    ContentTemplateSelector = itemTemplateSelector;
+                if (itemStringFormat != null)
+                    ContentStringFormat = itemStringFormat;
+            }
+            else
+            {
+                ContentIsNotLogical = false;
+            }
+        }
+
+        public virtual void ClearContainer(object? item)
+        {
+            if (item != this)
+            {
+                if (ContentIsItem)
+                {
+                    ClearValue(ContentProperty);
+                }
+            }
         }
 
         #endregion

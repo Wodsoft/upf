@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Win32;
 using Wodsoft.UI.Input;
 using Wodsoft.UI.Threading;
 
@@ -75,5 +78,27 @@ namespace Wodsoft.UI.Platforms.Win32
         protected override bool IsActived => _windowContext.State != WindowState.Minimized;
 
         internal Win32InputMethod InputMethodInternal => _inputMethod;
+
+        #region Timer
+
+        protected override void SetTimerTick(int targetTick)
+        {
+            int tick = targetTick - Environment.TickCount;
+            if (tick < 0)
+                tick = 0;
+            PInvoke.SetTimer(_windowContext.Hwnd, 1, (uint)tick, null);
+        }
+
+        protected override void RemoveTimerTick()
+        {
+            PInvoke.KillTimer(_windowContext.Hwnd, 1);
+        }
+
+        internal void ApplyTimerTick()
+        {
+            ApplyTimerTick(Environment.TickCount);
+        }
+
+        #endregion
     }
 }

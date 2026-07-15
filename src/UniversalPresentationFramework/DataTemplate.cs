@@ -16,6 +16,13 @@ namespace Wodsoft.UI
         private Type? _dataType;
         private TriggerCollection? _triggers;
 
+        public DataTemplate() { }
+
+        public DataTemplate(Type dataType)
+        {
+            _dataType = dataType;
+        }
+
         [DefaultValue(null)]
         [Ambient]
         public Type? DataType

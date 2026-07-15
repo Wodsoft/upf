@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	    xmlns:local="clr-namespace:Wodsoft.UI.Test;assembly=UniversalPresentationFramework.Test"
 		Width="640" Height="480" Title="Hello Window">
-	<Grid>
+	<Grid Background="Black">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="auto"/>
 			<ColumnDefinition Width="*"/>
@@ -29,4 +29,57 @@ New Line.</TextBox.Text>
 		<Rectangle Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2" Fill="Green" Margin="50"/>
 		<Rectangle Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2" Fill="Green" Height="50" Width="100" VerticalAlignment="Top"/>
 	</Grid>
+	<!--<TextBlock>
+		这是一个悲伤的故事，要从哪里开始说起呢？
+		这是一个很长
+		<InlineUIContainer>
+			<Rectangle Width="100" Height="24" Fill="Blue"/>
+		</InlineUIContainer> 的段落，
+		<InlineUIContainer>
+			<Rectangle Margin="10" Width="100" Height="24" Fill="Red"/>
+		</InlineUIContainer> 长到没有尽头……
+		dafsdfasdf
+		<Bold FontSize="12">aasdfasdffdd</Bold>
+	</TextBlock>-->
+	<!--<TextBlock Text="123" IsTextSelectionEnabled="True">
+		<Figure Width="100" Margin="0" Padding="0" HorizontalAnchor="PageCenter" Background="Red">
+			<Paragraph>
+				float A
+			</Paragraph>
+		</Figure>
+		test<InlineUIContainer>
+			<Rectangle Width="100" Height="24" Fill="Green"/>
+		</InlineUIContainer> 的段落，
+		<Figure Width="50" Margin="0" Padding="0" HorizontalAnchor="PageLeft" Background="Red">
+			<BlockUIContainer>
+				<Rectangle Width="50" Height="40" Fill="Blue"/>
+			</BlockUIContainer>
+		</Figure>
+		<Figure Width="50" Margin="0" Padding="0" HorizontalAnchor="PageLeft" Background="Red">
+			<BlockUIContainer>
+				<Rectangle Width="50" Height="100" Fill="Blue"/>
+			</BlockUIContainer>
+		</Figure>
+		<Figure Width="100" Margin="0" Padding="1" HorizontalAnchor="PageRight" Background="Red" VerticalAnchor="ContentTop">
+			<Paragraph>
+				float C
+				aaaaaaaaaaa
+			</Paragraph>
+		</Figure>
+		这是一个悲伤的故事，要从哪里开始说起呢？
+		<Underline>这是一个很长</Underline>
+		<InlineUIContainer>
+			<Rectangle Width="100" Height="24" Fill="Green"/>
+		</InlineUIContainer> 的段落，
+		<InlineUIContainer>
+			<Rectangle Margin="10" Width="100" Height="24" Fill="Red"/>
+		</InlineUIContainer> 长到没有尽头……
+		dafsdfasdf
+		<Bold FontSize="12">测试粗体</Bold>
+		<Figure Width="100" Margin="0" Padding="0" HorizontalAnchor="PageLeft" Background="Red">
+			<Paragraph>
+				float D
+			</Paragraph>
+		</Figure>
+	</TextBlock>-->
 </Window>

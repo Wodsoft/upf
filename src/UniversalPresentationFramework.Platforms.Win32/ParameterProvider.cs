@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Wodsoft.UI.Providers;
+using System.Collections;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.WindowsAndMessaging;
-using Wodsoft.UI.Controls;
 using Wodsoft.UI.Media;
-using System.Collections;
+using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI.Platforms.Win32
 {
@@ -17,7 +15,22 @@ namespace Wodsoft.UI.Platforms.Win32
     {
         #region Window Parameters
 
-        public bool MinimizeAnimation => throw new NotImplementedException();
+        private bool? _minimizeAnimation;
+        public unsafe bool MinimizeAnimation
+        {
+            get
+            {
+                if (_minimizeAnimation == null)
+                {
+                    var animInfo = new ANIMATIONINFO();
+                    animInfo.cbSize = (uint)sizeof(ANIMATIONINFO);
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETANIMATION, animInfo.cbSize, &animInfo, 0))
+                        throw new Win32Exception();
+                    _minimizeAnimation = animInfo.iMinAnimate != 0;
+                }
+                return _minimizeAnimation.Value;
+            }
+        }
 
         private int? _border;
         public unsafe int Border
@@ -27,18 +40,36 @@ namespace Wodsoft.UI.Platforms.Win32
                 if (_border == null)
                 {
                     int border = 0;
-                    PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETBORDER, 0, &border, 0);
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETBORDER, 0, &border, 0))
+                        throw new Win32Exception();
                     _border = border;
                 }
                 return _border.Value;
             }
         }
 
-        public float CaretWidth => throw new NotImplementedException();
+        private float? _caretWidth;
+        public unsafe float CaretWidth
+        {
+            get
+            {
+                if (_caretWidth == null)
+                {
+                    // OS does not scale SPI_GETCARETWIDTH to the primary monitor's DPI.
+                    int caretWidth = 0;
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETCARETWIDTH, 0, &caretWidth, 0))
+                        throw new Win32Exception();
+                    _caretWidth = caretWidth;
+                }
+                return _caretWidth.Value;
+            }
+        }
 
-        public bool DragFullWindows => throw new NotImplementedException();
+        private bool? _dragFullWindows;
+        public bool DragFullWindows => GetSystemParameterBool(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETDRAGFULLWINDOWS, ref _dragFullWindows);
 
-        public int ForegroundFlashCount => throw new NotImplementedException();
+        private int? _foregroundFlashCount;
+        public int ForegroundFlashCount => GetSystemParameterInt(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETFOREGROUNDFLASHCOUNT, ref _foregroundFlashCount);
 
         public float BorderWidth => ClientMetrics.iBorderWidth;
 
@@ -56,7 +87,8 @@ namespace Wodsoft.UI.Platforms.Win32
                     var clientMetrics = new NONCLIENTMETRICSW();
                     clientMetrics.cbSize = (uint)sizeof(NONCLIENTMETRICSW);
 #pragma warning disable CA1416 // 验证平台兼容性
-                    PInvoke.SystemParametersInfoForDpi((uint)SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETNONCLIENTMETRICS, clientMetrics.cbSize, &clientMetrics, 0, 96);
+                    if (!PInvoke.SystemParametersInfoForDpi((uint)SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETNONCLIENTMETRICS, clientMetrics.cbSize, &clientMetrics, 0, 96))
+                        throw new Win32Exception();
 #pragma warning restore CA1416 // 验证平台兼容性
                     _clientMetrics = clientMetrics;
                 }
@@ -80,75 +112,171 @@ namespace Wodsoft.UI.Platforms.Win32
 
         #region Font Parameters
 
-        public float IconFontSize => throw new NotImplementedException();
+        private ICONMETRICSW? _iconMetrics;
+        private unsafe ICONMETRICSW IconMetrics
+        {
+            get
+            {
+                if (_iconMetrics == null)
+                {
+                    var iconMetrics = new ICONMETRICSW();
+                    iconMetrics.cbSize = (uint)sizeof(ICONMETRICSW);
+#pragma warning disable CA1416 // 验证平台兼容性
+                    if (!PInvoke.SystemParametersInfoForDpi((uint)SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETICONMETRICS, iconMetrics.cbSize, &iconMetrics, 0, 96))
+                        throw new Win32Exception();
+#pragma warning restore CA1416 // 验证平台兼容性
+                    _iconMetrics = iconMetrics;
+                }
+                return _iconMetrics.Value;
+            }
+        }
 
-        public FontFamily IconFontFamily => throw new NotImplementedException();
+        public float IconFontSize => GetFontSize(IconMetrics.lfFont);
 
-        public FontStyle IconFontStyle => throw new NotImplementedException();
+        public FontFamily IconFontFamily => GetFontFamily(IconMetrics.lfFont);
 
-        public FontWeight IconFontWeight => throw new NotImplementedException();
+        public FontStyle IconFontStyle => GetFontStyle(IconMetrics.lfFont);
 
-        public TextDecorationCollection IconFontTextDecorations => throw new NotImplementedException();
+        public FontWeight IconFontWeight => GetFontWeight(IconMetrics.lfFont);
 
-        public float CaptionFontSize => throw new NotImplementedException();
+        public TextDecorationCollection IconFontTextDecorations => GetFontTextDecorations(IconMetrics.lfFont);
 
-        public FontFamily CaptionFontFamily => throw new NotImplementedException();
+        public float CaptionFontSize => GetFontSize(ClientMetrics.lfCaptionFont);
 
-        public FontStyle CaptionFontStyle => throw new NotImplementedException();
+        public FontFamily CaptionFontFamily => GetFontFamily(ClientMetrics.lfCaptionFont);
 
-        public FontWeight CaptionFontWeight => throw new NotImplementedException();
+        public FontStyle CaptionFontStyle => GetFontStyle(ClientMetrics.lfCaptionFont);
 
-        public TextDecorationCollection CaptionFontTextDecorations => throw new NotImplementedException();
+        public FontWeight CaptionFontWeight => GetFontWeight(ClientMetrics.lfCaptionFont);
 
-        public float SmallCaptionFontSize { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public TextDecorationCollection CaptionFontTextDecorations => GetFontTextDecorations(ClientMetrics.lfCaptionFont);
 
-        public FontFamily SmallCaptionFontFamily => throw new NotImplementedException();
+        public float SmallCaptionFontSize
+        {
+            get => GetFontSize(ClientMetrics.lfSmCaptionFont);
+            set => throw new NotSupportedException("SmallCaptionFontSize is read-only system parameter.");
+        }
 
-        public FontStyle SmallCaptionFontStyle => throw new NotImplementedException();
+        public FontFamily SmallCaptionFontFamily => GetFontFamily(ClientMetrics.lfSmCaptionFont);
 
-        public FontWeight SmallCaptionFontWeight => throw new NotImplementedException();
+        public FontStyle SmallCaptionFontStyle => GetFontStyle(ClientMetrics.lfSmCaptionFont);
 
-        public TextDecorationCollection SmallCaptionFontTextDecorations => throw new NotImplementedException();
+        public FontWeight SmallCaptionFontWeight => GetFontWeight(ClientMetrics.lfSmCaptionFont);
 
-        public float MenuFontSize => throw new NotImplementedException();
+        public TextDecorationCollection SmallCaptionFontTextDecorations => GetFontTextDecorations(ClientMetrics.lfSmCaptionFont);
 
-        public FontFamily MenuFontFamily => throw new NotImplementedException();
+        public float MenuFontSize => GetFontSize(ClientMetrics.lfMenuFont);
 
-        public FontStyle MenuFontStyle => throw new NotImplementedException();
+        public FontFamily MenuFontFamily => GetFontFamily(ClientMetrics.lfMenuFont);
 
-        public FontWeight MenuFontWeight => throw new NotImplementedException();
+        public FontStyle MenuFontStyle => GetFontStyle(ClientMetrics.lfMenuFont);
 
-        public TextDecorationCollection MenuFontTextDecorations => throw new NotImplementedException();
+        public FontWeight MenuFontWeight => GetFontWeight(ClientMetrics.lfMenuFont);
 
-        public float StatusFontSize => throw new NotImplementedException();
+        public TextDecorationCollection MenuFontTextDecorations => GetFontTextDecorations(ClientMetrics.lfMenuFont);
 
-        public FontFamily StatusFontFamily => throw new NotImplementedException();
+        public float StatusFontSize => GetFontSize(ClientMetrics.lfStatusFont);
 
-        public FontStyle StatusFontStyle => throw new NotImplementedException();
+        public FontFamily StatusFontFamily => GetFontFamily(ClientMetrics.lfStatusFont);
 
-        public FontWeight StatusFontWeight => throw new NotImplementedException();
+        public FontStyle StatusFontStyle => GetFontStyle(ClientMetrics.lfStatusFont);
 
-        public TextDecorationCollection StatusFontTextDecorations => throw new NotImplementedException();
+        public FontWeight StatusFontWeight => GetFontWeight(ClientMetrics.lfStatusFont);
 
-        public float MessageFontSize => -ClientMetrics.lfMessageFont.lfHeight;
+        public TextDecorationCollection StatusFontTextDecorations => GetFontTextDecorations(ClientMetrics.lfStatusFont);
 
-        public FontFamily MessageFontFamily => new FontFamily(ClientMetrics.lfMessageFont.lfFaceName.ToString());
+        public float MessageFontSize => GetFontSize(ClientMetrics.lfMessageFont);
 
-        public FontStyle MessageFontStyle => ClientMetrics.lfMessageFont.lfItalic != 0 ? FontStyles.Italic : FontStyles.Normal;
+        public FontFamily MessageFontFamily => GetFontFamily(ClientMetrics.lfMessageFont);
 
-        public FontWeight MessageFontWeight => FontWeight.FromOpenTypeWeight(ClientMetrics.lfMessageFont.lfWeight);
+        public FontStyle MessageFontStyle => GetFontStyle(ClientMetrics.lfMessageFont);
 
-        public TextDecorationCollection MessageFontTextDecorations => throw new NotImplementedException();
+        public FontWeight MessageFontWeight => GetFontWeight(ClientMetrics.lfMessageFont);
+
+        public TextDecorationCollection MessageFontTextDecorations => GetFontTextDecorations(ClientMetrics.lfMessageFont);
+
+        private static float GetFontSize(in LOGFONTW logFont) => Math.Abs(logFont.lfHeight);
+
+        private static FontFamily GetFontFamily(in LOGFONTW logFont) => new FontFamily(logFont.lfFaceName.ToString());
+
+        private static FontStyle GetFontStyle(in LOGFONTW logFont) => logFont.lfItalic != 0 ? FontStyles.Italic : FontStyles.Normal;
+
+        private static FontWeight GetFontWeight(in LOGFONTW logFont) => FontWeight.FromOpenTypeWeight(logFont.lfWeight);
+
+        private static TextDecorationCollection GetFontTextDecorations(in LOGFONTW logFont)
+        {
+            bool underline = logFont.lfUnderline != 0;
+            bool strikeOut = logFont.lfStrikeOut != 0;
+            if (!underline && !strikeOut)
+                return TextDecorationCollection.Empty;
+
+            var collection = new TextDecorationCollection();
+            if (underline)
+            {
+                foreach (TextDecoration decoration in TextDecorations.Underline)
+                    collection.Add((TextDecoration)decoration.Clone());
+            }
+            if (strikeOut)
+            {
+                foreach (TextDecoration decoration in TextDecorations.Strikethrough)
+                    collection.Add((TextDecoration)decoration.Clone());
+            }
+            collection.Freeze();
+            return collection;
+        }
 
         #endregion
 
         #region Accessibility Parameters
 
-        public float FocusBorderWidth => throw new NotImplementedException();
+        private float? _focusBorderWidth;
+        public unsafe float FocusBorderWidth
+        {
+            get
+            {
+                if (_focusBorderWidth == null)
+                {
+                    int focusBorderWidth = 0;
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETFOCUSBORDERWIDTH, 0, &focusBorderWidth, 0))
+                        throw new Win32Exception();
+                    _focusBorderWidth = ConvertPixel(focusBorderWidth);
+                }
+                return _focusBorderWidth.Value;
+            }
+        }
 
-        public float FocusBorderHeight => throw new NotImplementedException();
+        private float? _focusBorderHeight;
+        public unsafe float FocusBorderHeight
+        {
+            get
+            {
+                if (_focusBorderHeight == null)
+                {
+                    int focusBorderHeight = 0;
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETFOCUSBORDERHEIGHT, 0, &focusBorderHeight, 0))
+                        throw new Win32Exception();
+                    _focusBorderHeight = ConvertPixel(focusBorderHeight);
+                }
+                return _focusBorderHeight.Value;
+            }
+        }
 
-        public bool HighContrast => throw new NotImplementedException();
+        private bool? _highContrast;
+        public unsafe bool HighContrast
+        {
+            get
+            {
+                if (_highContrast == null)
+                {
+                    var highContrast = new HIGHCONTRAST_I();
+                    highContrast.cbSize = (uint)sizeof(HIGHCONTRAST_I);
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETHIGHCONTRAST, highContrast.cbSize, &highContrast, 0))
+                        throw new Win32Exception();
+                    _highContrast = (highContrast.dwFlags & HCF_HIGHCONTRASTON) == HCF_HIGHCONTRASTON;
+                }
+                return _highContrast.Value;
+            }
+        }
 
         #endregion
 
@@ -323,6 +451,120 @@ namespace Wodsoft.UI.Platforms.Win32
                 return _brushCache[slot];
             }
         }
+
+        #endregion
+
+        #region Input Parameters
+
+        private bool? _keyboardCues;
+        public bool KeyboardCues => GetSystemParameterBool(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETKEYBOARDCUES, ref _keyboardCues);
+
+        private int? _keyboardDelay;
+        public int KeyboardDelay => GetSystemParameterInt(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETKEYBOARDDELAY, ref _keyboardDelay);
+
+        private bool? _keyboardPreference;
+        public bool KeyboardPreference => GetSystemParameterBool(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETKEYBOARDPREF, ref _keyboardPreference);
+
+        private int? _keyboardSpeed;
+        public int KeyboardSpeed => GetSystemParameterInt(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETKEYBOARDSPEED, ref _keyboardSpeed);
+
+        private bool? _snapToDefaultButton;
+        public bool SnapToDefaultButton => GetSystemParameterBool(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETSNAPTODEFBUTTON, ref _snapToDefaultButton);
+
+        private int? _wheelScrollLines;
+        public int WheelScrollLines => GetSystemParameterInt(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETWHEELSCROLLLINES, ref _wheelScrollLines);
+
+        public TimeSpan MouseHoverTime => TimeSpan.FromMilliseconds(MouseHoverTimeMilliseconds);
+
+        private int? _mouseHoverTimeMilliseconds;
+        internal int MouseHoverTimeMilliseconds => GetSystemParameterInt(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETMOUSEHOVERTIME, ref _mouseHoverTimeMilliseconds);
+
+        private float? _mouseHoverHeight;
+        public unsafe float MouseHoverHeight
+        {
+            get
+            {
+                if (_mouseHoverHeight == null)
+                {
+                    int mouseHoverHeight = 0;
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETMOUSEHOVERHEIGHT, 0, &mouseHoverHeight, 0))
+                        throw new Win32Exception();
+                    _mouseHoverHeight = ConvertPixel(mouseHoverHeight);
+                }
+                return _mouseHoverHeight.Value;
+            }
+        }
+
+        private float? _mouseHoverWidth;
+        public unsafe float MouseHoverWidth
+        {
+            get
+            {
+                if (_mouseHoverWidth == null)
+                {
+                    int mouseHoverWidth = 0;
+                    if (!PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_GETMOUSEHOVERWIDTH, 0, &mouseHoverWidth, 0))
+                        throw new Win32Exception();
+                    _mouseHoverWidth = ConvertPixel(mouseHoverWidth);
+                }
+                return _mouseHoverWidth.Value;
+            }
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private unsafe bool GetSystemParameterBool(SYSTEM_PARAMETERS_INFO_ACTION action, ref bool? cache)
+        {
+            if (cache == null)
+            {
+                BOOL value = false;
+                if (!PInvoke.SystemParametersInfo(action, 0, &value, 0))
+                    throw new Win32Exception();
+                cache = value;
+            }
+            return cache.Value;
+        }
+
+        private unsafe int GetSystemParameterInt(SYSTEM_PARAMETERS_INFO_ACTION action, ref int? cache)
+        {
+            if (cache == null)
+            {
+                int value = 0;
+                if (!PInvoke.SystemParametersInfo(action, 0, &value, 0))
+                    throw new Win32Exception();
+                cache = value;
+            }
+            return cache.Value;
+        }
+
+        private unsafe float ConvertPixel(int pixel)
+        {
+            var dc = PInvoke.GetDC(HWND.Null);
+            try
+            {
+                int dpi = PInvoke.GetDeviceCaps(dc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
+                if (dpi != 0)
+                    return pixel * 96f / dpi;
+                return pixel;
+            }
+            finally
+            {
+                PInvoke.ReleaseDC(HWND.Null, dc);
+            }
+        }
+
+        // Mirrors WPF's HIGHCONTRAST_I layout for SPI_GETHIGHCONTRAST.
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct HIGHCONTRAST_I
+        {
+            public uint cbSize;
+            public uint dwFlags;
+            public IntPtr lpszDefaultScheme;
+        }
+
+        private const uint HCF_HIGHCONTRASTON = 0x00000001;
 
         #endregion
     }

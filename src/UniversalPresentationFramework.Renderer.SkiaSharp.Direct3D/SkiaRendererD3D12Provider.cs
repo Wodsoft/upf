@@ -55,7 +55,7 @@ namespace Wodsoft.UI.Renderers
             {
                 if (factory6 != null)
                 {
-                    for (int adapterIndex = 0; factory6.EnumAdapterByGpuPreference(adapterIndex, GpuPreference.HighPerformance, out adapter).Success; adapterIndex++)
+                    for (uint adapterIndex = 0; factory6.EnumAdapterByGpuPreference(adapterIndex, GpuPreference.HighPerformance, out adapter).Success; adapterIndex++)
                     {
                         AdapterDescription1 desc = adapter!.Description1;
 
@@ -72,7 +72,7 @@ namespace Wodsoft.UI.Renderers
                 }
                 else
                 {
-                    for (int adapterIndex = 0;
+                    for (uint adapterIndex = 0;
                         factory.EnumAdapters1(adapterIndex, out adapter).Success;
                         adapterIndex++)
                     {

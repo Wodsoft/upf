@@ -27,6 +27,14 @@ namespace Wodsoft.UI
             return (IList<VisualStateGroup>)d.GetValue(VisualStateGroupsProperty)!;
         }
 
+        public static IList<VisualStateGroup>? GetVisualStateGroupsInternal(DependencyObject d)
+        {
+            ref readonly var effectiveValue = ref d.GetEffectiveValue(VisualStateGroupsProperty);
+            if (effectiveValue.Source == DependencyEffectiveSource.None)
+                return null;
+            return (IList<VisualStateGroup>)effectiveValue.Value!;
+        }
+
 
         public static readonly DependencyProperty CustomVisualStateManagerProperty = DependencyProperty.RegisterAttached("CustomVisualStateManager", typeof(VisualStateManager), typeof(VisualStateManager));
         public static VisualStateManager? GetCustomVisualStateManager(DependencyObject d)

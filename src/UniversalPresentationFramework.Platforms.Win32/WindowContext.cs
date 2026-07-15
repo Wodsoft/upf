@@ -774,6 +774,11 @@ namespace Wodsoft.UI.Platforms.Win32
                     }
                     break;
                 #endregion
+                #region Timer
+                case PInvoke.WM_TIMER:
+                    _dispatcher.ApplyTimerTick();
+                    break;
+                #endregion
                 case _InsertMessage:
                     while (_insertMessages.TryPop(out var action))
                         action();

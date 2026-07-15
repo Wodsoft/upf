@@ -13,6 +13,8 @@ namespace Wodsoft.UI.Threading
         public EmptyDispatcherOperation(DispatcherPriority priority, Task task) : base(EmptyDispatcher.Default, priority)
         {
             _task = task;
+            if (priority != DispatcherPriority.Inactive)
+                task.Start();
         }
 
         public override Task Task => _task;
@@ -34,6 +36,11 @@ namespace Wodsoft.UI.Threading
 
         protected override bool SetPriority(DispatcherPriority priority)
         {
+            if (Priority == DispatcherPriority.Inactive && priority != DispatcherPriority.Invalid)
+            {
+                _task.Start();
+                return true;
+            }
             return false;
         }
     }
@@ -49,6 +56,8 @@ namespace Wodsoft.UI.Threading
             {
                 _result = task.Result;
             });
+            if (priority != DispatcherPriority.Inactive)
+                task.Start();
         }
 
         public override DispatcherOperationStatus Status
@@ -99,6 +108,11 @@ namespace Wodsoft.UI.Threading
 
         protected override bool SetPriority(DispatcherPriority priority)
         {
+            if (Priority == DispatcherPriority.Inactive && priority != DispatcherPriority.Invalid)
+            {
+                _task.Start();
+                return true;
+            }
             return false;
         }
     }

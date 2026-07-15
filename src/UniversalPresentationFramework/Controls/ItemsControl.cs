@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xaml.Markup;
@@ -14,7 +15,7 @@ using Wodsoft.UI.Media;
 namespace Wodsoft.UI.Controls
 {
     [ContentProperty("Items")]
-    public class ItemsControl : Control, IItemsControl
+    public class ItemsControl : Control, IItemsControl, IItemContainer
     {
         private ItemContainerGenerator? _itemContainerGenerator;
 
@@ -289,26 +290,26 @@ namespace Wodsoft.UI.Controls
             // Management considers this undesirable, hence the following rather
             // inelegant code.
 
-            var itemTemplate = ItemTemplate;
-            var itemTemplateSelector = ItemTemplateSelector;
-            var itemStringFormat = ItemStringFormat;
 
-            //if (element is HeaderedContentControl hcc)
+            //if (element is HeaderedContentControl hcc && item != element)
             //{
-            //    hcc.PrepareHeaderedContentControl(item, ItemTemplate, ItemTemplateSelector, ItemStringFormat);
+            //    var itemTemplate = ItemTemplate;
+            //    var itemTemplateSelector = ItemTemplateSelector;
+            //    var itemStringFormat = ItemStringFormat;
+            //    if (itemTemplate != null)
+            //        hcc.ContentTemplate = itemTemplate;
+            //    if (itemTemplateSelector != null)
+            //        hcc.ContentTemplateSelector = itemTemplateSelector;
+            //    if (itemStringFormat != null)
+            //        hcc.ContentStringFormat = itemStringFormat;
             //}
-            if (element is ContentControl cc)
+            if (element is IItemContainer preparableContainer)
+                preparableContainer.PrepareContainer(this, item);
+            if (element is ContentPresenter cp)
             {
-                if (itemTemplate != null)
-                    cc.ContentTemplate = itemTemplate;
-                if (itemTemplateSelector != null)
-                    cc.ContentTemplateSelector = itemTemplateSelector;
-                if (itemStringFormat != null)
-                    cc.ContentStringFormat = itemStringFormat;
-                cc.Content = item;
-            }
-            else if (element is ContentPresenter cp)
-            {
+                var itemTemplate = ItemTemplate;
+                var itemTemplateSelector = ItemTemplateSelector;
+                var itemStringFormat = ItemStringFormat;
                 if (itemTemplate != null)
                     cp.ContentTemplate = itemTemplate;
                 if (itemTemplateSelector != null)
@@ -317,17 +318,43 @@ namespace Wodsoft.UI.Controls
                     cp.ContentStringFormat = itemStringFormat;
                 cp.Content = item;
             }
-            //else if (element is HeaderedItemsControl hic)
-            //{
-            //    hic.PrepareHeaderedItemsControl(item, this);
-            //}
-            //else if (element is ItemsControl ic)
-            //{
-            //    if (ic != this)
-            //    {
-            //        ic.PrepareItemsControl(item, this);
-            //    }
-            //}
+            else if (element is ItemsControl ic)
+            {
+                ic.PrepareItemsControl(item, this);
+            }
+        }
+
+        public virtual void PrepareContainer(ItemsControl parent, object? item)
+        {
+            // copy styles from parent ItemsControl
+            PrepareItemsControl(item, parent);
+        }
+
+        public virtual void ClearContainer(object? item)
+        {
+
+        }
+
+        protected virtual void PrepareItemsControl(object? item, ItemsControl parentItemsControl)
+        {
+            if (item != this)
+            {
+                var itemTemplate = parentItemsControl.ItemTemplate;
+                var itemTemplateSelector = parentItemsControl.ItemTemplateSelector;
+                var itemStringFormat = parentItemsControl.ItemStringFormat;
+                var itemContainerStyle = parentItemsControl.ItemContainerStyle;
+                var itemContainerStyleSelector = parentItemsControl.ItemContainerStyleSelector;
+                if (itemTemplate != null)
+                    ItemTemplate = itemTemplate;
+                if (itemTemplateSelector != null)
+                    ItemTemplateSelector = itemTemplateSelector;
+                if (itemStringFormat != null)
+                    ItemStringFormat = itemStringFormat;
+                if (itemContainerStyle != null)
+                    ItemContainerStyle = itemContainerStyle;
+                if (itemContainerStyleSelector != null)
+                    ItemContainerStyleSelector = itemContainerStyleSelector;
+            }
         }
 
         protected virtual void ClearContainerForItemOverride(UIElement element, object? item)

@@ -78,5 +78,10 @@ namespace Wodsoft.UI.Input
             }
             return null;
         }
+
+        public static bool IsValid(IInputElement e)
+        {
+            return e is DependencyObject;
+        }
     }
 }

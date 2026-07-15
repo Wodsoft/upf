@@ -39,6 +39,8 @@ ReleaseCapture
 SendMessage
 GetMessageTime
 NONCLIENTMETRICSW
+ANIMATIONINFO
+ICONMETRICSW
 GetCursorPos
 MonitorFromPoint
 GetMonitorInfo
@@ -90,3 +92,5 @@ ITfInputScope
 ITfContextOwnerServices
 CoCreateInstance
 ClientToScreen
+SetTimer
+KillTimer

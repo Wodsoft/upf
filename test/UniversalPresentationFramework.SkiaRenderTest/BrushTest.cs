@@ -70,11 +70,44 @@ namespace Wodsoft.UI.Test
             rect.Stroke = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0));
             rect.Fill = new ImageBrush
             {
-                ImageSource = bitmapImage,
-                TileMode = TileMode.Tile,
-                Viewport = new Rect(0, 0, 0.5f, 0.5f)
+                ImageSource = bitmapImage
             };
             grid.Children.Add(rect);
+            grid.Arrange(new Rect(0, 0, 400, 400));
+            RenderToBitmap(grid);
+        }
+
+        [Fact]
+        public void ImageBrushTileTest()
+        {
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = File.OpenRead("tri.png");
+            bitmapImage.EndInit();
+            var grid = new Grid();
+            grid.Background = Brushes.White;
+            var rect = new Rectangle();
+            rect.Margin = new Thickness(25);
+            rect.StrokeThickness = 10;
+            rect.Stroke = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0));
+            rect.Fill = new ImageBrush
+            {
+                ImageSource = bitmapImage,
+                TileMode = TileMode.Tile,
+                Viewport = new Rect(0, 0, 0.25f, 0.5f),
+                AlignmentY = AlignmentY.Top,
+                Stretch = Stretch.Uniform,
+                Transform = new TranslateTransform(50, 50)
+                //RelativeTransform = new TranslateTransform(0.25f, 0.25f)
+            };
+            grid.Children.Add(rect);
+            var rect2 = new Rectangle();
+            rect2.HorizontalAlignment = HorizontalAlignment.Left;
+            rect2.VerticalAlignment = VerticalAlignment.Top;
+            rect2.Width = 25;
+            rect2.Height = 25;
+            rect2.Fill = new SolidColorBrush(new Color(128, 0, 0, 0));
+            grid.Children.Add(rect2);
             grid.Arrange(new Rect(0, 0, 400, 400));
             RenderToBitmap(grid);
         }

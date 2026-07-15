@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Wodsoft.UI.Gallery</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\UniversalPresentationFramework.Aero\UniversalPresentationFramework.Aero.csproj" />
+		<ProjectReference Include="..\..\src\UniversalPresentationFramework.SourceGenerators\UniversalPresentationFramework.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\src\UniversalPresentationFramework\UniversalPresentationFramework.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Page Include="**\*.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="App.xaml" />
+	  <None Remove="MainWindow.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Remove="App.xaml" />
+	  <Page Remove="MainWindow.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="@(Page)" SourceItemGroup="XAML" />
+		<AdditionalFiles Include="App.xaml">
+		  <SourceItemGroup>XAML</SourceItemGroup>
+		  <Generator>MSBuild:Compile</Generator>
+		</AdditionalFiles>
+		<AdditionalFiles Include="MainWindow.xaml">
+		  <SourceItemGroup>XAML</SourceItemGroup>
+		  <Generator>MSBuild:Compile</Generator>
+		</AdditionalFiles>
+		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="SourceItemGroup" />
+	</ItemGroup>
+</Project>

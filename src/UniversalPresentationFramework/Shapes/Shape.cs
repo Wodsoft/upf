@@ -168,8 +168,8 @@ namespace Wodsoft.UI.Shapes
 
         private bool SizeIsInvalidOrEmpty(Size size)
         {
-            return (double.IsNaN(size.Width) ||
-                    double.IsNaN(size.Height) ||
+            return (float.IsNaN(size.Width) ||
+                    float.IsNaN(size.Height) ||
                     size.IsEmpty);
         }
 
@@ -188,6 +188,10 @@ namespace Wodsoft.UI.Shapes
             {
                 return MathF.Abs(strokeThickness);
             }
+        }
+        internal static bool IsFloatFinite(float o)
+        {
+            return !(float.IsInfinity(o) || float.IsNaN(o));
         }
 
         #endregion

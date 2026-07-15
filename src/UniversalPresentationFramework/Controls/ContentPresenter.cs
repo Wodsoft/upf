@@ -14,7 +14,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Wodsoft.UI.Controls
 {
-    public class ContentPresenter : FrameworkElement
+    public class ContentPresenter : FrameworkElement, IItemContainer
     {
         #region Static
 
@@ -322,6 +322,45 @@ namespace Wodsoft.UI.Controls
                 if (content is FrameworkElement fe)
                     return fe;
                 return null;
+            }
+        }
+
+        #endregion
+
+        #region PreparableContainer
+
+        private bool _contentIsItem;
+
+        public void PrepareContainer(ItemsControl parent, object? item)
+        {
+            if (item != this)
+            {
+                // copy styles from the ItemsControl
+                if (_contentIsItem || !HasNonDefaultValue(ContentProperty))
+                {
+                    Content = item;
+                    _contentIsItem = true;
+                }
+                var itemTemplate = parent.ItemTemplate;
+                var itemTemplateSelector = parent.ItemTemplateSelector;
+                var itemStringFormat = parent.ItemStringFormat;
+                if (itemTemplate != null)
+                    ContentTemplate = itemTemplate;
+                if (itemTemplateSelector != null)
+                    ContentTemplateSelector = itemTemplateSelector;
+                if (itemStringFormat != null)
+                    ContentStringFormat = itemStringFormat;
+            }
+        }
+
+        public void ClearContainer(object? item)
+        {
+            if (item != this)
+            {
+                if (_contentIsItem)
+                {
+                    ClearValue(ContentProperty);
+                }
             }
         }
 

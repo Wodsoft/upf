@@ -310,6 +310,57 @@ namespace Wodsoft.UI
 
         #endregion
 
+        #region Input Parameters
+
+        /// <summary>
+        ///     Maps to SPI_GETKEYBOARDCUES
+        /// </summary>
+        ///
+        public static bool KeyboardCues => FrameworkProvider.GetParameterProvider().KeyboardCues;
+
+        /// <summary>
+        ///     Maps to SPI_GETKEYBOARDDELAY
+        /// </summary>
+        public static int KeyboardDelay => FrameworkProvider.GetParameterProvider().KeyboardDelay;
+
+        /// <summary>
+        ///     Maps to SPI_GETKEYBOARDPREF
+        /// </summary>
+        public static bool KeyboardPreference => FrameworkProvider.GetParameterProvider().KeyboardPreference;
+
+        /// <summary>
+        ///     Maps to SPI_GETKEYBOARDSPEED
+        /// </summary>
+        public static int KeyboardSpeed => FrameworkProvider.GetParameterProvider().KeyboardSpeed;
+
+        /// <summary>
+        ///     Maps to SPI_GETSNAPTODEFBUTTON
+        /// </summary>
+        public static bool SnapToDefaultButton => FrameworkProvider.GetParameterProvider().SnapToDefaultButton;
+
+        /// <summary>
+        ///     Maps to SPI_GETWHEELSCROLLLINES
+        /// </summary>
+        public static int WheelScrollLines => FrameworkProvider.GetParameterProvider().WheelScrollLines;
+
+        /// <summary>
+        ///     Maps to SPI_GETMOUSEHOVERTIME.
+        /// </summary>
+        public static TimeSpan MouseHoverTime => FrameworkProvider.GetParameterProvider().MouseHoverTime;
+
+        /// <summary>
+        ///     Maps to SPI_GETMOUSEHOVERHEIGHT.
+        /// </summary>
+        public static float MouseHoverHeight => FrameworkProvider.GetParameterProvider().MouseHoverHeight;
+
+        /// <summary>
+        ///     Maps to SPI_GETMOUSEHOVERWIDTH.
+        /// </summary>
+        ///
+        public static float MouseHoverWidth => FrameworkProvider.GetParameterProvider().MouseHoverWidth;
+
+        #endregion
+
         #region Input Keys
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using Wodsoft.UI.Platforms.Win32;
+﻿using Wodsoft.UI.Documents;
+using Wodsoft.UI.Platforms.Win32;
 using Wodsoft.UI.Test;
 
 //MainWindow window = new MainWindow();

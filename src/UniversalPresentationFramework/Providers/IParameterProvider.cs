@@ -137,5 +137,19 @@ namespace Wodsoft.UI.Providers
         SolidColorBrush InactiveSelectionHighlightTextBrush { get; }
 
         #endregion
+
+        #region Input Parameters
+        
+        float MouseHoverWidth { get; }
+        float MouseHoverHeight { get; }
+        TimeSpan MouseHoverTime { get; }
+        int WheelScrollLines { get; }
+        bool SnapToDefaultButton { get; }
+        int KeyboardSpeed { get; }
+        bool KeyboardPreference { get; }
+        int KeyboardDelay { get; }
+        bool KeyboardCues { get; }
+
+        #endregion
     }
 }

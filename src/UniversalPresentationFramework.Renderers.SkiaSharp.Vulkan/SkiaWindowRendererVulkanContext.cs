@@ -265,7 +265,7 @@ namespace Wodsoft.UI.Renderers
             _renderTargets = new GRBackendRenderTarget[imageCount];
             for (int i = 0; i < imageCount; i++)
             {
-                _renderTargets[i] = new GRBackendRenderTarget(_windowContext.Width, _windowContext.Height, 1, new GRVkImageInfo
+                _renderTargets[i] = new GRBackendRenderTarget(_windowContext.Width, _windowContext.Height, new GRVkImageInfo
                 {
                     CurrentQueueFamily = _queueFamilies.PresentFamily!.Value,
                     Format = (uint)format,

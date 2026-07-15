@@ -1,96 +1,110 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wodsoft.UI.Media;
 using Wodsoft.UI.Providers;
 
 namespace Wodsoft.UI.Test
 {
+    /// <summary>
+    /// Fixed Windows (96 DPI) system parameter defaults for deterministic tests.
+    /// Values mirror stock Win10/11 light theme SPI / NONCLIENTMETRICS / GetSysColor.
+    /// </summary>
     public class TestParameterProvider : IParameterProvider
     {
-        public bool MinimizeAnimation => throw new NotImplementedException();
+        private float _smallCaptionFontSize = 12f;
 
-        public int Border => throw new NotImplementedException();
+        #region Window Parameters
 
-        public float CaretWidth => throw new NotImplementedException();
+        public bool MinimizeAnimation => true;
 
-        public bool DragFullWindows => throw new NotImplementedException();
+        public int Border => 1;
 
-        public int ForegroundFlashCount => throw new NotImplementedException();
+        public float CaretWidth => 1f;
 
-        public float BorderWidth => throw new NotImplementedException();
+        public bool DragFullWindows => true;
 
-        public float ScrollWidth => throw new NotImplementedException();
+        public int ForegroundFlashCount => 7;
 
-        public float ScrollHeight => throw new NotImplementedException();
+        public float BorderWidth => 1f;
 
-        public float CaptionWidth => throw new NotImplementedException();
+        public float ScrollWidth => 17f;
 
-        public float CaptionHeight => throw new NotImplementedException();
+        public float ScrollHeight => 17f;
 
-        public float SmallCaptionWidth => throw new NotImplementedException();
+        public float CaptionWidth => 36f;
 
-        public float SmallCaptionHeight => throw new NotImplementedException();
+        public float CaptionHeight => 22f;
 
-        public float MenuWidth => throw new NotImplementedException();
+        public float SmallCaptionWidth => 22f;
 
-        public float MenuHeight => throw new NotImplementedException();
+        public float SmallCaptionHeight => 22f;
 
-        public float IconFontSize => throw new NotImplementedException();
+        public float MenuWidth => 19f;
 
-        public FontFamily IconFontFamily => throw new NotImplementedException();
+        public float MenuHeight => 19f;
 
-        public FontStyle IconFontStyle => throw new NotImplementedException();
+        #endregion
 
-        public FontWeight IconFontWeight => throw new NotImplementedException();
+        #region Font Parameters
 
-        public TextDecorationCollection IconFontTextDecorations => throw new NotImplementedException();
+        private static readonly FontFamily _DefaultFontFamily = new FontFamily("Segoe UI");
 
-        public float CaptionFontSize => throw new NotImplementedException();
+        public float IconFontSize => 12f;
 
-        public FontFamily CaptionFontFamily => throw new NotImplementedException();
+        public FontFamily IconFontFamily => _DefaultFontFamily;
 
-        public FontStyle CaptionFontStyle => throw new NotImplementedException();
+        public FontStyle IconFontStyle => FontStyles.Normal;
 
-        public FontWeight CaptionFontWeight => throw new NotImplementedException();
+        public FontWeight IconFontWeight => FontWeights.Normal;
 
-        public TextDecorationCollection CaptionFontTextDecorations => throw new NotImplementedException();
+        public TextDecorationCollection IconFontTextDecorations => TextDecorationCollection.Empty;
 
-        public float SmallCaptionFontSize { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public float CaptionFontSize => 12f;
 
-        public FontFamily SmallCaptionFontFamily => throw new NotImplementedException();
+        public FontFamily CaptionFontFamily => _DefaultFontFamily;
 
-        public FontStyle SmallCaptionFontStyle => throw new NotImplementedException();
+        public FontStyle CaptionFontStyle => FontStyles.Normal;
 
-        public FontWeight SmallCaptionFontWeight => throw new NotImplementedException();
+        public FontWeight CaptionFontWeight => FontWeights.Normal;
 
-        public TextDecorationCollection SmallCaptionFontTextDecorations => throw new NotImplementedException();
+        public TextDecorationCollection CaptionFontTextDecorations => TextDecorationCollection.Empty;
 
-        public float MenuFontSize => throw new NotImplementedException();
+        public float SmallCaptionFontSize
+        {
+            get => _smallCaptionFontSize;
+            set => _smallCaptionFontSize = value;
+        }
 
-        public FontFamily MenuFontFamily => throw new NotImplementedException();
+        public FontFamily SmallCaptionFontFamily => _DefaultFontFamily;
 
-        public FontStyle MenuFontStyle => throw new NotImplementedException();
+        public FontStyle SmallCaptionFontStyle => FontStyles.Normal;
 
-        public FontWeight MenuFontWeight => throw new NotImplementedException();
+        public FontWeight SmallCaptionFontWeight => FontWeights.Normal;
 
-        public TextDecorationCollection MenuFontTextDecorations => throw new NotImplementedException();
+        public TextDecorationCollection SmallCaptionFontTextDecorations => TextDecorationCollection.Empty;
 
-        public float StatusFontSize => throw new NotImplementedException();
+        public float MenuFontSize => 12f;
 
-        public FontFamily StatusFontFamily => throw new NotImplementedException();
+        public FontFamily MenuFontFamily => _DefaultFontFamily;
 
-        public FontStyle StatusFontStyle => throw new NotImplementedException();
+        public FontStyle MenuFontStyle => FontStyles.Normal;
 
-        public FontWeight StatusFontWeight => throw new NotImplementedException();
+        public FontWeight MenuFontWeight => FontWeights.Normal;
 
-        public TextDecorationCollection StatusFontTextDecorations => throw new NotImplementedException();
+        public TextDecorationCollection MenuFontTextDecorations => TextDecorationCollection.Empty;
+
+        public float StatusFontSize => 12f;
+
+        public FontFamily StatusFontFamily => _DefaultFontFamily;
+
+        public FontStyle StatusFontStyle => FontStyles.Normal;
+
+        public FontWeight StatusFontWeight => FontWeights.Normal;
+
+        public TextDecorationCollection StatusFontTextDecorations => TextDecorationCollection.Empty;
 
         public float MessageFontSize => 12f;
 
-        public FontFamily MessageFontFamily => new FontFamily("Aria");
+        public FontFamily MessageFontFamily => _DefaultFontFamily;
 
         public FontStyle MessageFontStyle => FontStyles.Normal;
 
@@ -98,134 +112,206 @@ namespace Wodsoft.UI.Test
 
         public TextDecorationCollection MessageFontTextDecorations => TextDecorationCollection.Empty;
 
-        public float FocusBorderWidth => throw new NotImplementedException();
+        #endregion
 
-        public float FocusBorderHeight => throw new NotImplementedException();
+        #region Accessibility Parameters
 
-        public bool HighContrast => throw new NotImplementedException();
+        public float FocusBorderWidth => 1f;
 
-        public Color ActiveBorderColor => Colors.Black;
+        public float FocusBorderHeight => 1f;
 
-        public Color ActiveCaptionColor => Colors.Black;
+        public bool HighContrast => false;
+
+        #endregion
+
+        #region System Colors
+
+        public Color ActiveBorderColor => Color.FromRgb(0xB4, 0xB4, 0xB4);
+
+        public Color ActiveCaptionColor => Color.FromRgb(0x99, 0xB4, 0xD1);
 
         public Color ActiveCaptionTextColor => Colors.Black;
 
-        public Color AppWorkspaceColor => Colors.Black;
+        public Color AppWorkspaceColor => Color.FromRgb(0xAB, 0xAB, 0xAB);
 
-        public Color ControlColor => Colors.Black;
+        public Color ControlColor => Color.FromRgb(0xF0, 0xF0, 0xF0);
 
-        public Color ControlDarkColor => Colors.Black;
+        public Color ControlDarkColor => Color.FromRgb(0xA0, 0xA0, 0xA0);
 
-        public Color ControlDarkDarkColor => Colors.Black;
+        public Color ControlDarkDarkColor => Color.FromRgb(0x69, 0x69, 0x69);
 
-        public Color ControlLightColor => Colors.Black;
+        public Color ControlLightColor => Color.FromRgb(0xE3, 0xE3, 0xE3);
 
-        public Color ControlLightLightColor => Colors.Black;
+        public Color ControlLightLightColor => Colors.White;
 
         public Color ControlTextColor => Colors.Black;
 
         public Color DesktopColor => Colors.Black;
 
-        public Color GradientActiveCaptionColor => Colors.Black;
+        public Color GradientActiveCaptionColor => Color.FromRgb(0xB9, 0xD1, 0xEA);
 
-        public Color GradientInactiveCaptionColor => Colors.Black;
+        public Color GradientInactiveCaptionColor => Color.FromRgb(0xD7, 0xE4, 0xF2);
 
-        public Color GrayTextColor => Colors.Black;
+        public Color GrayTextColor => Color.FromRgb(0x6D, 0x6D, 0x6D);
 
-        public Color HighlightColor => Colors.Black;
+        public Color HighlightColor => Color.FromRgb(0x00, 0x78, 0xD7);
 
-        public Color HighlightTextColor => Colors.Black;
+        public Color HighlightTextColor => Colors.White;
 
-        public Color HotTrackColor => Colors.Black;
+        public Color HotTrackColor => Color.FromRgb(0x00, 0x66, 0xCC);
 
-        public Color InactiveBorderColor => Colors.Black;
+        public Color InactiveBorderColor => Color.FromRgb(0xF4, 0xF7, 0xFC);
 
-        public Color InactiveCaptionColor => Colors.Black;
+        public Color InactiveCaptionColor => Color.FromRgb(0xBF, 0xCD, 0xDB);
 
         public Color InactiveCaptionTextColor => Colors.Black;
 
-        public Color InfoColor => Colors.Black;
+        public Color InfoColor => Color.FromRgb(0xFF, 0xFF, 0xE1);
 
         public Color InfoTextColor => Colors.Black;
 
-        public Color MenuColor => Colors.Black;
+        public Color MenuColor => Color.FromRgb(0xF0, 0xF0, 0xF0);
 
-        public Color MenuBarColor => Colors.Black;
+        public Color MenuBarColor => Color.FromRgb(0xF0, 0xF0, 0xF0);
 
-        public Color MenuHighlightColor => Colors.Black;
+        public Color MenuHighlightColor => Color.FromRgb(0x00, 0x78, 0xD7);
 
         public Color MenuTextColor => Colors.Black;
 
-        public Color ScrollBarColor => Colors.Black;
+        public Color ScrollBarColor => Color.FromRgb(0xC8, 0xC8, 0xC8);
 
-        public Color WindowColor => Colors.Black;
+        public Color WindowColor => Colors.White;
 
-        public Color WindowFrameColor => Colors.Black;
+        public Color WindowFrameColor => Color.FromRgb(0x64, 0x64, 0x64);
 
         public Color WindowTextColor => Colors.Black;
 
-        public SolidColorBrush ActiveBorderBrush => Brushes.Black;
+        public SolidColorBrush ActiveBorderBrush => _ActiveBorderBrush;
 
-        public SolidColorBrush ActiveCaptionBrush => Brushes.Black;
+        public SolidColorBrush ActiveCaptionBrush => _ActiveCaptionBrush;
 
-        public SolidColorBrush ActiveCaptionTextBrush => Brushes.Black;
+        public SolidColorBrush ActiveCaptionTextBrush => _ActiveCaptionTextBrush;
 
-        public SolidColorBrush AppWorkspaceBrush => Brushes.Black;
+        public SolidColorBrush AppWorkspaceBrush => _AppWorkspaceBrush;
 
-        public SolidColorBrush ControlBrush => Brushes.Black;
+        public SolidColorBrush ControlBrush => _ControlBrush;
 
-        public SolidColorBrush ControlDarkBrush => Brushes.Black;
+        public SolidColorBrush ControlDarkBrush => _ControlDarkBrush;
 
-        public SolidColorBrush ControlDarkDarkBrush => Brushes.Black;
+        public SolidColorBrush ControlDarkDarkBrush => _ControlDarkDarkBrush;
 
-        public SolidColorBrush ControlLightBrush => Brushes.Black;
+        public SolidColorBrush ControlLightBrush => _ControlLightBrush;
 
-        public SolidColorBrush ControlLightLightBrush => Brushes.Black;
+        public SolidColorBrush ControlLightLightBrush => _ControlLightLightBrush;
 
-        public SolidColorBrush ControlTextBrush => Brushes.Black;
+        public SolidColorBrush ControlTextBrush => _ControlTextBrush;
 
-        public SolidColorBrush DesktopBrush => Brushes.Black;
+        public SolidColorBrush DesktopBrush => _DesktopBrush;
 
-        public SolidColorBrush GradientActiveCaptionBrush => Brushes.Black;
+        public SolidColorBrush GradientActiveCaptionBrush => _GradientActiveCaptionBrush;
 
-        public SolidColorBrush GradientInactiveCaptionBrush => Brushes.Black;
+        public SolidColorBrush GradientInactiveCaptionBrush => _GradientInactiveCaptionBrush;
 
-        public SolidColorBrush GrayTextBrush => Brushes.Black;
+        public SolidColorBrush GrayTextBrush => _GrayTextBrush;
 
-        public SolidColorBrush HighlightBrush => Brushes.Black;
+        public SolidColorBrush HighlightBrush => _HighlightBrush;
 
-        public SolidColorBrush HighlightTextBrush => Brushes.Black;
+        public SolidColorBrush HighlightTextBrush => _HighlightTextBrush;
 
-        public SolidColorBrush HotTrackBrush => Brushes.Black;
+        public SolidColorBrush HotTrackBrush => _HotTrackBrush;
 
-        public SolidColorBrush InactiveBorderBrush => Brushes.Black;
+        public SolidColorBrush InactiveBorderBrush => _InactiveBorderBrush;
 
-        public SolidColorBrush InactiveCaptionBrush => Brushes.Black;
+        public SolidColorBrush InactiveCaptionBrush => _InactiveCaptionBrush;
 
-        public SolidColorBrush InactiveCaptionTextBrush => Brushes.Black;
+        public SolidColorBrush InactiveCaptionTextBrush => _InactiveCaptionTextBrush;
 
-        public SolidColorBrush InfoBrush => Brushes.Black;
+        public SolidColorBrush InfoBrush => _InfoBrush;
 
-        public SolidColorBrush InfoTextBrush => Brushes.Black;
+        public SolidColorBrush InfoTextBrush => _InfoTextBrush;
 
-        public SolidColorBrush MenuBrush => Brushes.Black;
+        public SolidColorBrush MenuBrush => _MenuBrush;
 
-        public SolidColorBrush MenuBarBrush => Brushes.Black;
+        public SolidColorBrush MenuBarBrush => _MenuBarBrush;
 
-        public SolidColorBrush MenuHighlightBrush => Brushes.Black;
+        public SolidColorBrush MenuHighlightBrush => _MenuHighlightBrush;
 
-        public SolidColorBrush MenuTextBrush => Brushes.Black;
+        public SolidColorBrush MenuTextBrush => _MenuTextBrush;
 
-        public SolidColorBrush ScrollBarBrush => Brushes.Black;
+        public SolidColorBrush ScrollBarBrush => _ScrollBarBrush;
 
-        public SolidColorBrush WindowBrush => Brushes.Black;
+        public SolidColorBrush WindowBrush => _WindowBrush;
 
-        public SolidColorBrush WindowFrameBrush => Brushes.Black;
+        public SolidColorBrush WindowFrameBrush => _WindowFrameBrush;
 
-        public SolidColorBrush WindowTextBrush => Brushes.Black;
+        public SolidColorBrush WindowTextBrush => _WindowTextBrush;
 
-        public SolidColorBrush InactiveSelectionHighlightBrush => Brushes.Black;
+        public SolidColorBrush InactiveSelectionHighlightBrush => HighContrast ? HighlightBrush : ControlBrush;
 
-        public SolidColorBrush InactiveSelectionHighlightTextBrush => Brushes.Black;
+        public SolidColorBrush InactiveSelectionHighlightTextBrush => HighContrast ? HighlightTextBrush : ControlTextBrush;
+
+        private static readonly SolidColorBrush _ActiveBorderBrush = CreateBrush(0xB4, 0xB4, 0xB4);
+        private static readonly SolidColorBrush _ActiveCaptionBrush = CreateBrush(0x99, 0xB4, 0xD1);
+        private static readonly SolidColorBrush _ActiveCaptionTextBrush = CreateBrush(Colors.Black);
+        private static readonly SolidColorBrush _AppWorkspaceBrush = CreateBrush(0xAB, 0xAB, 0xAB);
+        private static readonly SolidColorBrush _ControlBrush = CreateBrush(0xF0, 0xF0, 0xF0);
+        private static readonly SolidColorBrush _ControlDarkBrush = CreateBrush(0xA0, 0xA0, 0xA0);
+        private static readonly SolidColorBrush _ControlDarkDarkBrush = CreateBrush(0x69, 0x69, 0x69);
+        private static readonly SolidColorBrush _ControlLightBrush = CreateBrush(0xE3, 0xE3, 0xE3);
+        private static readonly SolidColorBrush _ControlLightLightBrush = CreateBrush(Colors.White);
+        private static readonly SolidColorBrush _ControlTextBrush = CreateBrush(Colors.Black);
+        private static readonly SolidColorBrush _DesktopBrush = CreateBrush(Colors.Black);
+        private static readonly SolidColorBrush _GradientActiveCaptionBrush = CreateBrush(0xB9, 0xD1, 0xEA);
+        private static readonly SolidColorBrush _GradientInactiveCaptionBrush = CreateBrush(0xD7, 0xE4, 0xF2);
+        private static readonly SolidColorBrush _GrayTextBrush = CreateBrush(0x6D, 0x6D, 0x6D);
+        private static readonly SolidColorBrush _HighlightBrush = CreateBrush(0x00, 0x78, 0xD7);
+        private static readonly SolidColorBrush _HighlightTextBrush = CreateBrush(Colors.White);
+        private static readonly SolidColorBrush _HotTrackBrush = CreateBrush(0x00, 0x66, 0xCC);
+        private static readonly SolidColorBrush _InactiveBorderBrush = CreateBrush(0xF4, 0xF7, 0xFC);
+        private static readonly SolidColorBrush _InactiveCaptionBrush = CreateBrush(0xBF, 0xCD, 0xDB);
+        private static readonly SolidColorBrush _InactiveCaptionTextBrush = CreateBrush(Colors.Black);
+        private static readonly SolidColorBrush _InfoBrush = CreateBrush(0xFF, 0xFF, 0xE1);
+        private static readonly SolidColorBrush _InfoTextBrush = CreateBrush(Colors.Black);
+        private static readonly SolidColorBrush _MenuBrush = CreateBrush(0xF0, 0xF0, 0xF0);
+        private static readonly SolidColorBrush _MenuBarBrush = CreateBrush(0xF0, 0xF0, 0xF0);
+        private static readonly SolidColorBrush _MenuHighlightBrush = CreateBrush(0x00, 0x78, 0xD7);
+        private static readonly SolidColorBrush _MenuTextBrush = CreateBrush(Colors.Black);
+        private static readonly SolidColorBrush _ScrollBarBrush = CreateBrush(0xC8, 0xC8, 0xC8);
+        private static readonly SolidColorBrush _WindowBrush = CreateBrush(Colors.White);
+        private static readonly SolidColorBrush _WindowFrameBrush = CreateBrush(0x64, 0x64, 0x64);
+        private static readonly SolidColorBrush _WindowTextBrush = CreateBrush(Colors.Black);
+
+        private static SolidColorBrush CreateBrush(byte r, byte g, byte b) => CreateBrush(Color.FromRgb(r, g, b));
+
+        private static SolidColorBrush CreateBrush(Color color)
+        {
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+            return brush;
+        }
+
+        #endregion
+
+        #region Input Parameters
+
+        public float MouseHoverWidth => 4f;
+
+        public float MouseHoverHeight => 4f;
+
+        public TimeSpan MouseHoverTime => TimeSpan.FromMilliseconds(400);
+
+        public int WheelScrollLines => 3;
+
+        public bool SnapToDefaultButton => false;
+
+        public int KeyboardSpeed => 31;
+
+        public bool KeyboardPreference => false;
+
+        public int KeyboardDelay => 1;
+
+        public bool KeyboardCues => false;
+
+        #endregion
     }
 }

@@ -38,6 +38,37 @@ namespace Wodsoft.UI.Threading
 
         public abstract void VerifyAccess();
 
+        private static PriorityRange _ForegroundPriorityRange = new PriorityRange(DispatcherPriority.Loaded, true, DispatcherPriority.Send, true);
+        private static PriorityRange _BackgroundPriorityRange = new PriorityRange(DispatcherPriority.Background, true, DispatcherPriority.Input, true);
+        private static PriorityRange _IdlePriorityRange = new PriorityRange(DispatcherPriority.SystemIdle, true, DispatcherPriority.ContextIdle, true);
+        /// <summary>
+        ///     Validates that a priority is suitable for use by the dispatcher.
+        /// </summary>
+        /// <param name="priority">
+        ///     The priority to validate.
+        /// </param>
+        /// <param name="parameterName">
+        ///     The name if the argument to report in the ArgumentException
+        ///     that is raised if the priority is not suitable for use by
+        ///     the dispatcher.
+        /// </param>
+        public static void ValidatePriority(DispatcherPriority priority, string parameterName) // NOTE: should be Priority
+        {
+            // First make sure the Priority is valid.
+            // Priority.ValidatePriority(priority, paramName);
+
+            // Second, make sure the priority is in a range recognized by
+            // the dispatcher.
+            if (!_ForegroundPriorityRange.Contains(priority) &&
+               !_BackgroundPriorityRange.Contains(priority) &&
+               !_IdlePriorityRange.Contains(priority) &&
+               DispatcherPriority.Inactive != priority)  // NOTE: should be Priority.Min
+            {
+                // If we move to a Priority class, this exception will have to change too.
+                throw new System.ComponentModel.InvalidEnumArgumentException(parameterName, (int)priority, typeof(DispatcherPriority));
+            }
+        }
+
         #endregion
 
         #region Invoke
@@ -121,6 +152,122 @@ namespace Wodsoft.UI.Threading
                 }
             }
             return EmptyDispatcher.Default;
+        }
+
+        #endregion
+
+        #region Timer
+
+        private readonly List<DispatcherTimer> _timers = new List<DispatcherTimer>();
+        private readonly object _timerLock = new object();
+        private int _minTimerTick = 0;
+
+        internal void AddTimer(DispatcherTimer timer)
+        {
+            lock (_timerLock)
+            {
+                _timers.Add(timer);
+                UpdateTimerCore(timer);
+            }
+        }
+
+        internal void RemoveTimer(DispatcherTimer timer)
+        {
+            lock (_timerLock)
+            {
+                _timers.Remove(timer);
+                if (_timers.Count == 0)
+                {
+                    if (CheckAccess())
+                    {
+                        RemoveTimerTick();
+                    }
+                    else
+                    {
+                        Invoke(RemoveTimerTick);
+                    }
+                }
+                else if (timer._dueTimeInTicks == _minTimerTick)
+                {
+                    for (int i = 0; i < _timers.Count; i++)
+                    {
+                        if (UpdateTimerCore(_timers[i]))
+                            break;
+                    }
+                }
+            }
+        }
+
+        internal void UpdateTimer(DispatcherTimer timer)
+        {
+            lock (_timerLock)
+            {
+                UpdateTimerCore(timer);
+            }
+        }
+
+        private bool UpdateTimerCore(DispatcherTimer timer)
+        {
+            if (_minTimerTick == 0 || timer._dueTimeInTicks < _minTimerTick)
+            {
+                _minTimerTick = timer._dueTimeInTicks;
+                if (CheckAccess())
+                {
+                    PreUpdateTimer(timer._dueTimeInTicks);
+                }
+                else
+                {
+                    Invoke(() => PreUpdateTimer(timer._dueTimeInTicks));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private void PreUpdateTimer(int targetTick)
+        {
+            if (Environment.TickCount < targetTick)
+            {
+                SetTimerTick(targetTick);
+            }
+        }
+
+        protected abstract void SetTimerTick(int targetTick);
+
+        protected abstract void RemoveTimerTick();
+
+        protected void ApplyTimerTick(int currentTick)
+        {
+            lock (_timerLock)
+            {
+                _minTimerTick = 0;
+                int minDueTime = int.MaxValue;
+                var timerMaxIndex = _timers.Count - 1;
+                for (int i = timerMaxIndex; i >= 0; i--)
+                {
+                    var timer = _timers[i];
+                    if (timer._dueTimeInTicks <= currentTick)
+                    {
+                        if (i == timerMaxIndex)
+                        {
+                            _timers.RemoveAt(i);
+                        }
+                        else
+                        {
+                            _timers[i] = _timers[timerMaxIndex];
+                            _timers.RemoveAt(timerMaxIndex);
+                        }
+                        timerMaxIndex--;
+                        timer.Promote();
+                    }
+                    else if (timer._dueTimeInTicks < minDueTime)
+                        minDueTime = timer._dueTimeInTicks;
+                }
+                if (minDueTime == int.MaxValue)
+                    RemoveTimerTick();
+                else
+                    SetTimerTick(minDueTime);
+            }
         }
 
         #endregion

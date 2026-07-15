@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UniversalPresentationFramework.SkiaRenderTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

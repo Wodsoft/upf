@@ -48,8 +48,8 @@ namespace Wodsoft.UI.Renderers
                     if (grContextPtr == default)
                         throw new NotSupportedException("Create Direct3D GRContext failed.");
 
-                    _grContext = (GRContext)typeof(GRContext).GetMethod("GetObject", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static, [typeof(nint), typeof(bool)])!
-                        .Invoke(null, [grContextPtr, true])!;
+                    _grContext = (GRContext)typeof(GRContext).GetMethod("GetObject", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static, [typeof(nint), typeof(bool), typeof(bool)])!
+                        .Invoke(null, [grContextPtr, true, true])!;
                 }
                 return _grContext;
             }
@@ -79,7 +79,7 @@ namespace Wodsoft.UI.Renderers
 
         public override GRSurfaceOrigin SurfaceOrigin => GRSurfaceOrigin.TopLeft;
 
-        protected override int CurrentBufferIndex => _swapChain?.CurrentBackBufferIndex ?? 0;
+        protected override int CurrentBufferIndex => (int)(_swapChain?.CurrentBackBufferIndex ?? 0);
 
         protected unsafe override GRBackendRenderTarget[] CreateRenderTargets(int width, int height)
         {
@@ -88,16 +88,16 @@ namespace Wodsoft.UI.Renderers
             {
                 SwapChainDescription1 swapChainDescription = new SwapChainDescription1
                 {
-                    BufferCount = _windowContext.BufferCount,
-                    Width = width,
-                    Height = height,
+                    BufferCount = (uint)_windowContext.BufferCount,
+                    Width = (uint)width,
+                    Height = (uint)height,
                     Format = format,
                     BufferUsage = Usage.RenderTargetOutput,
                     SwapEffect = SwapEffect.FlipDiscard,
                     Scaling = Scaling.None,
                     SampleDescription = new SampleDescription
                     {
-                        Count = _windowContext.SampleCount
+                        Count = (uint)_windowContext.SampleCount
                     }
                 };
                 var swapChain = _context.Factory.CreateSwapChainForHwnd(Queue, _windowContext.WindowHandle, swapChainDescription);
@@ -124,13 +124,13 @@ namespace Wodsoft.UI.Renderers
                     _surfaceFrameCounts[i] = 0;
                 }
                 _frameCount = 0;
-                var result = _swapChain.ResizeBuffers(0, _windowContext.Width, _windowContext.Height, format, SwapChainFlags.None);
+                var result = _swapChain.ResizeBuffers(0, (uint)_windowContext.Width, (uint)_windowContext.Height, format, SwapChainFlags.None);
                 if (!result.Success)
                 {
 
                 }
             }
-            for (int i = 0; i < _windowContext.BufferCount; i++)
+            for (uint i = 0; i < _windowContext.BufferCount; i++)
             {
                 var textureInfo = new GRD3D12TextureInfo();
                 var resource = _swapChain.GetBuffer<ID3D12Resource>(i);
